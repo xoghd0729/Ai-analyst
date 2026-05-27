@@ -144,6 +144,7 @@ class RecommendationPipeline:
             "monte_carlo":       ctx.monte_carlo,
             "tax_optimizer":     ctx.tax_optimizer_result,
             "behavioral_finance":ctx.behavioral,
+            "yield_traps":       ctx.yield_traps,
             "storytelling":      ctx.storytelling,
             "isa_strategy":      ctx.isa,
 

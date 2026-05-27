@@ -9,6 +9,8 @@ import HealthRadarChart    from '../components/HealthRadarChart'
 import DividendCalendarHeatmap from '../components/DividendCalendarHeatmap'
 import MonteCarloChart     from '../components/MonteCarloChart'
 import CashflowMilestone   from '../components/CashflowMilestone'
+import YieldTrapWarning    from '../components/YieldTrapWarning'
+import PortfolioMonitor    from '../components/PortfolioMonitor'
 import './Portfolio.css'
 
 const RISK_OPTIONS = [
@@ -769,6 +771,7 @@ export default function Portfolio() {
             {/* 추천 종목 테이블 */}
             <div className="card">
               <h3 className="card-title">📋 종목별 적립 배분</h3>
+              <YieldTrapWarning yieldTraps={result.yield_traps || []} />
               <table className="rec-table">
                 <thead>
                   <tr>
@@ -933,6 +936,13 @@ export default function Portfolio() {
                 </div>
               </div>
             )}
+
+            <PortfolioMonitor
+              calendar={result.dividend_calendar}
+              rebalancingPlan={result.rebalancing_plan}
+              recommendations={result.recommendations}
+              projection={result.projection}
+            />
 
           </div>
         ) : (

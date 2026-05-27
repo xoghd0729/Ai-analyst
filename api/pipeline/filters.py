@@ -403,7 +403,25 @@ class BehavioralFinanceFilter(BaseFilter):
 
 
 # ═══════════════════════════════════════════════════════════════
-# Filter 16 — Portfolio Health Score (6축)
+# Filter 16 — Yield Trap 감지
+# ═══════════════════════════════════════════════════════════════
+class YieldTrapFilter(BaseFilter):
+    """
+    배당 함정(Yield Trap) 자동 감지.
+    고배당이더라도 주가 하락/배당 지속성 취약/ML BROKEN이면 경고를 생성한다.
+    """
+    name = "YieldTrap"
+
+    def process(self, ctx: PipelineContext) -> None:
+        try:
+            from utils.yield_trap_detector import detect_yield_traps
+            ctx.yield_traps = detect_yield_traps(ctx.recommendations)
+        except Exception as e:
+            ctx.add_error(self.name, str(e))
+
+
+# ═══════════════════════════════════════════════════════════════
+# Filter 17 — Portfolio Health Score (6축)
 # ═══════════════════════════════════════════════════════════════
 class PortfolioHealthFilter(BaseFilter):
     """
@@ -427,7 +445,7 @@ class PortfolioHealthFilter(BaseFilter):
 
 
 # ═══════════════════════════════════════════════════════════════
-# Filter 17 — 서술형 스토리텔링
+# Filter 18 — 서술형 스토리텔링
 # ═══════════════════════════════════════════════════════════════
 class StorytellingFilter(BaseFilter):
     """
@@ -517,7 +535,8 @@ PIPELINE_FILTERS: list[type[BaseFilter]] = [
     MonteCarloFilter,        # 13. Monte Carlo (Macro 연동)
     TaxOptimizerFilter,      # 14. 세금 최적화 (2026)
     BehavioralFinanceFilter, # 15. 행동편향
-    PortfolioHealthFilter,   # 16. Health Score
+    YieldTrapFilter,         # 16. Yield Trap 감지
+    PortfolioHealthFilter,   # 17. Health Score
     SHAPExplainerFilter,     # 18. SHAP 설명 (ML 위험 종목)
-    StorytellingFilter,      # 17. 스토리텔링
+    StorytellingFilter,      # 19. 스토리텔링
 ]

@@ -102,10 +102,13 @@ class PipelineContext:
     # ── Step 15: 행동편향 ──────────────────────────────────────
     behavioral: dict = field(default_factory=dict)
 
-    # ── Step 16: Portfolio Health ───────────────────────────────
+    # ── Step 16: Yield Trap 탐지 ────────────────────────────────
+    yield_traps: list = field(default_factory=list)
+
+    # ── Step 17: Portfolio Health ───────────────────────────────
     health: dict = field(default_factory=dict)
 
-    # ── Step 17: 스토리텔링 ────────────────────────────────────
+    # ── Step 18: 스토리텔링 ────────────────────────────────────
     storytelling: str = ""
 
     # ── 메타 ──────────────────────────────────────────────────
