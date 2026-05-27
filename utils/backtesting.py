@@ -156,6 +156,27 @@ _ASSET_HIST_RETURNS: dict[str, dict[int, float]] = {
               2020:7.7,  2021:-1.8, 2022:-13.1,2023:5.5,  2024:1.2},
     "AGG":   {2015:0.5,  2016:2.6,  2017:3.5,  2018:-0.1, 2019:8.5,
               2020:7.5,  2021:-1.7, 2022:-13.0,2023:5.5,  2024:1.2},
+    # 한국 ETF (2015~2024, 상장 이전 NaN)
+    "279530": {2015:math.nan, 2016:math.nan, 2017:math.nan, 2018:math.nan, 2019:-2.3,
+               2020:6.5, 2021:15.0, 2022:-10.2, 2023:12.7, 2024:-3.8},  # KODEX 고배당
+    "210780": {2015:-2.0, 2016:4.2, 2017:18.4, 2018:-13.7, 2019:8.0,
+               2020:5.8, 2021:10.6, 2022:-14.6, 2023:11.9, 2024:-4.4},  # TIGER 코스피고배당
+    "161510": {2015:0.8, 2016:5.0, 2017:19.1, 2018:-14.1, 2019:7.4,
+               2020:8.1, 2021:12.0, 2022:-13.8, 2023:10.5, 2024:-5.2},  # ARIRANG 고배당주
+    "266390": {2015:math.nan, 2016:math.nan, 2017:math.nan, 2018:math.nan, 2019:3.1,
+               2020:7.1, 2021:14.3, 2022:-11.8, 2023:13.2, 2024:-4.1},  # KBSTAR 고배당
+    "458730": {2015:math.nan, 2016:math.nan, 2017:math.nan, 2018:math.nan, 2019:math.nan,
+               2020:math.nan, 2021:math.nan, 2022:math.nan, 2023:12.8, 2024:15.3},  # TIGER 미국배당다우존스
+    "329200": {2015:math.nan, 2016:math.nan, 2017:math.nan, 2018:math.nan, 2019:math.nan,
+               2020:math.nan, 2021:math.nan, 2022:-17.6, 2023:9.8, 2024:2.4},  # TIGER 리츠부동산인프라
+    "069500": {2015:4.1, 2016:3.0, 2017:25.2, 2018:-16.7, 2019:9.5,
+               2020:32.1, 2021:2.3, 2022:-23.7, 2023:19.4, 2024:-8.9},  # KODEX 200
+    "360750": {2015:math.nan, 2016:math.nan, 2017:math.nan, 2018:math.nan, 2019:math.nan,
+               2020:17.5, 2021:29.4, 2022:-17.9, 2023:27.0, 2024:24.2},  # TIGER 미국S&P500
+    "251600": {2015:math.nan, 2016:math.nan, 2017:math.nan, 2018:-7.6, 2019:24.5,
+               2020:9.4, 2021:26.2, 2022:-4.4, 2023:6.2, 2024:12.7},     # KODEX 미국S&P500배당귀족
+    "360200": {2015:math.nan, 2016:math.nan, 2017:math.nan, 2018:math.nan, 2019:math.nan,
+               2020:31.4, 2021:2.1, 2022:-23.9, 2023:18.8, 2024:-9.1},   # TIGER 코스피
 }
 
 # 한국 배당주 대용 수익률 (업종 평균 추정)
@@ -373,7 +394,7 @@ def run_backtest(
         if drawdown < mdd:
             mdd = drawdown
 
-    # ── Sharpe Ratio 계산 ─────────────────────────────────────
+    # ── Sharpe/Sortino Ratio 계산 ─────────────────────────────
     rets = [d["return_pct"] for d in yearly_returns]
     avg_ret = sum(rets) / len(rets)
     if len(rets) > 1:
@@ -382,6 +403,16 @@ def run_backtest(
         sharpe   = (avg_ret - risk_free_rate) / std_dev if std_dev > 0 else 0.0
     else:
         sharpe = 0.0
+
+    # Sortino: 하방 변동성(목표수익률=무위험수익률)만 페널티
+    downside_diffs = [min(0.0, r - risk_free_rate) for r in rets]
+    downside_squared = [d ** 2 for d in downside_diffs]
+    if len(rets) > 1:
+        downside_variance = sum(downside_squared) / (len(rets) - 1)
+        downside_dev = math.sqrt(downside_variance)
+        sortino = (avg_ret - risk_free_rate) / downside_dev if downside_dev > 0 else 0.0
+    else:
+        sortino = 0.0
 
     # ── 배당 CAGR ──────────────────────────────────────────────
     div_rets = [d["div_return_pct"] for d in yearly_returns]
@@ -392,6 +423,24 @@ def run_backtest(
     sp500_series = [sp500_returns.get(y, 0.0) for y in years]
     avg_kospi = (sum(kospi_series) / len(kospi_series)) if kospi_series else 0.0
     avg_sp500 = (sum(sp500_series) / len(sp500_series)) if sp500_series else 0.0
+
+    # Information Ratio: 초과수익 평균 / 추적오차(표준편차)
+    active_kospi = [r - k for r, k in zip(rets, kospi_series)]
+    active_sp500 = [r - s for r, s in zip(rets, sp500_series)]
+
+    def _information_ratio(active_returns: list[float]) -> float:
+        if len(active_returns) <= 1:
+            return 0.0
+        active_mean = sum(active_returns) / len(active_returns)
+        te_var = sum((a - active_mean) ** 2 for a in active_returns) / (len(active_returns) - 1)
+        te = math.sqrt(te_var)
+        return active_mean / te if te > 0 else 0.0
+
+    information_ratio_kospi = _information_ratio(active_kospi)
+    information_ratio_sp500 = _information_ratio(active_sp500)
+
+    # Calmar: CAGR / |MDD|
+    calmar = cagr_pct / abs(mdd) if mdd < 0 else 0.0
 
     # 최고/최저 연도
     best  = max(yearly_returns, key=lambda d: d["return_pct"])
@@ -416,6 +465,10 @@ def run_backtest(
         "total_return_pct": round(total_return_pct, 1),
         "mdd_pct":          round(mdd, 2),
         "sharpe_ratio":     round(sharpe, 3),
+        "sortino_ratio":    round(sortino, 3),
+        "calmar_ratio":     round(calmar, 3),
+        "information_ratio_kospi": round(information_ratio_kospi, 3),
+        "information_ratio_sp500": round(information_ratio_sp500, 3),
         "div_cagr_pct":     round(div_cagr, 2),
         "positive_years":   positive_years,
         "best_year":        best,
@@ -444,6 +497,9 @@ def _empty_result(start_year: int, end_year: int) -> dict:
         "period": f"{start_year}~{end_year}",
         "cagr_pct": 0.0, "total_return_pct": 0.0,
         "mdd_pct": 0.0, "sharpe_ratio": 0.0,
+        "sortino_ratio": 0.0, "calmar_ratio": 0.0,
+        "information_ratio_kospi": 0.0,
+        "information_ratio_sp500": 0.0,
         "yearly_returns": [], "summary_message": "데이터 없음",
         "grade": "N/A",
     }

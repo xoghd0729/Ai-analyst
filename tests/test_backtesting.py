@@ -221,6 +221,45 @@ class TestSharpe:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 신규 리스크 메트릭 검증 (Sortino/Calmar/IR)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestNewRiskMetrics:
+    def test_sortino_ratio_positive_for_growing_portfolio(self):
+        result = run_backtest(SCHD_ONLY, start_year=2019, end_year=2024, investable=10_000)
+        assert "sortino_ratio" in result
+        assert isinstance(result["sortino_ratio"], (int, float))
+        assert result["sortino_ratio"] > 0, f"Sortino가 양수가 아님: {result['sortino_ratio']}"
+
+    def test_calmar_ratio_formula(self):
+        result = run_backtest(SCHD_ONLY, start_year=2015, end_year=2024, investable=10_000)
+        mdd = result["mdd_pct"]
+        if mdd < 0:
+            expected = round(result["cagr_pct"] / abs(mdd), 3)
+            assert abs(result["calmar_ratio"] - expected) < 0.01, \
+                f"Calmar 계산 오류: {result['calmar_ratio']} != {expected}"
+        else:
+            assert result["calmar_ratio"] == 0.0
+
+    def test_information_ratio_vs_benchmark(self):
+        result = run_backtest(SCHD_ONLY, start_year=2015, end_year=2024, investable=10_000)
+        assert "information_ratio_kospi" in result
+        assert "information_ratio_sp500" in result
+        assert math.isfinite(result["information_ratio_kospi"])
+        assert math.isfinite(result["information_ratio_sp500"])
+
+    def test_new_metrics_in_response_dict(self, schd_result):
+        required = {
+            "sortino_ratio",
+            "calmar_ratio",
+            "information_ratio_kospi",
+            "information_ratio_sp500",
+        }
+        missing = required - set(schd_result.keys())
+        assert not missing, f"신규 메트릭 누락: {missing}"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 벤치마크 비교 검증
 # ─────────────────────────────────────────────────────────────────────────────
 
