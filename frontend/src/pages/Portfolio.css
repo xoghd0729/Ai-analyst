@@ -1,0 +1,667 @@
+.portfolio-page { display: flex; flex-direction: column; gap: 20px; }
+
+.portfolio-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* ── 입력 폼 ─────────────────────────────── */
+.form-card { display: flex; flex-direction: column; gap: 20px; }
+
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.input-wrap:focus-within { border-color: var(--blue); }
+
+.input-wrap input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.input-unit {
+  padding: 0 14px;
+  color: var(--text-sub);
+  font-size: 13px;
+  border-left: 1px solid var(--border);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+/* ── 투자 성향 버튼 ─────────────────────────────── */
+.risk-options { display: flex; flex-direction: column; gap: 8px; }
+
+.risk-btn {
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.risk-btn:hover { border-color: var(--blue); }
+.risk-btn.active { border-color: var(--blue); background: rgba(79,142,247,.1); }
+
+.risk-label { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.risk-desc  { font-size: 12px; color: var(--text-sub); }
+
+.submit-btn { width: 100%; margin-top: 4px; padding: 13px; font-size: 15px; }
+
+.label-sub { font-size: 11px; color: var(--text-sub); font-weight: 400; margin-left: 4px; }
+
+/* ── HERO 카드 ─────────────────────────────── */
+.hero-card {
+  background: linear-gradient(135deg, rgba(79,142,247,.15) 0%, rgba(52,211,153,.08) 100%);
+  border: 1px solid rgba(79,142,247,.3);
+  border-radius: 16px;
+  padding: 24px 28px;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+.hero-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hero-item.main {
+  grid-column: 1;
+}
+
+.hero-label {
+  font-size: 12px;
+  color: var(--text-sub);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.hero-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.hero-value.highlight .hv-num {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--blue);
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
+
+.hero-value .hv-num {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.hero-value .hv-num.green { color: var(--green); }
+.hero-value .hv-num.blue  { color: var(--blue); }
+
+.hv-unit {
+  font-size: 15px;
+  color: var(--text-sub);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+.hero-sub {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+/* ── card-title 서브텍스트 ─────────────────────────────── */
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: baseline; gap: 10px; }
+
+.title-sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-sub);
+}
+
+/* ── 복리 차트 노트 ─────────────────────────────── */
+.chart-note {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-sub);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ── 도넛 레이아웃 ─────────────────────────────── */
+.donut-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.donut-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 240px;
+  height: 240px;
+}
+
+.donut-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.dct-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.dct-label {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+/* ── 종목별 AI 근거 카드 ─────────────────────────────── */
+.stock-reasons {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-content: start;
+}
+
+.reason-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: border-color 0.15s;
+}
+
+.reason-card:hover { border-color: var(--blue); }
+
+.rc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.rc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.rc-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+.rc-weight {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+}
+
+.rc-yield {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+}
+
+.rc-reason {
+  font-size: 11px;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+/* ── 결과 영역 ─────────────────────────────── */
+.result-section { display: flex; flex-direction: column; gap: 20px; }
+
+/* ── 추천 종목 테이블 ─────────────────────────────── */
+.rec-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rec-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.rec-table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.rec-table tr:last-child td { border-bottom: none; }
+
+.rec-name { font-weight: 600; color: var(--text); }
+.rec-code { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+.num        { text-align: right; color: var(--text-sub); }
+.num.green  { color: var(--green); font-weight: 600; }
+.num.blue   { color: var(--blue);  font-weight: 600; }
+
+/* ── ISA 전략 ─────────────────────────────── */
+.isa-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.isa-item {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.isa-label { font-size: 12px; color: var(--text-sub); margin-bottom: 4px; }
+.isa-value { font-size: 15px; font-weight: 600; color: var(--text); }
+.isa-value.blue  { color: var(--blue); }
+.isa-value.green { color: var(--green); }
+
+.isa-tip, .rebalancing-tip {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.6;
+  margin-top: 8px;
+  background: var(--surface2);
+}
+
+/* ── 4축 자산 배분 요약 ─────────────────────────────── */
+.axis-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.axis-item {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+}
+
+.ax-label  { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.ax-weight { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.ax-yields { font-size: 11px; color: var(--text-sub); }
+.ax-tr     { color: var(--green); font-weight: 600; }
+.ax-count  { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+/* ── 종목 자산군 라벨 (테이블) ─────────────────────────────── */
+.rec-asset-label {
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* ── 이유카드 개선 ─────────────────────────────── */
+.rc-badge-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.rc-asset-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 12px;
+  background: rgba(79,142,247,.12);
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.rc-account-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.rc-tr {
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+/* ── 빈 화면 (결과 없을 때) ─────────────────────────────── */
+.empty-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  gap: 12px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+  padding: 48px;
+}
+
+.er-icon {
+  font-size: 48px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.er-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.er-desc {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.8;
+}
+
+/* ── ML 리스크 경보 카드 ─────────────────────────────────── */
+.risk-alert-card {
+  border-left: 4px solid var(--yellow, #fbbf24);
+  background: rgba(251, 191, 36, 0.04);
+}
+
+.risk-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.risk-alert-item {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  border-left: 3px solid transparent;
+}
+
+.risk-alert-item.severity-high   { border-left-color: #f87171; }
+.risk-alert-item.severity-medium { border-left-color: #fbbf24; }
+
+.ra-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.ra-icon { font-size: 16px; }
+
+.ra-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ra-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+}
+
+.ra-weight {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.ra-prob {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f87171;
+  margin-left: auto;
+}
+
+.ra-message {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.ra-alternative {
+  font-size: 12px;
+  color: var(--text-sub);
+  background: rgba(52, 211, 153, 0.06);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  line-height: 1.5;
+}
+
+.ra-alternative strong {
+  color: var(--green, #34d399);
+}
+
+/* ── ML 상태 배지 (추천 테이블) ─────────────────────────── */
+.ml-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ml-intact   { background: rgba(52, 211, 153, 0.12); color: #34d399; }
+.ml-weakening { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+.ml-broken   { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+
+/* ── 위험 종목 행 하이라이트 ────────────────────────────── */
+.row-broken   td { background: rgba(248, 113, 113, 0.04); }
+.row-weakening td { background: rgba(251, 191, 36, 0.04); }
+
+/* ── 세후 수익률 요약 배지 ────────────────────────────────── */
+.tax-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  flex-wrap: wrap;
+}
+
+.tax-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 14px;
+  min-width: 110px;
+}
+
+.tax-badge.accent { border-color: rgba(52,211,153,0.4); background: rgba(52,211,153,0.06); }
+.tax-badge.info   { border-color: rgba(79,142,247,0.3); background: rgba(79,142,247,0.05); }
+
+.tb-label {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.tb-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.tb-value.green { color: var(--green, #34d399); }
+
+.tax-arrow {
+  font-size: 18px;
+  color: var(--text-sub);
+  margin: 0 2px;
+}
+
+/* ── 월배당 현금흐름 캘린더 ────────────────────────────────── */
+.cashflow-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 6px;
+  align-items: end;
+  margin: 8px 0 4px;
+}
+
+.cf-month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.cf-label {
+  font-size: 11px;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+
+.cf-bar-wrap {
+  width: 100%;
+  height: 88px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.cf-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+  transition: height 0.3s ease;
+}
+
+.cf-amount {
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+}
+.cf-amount.green { color: var(--green, #34d399); }
+.cf-amount.muted { color: var(--text-sub); }
+
+@media (max-width: 700px) {
+  .cashflow-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* ── Monte Carlo 시나리오 범위 ────────────────────────────── */
+.scenario-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.sc-item {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.sc-item.pessimistic { background: rgba(248,113,113,0.12); color: #f87171; }
+.sc-item.base        { background: rgba(52,211,153,0.15);  color: #34d399; }
+.sc-item.optimistic  { background: rgba(79,142,247,0.12);  color: #4f8ef7; }
+.sc-sep { color: var(--text-sub); font-size: 11px; }
+
+/* ── AI 포트폴리오 진단 카드 ─────────────────────────────── */
+.ai-insight-card {
+  border-left: 4px solid #4f8ef7;
+  background: rgba(79, 142, 247, 0.03);
+}
+
+.insight-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.insight-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.insight-line.warn { color: #fbbf24; }
+
+.il-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4f8ef7;
+  margin-top: 7px;
+}
+
+.insight-line.warn .il-dot { background: #fbbf24; }
+
+/* hero에 색상 추가 */
+.hv-num.yellow { color: #fbbf24; }
+.hv-num.red    { color: #f87171; }

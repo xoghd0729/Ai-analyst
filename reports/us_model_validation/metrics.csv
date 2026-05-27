@@ -1,0 +1,55 @@
+﻿experiment,model,test_year,train_rows,test_rows,train_cuts,test_cuts,auc,pr_auc,f1,precision,recall,accuracy,tp,fp,tn,fn,notes
+expanding_holdout,xgb_full,2022,86,86,5,1,1.0,1.0,1.0,1.0,1.0,1.0,1,0,85,0,
+expanding_holdout,xgb_no_dps_yoy,2022,86,86,5,1,0.8059,0.05,0.0909,0.0476,1.0,0.7674,1,20,65,0,
+expanding_holdout,rule_dps_yoy_lt_minus_5,2022,86,86,5,1,1.0,1.0,1.0,1.0,1.0,1.0,1,0,85,0,This is label-equivalent and should be treated as a leakage baseline.
+expanding_holdout,rule_payout_gt_100,2022,86,86,5,1,0.4941,0.0116,0.0,0.0,0.0,0.9767,0,1,84,1,Simple accounting stress rule.
+expanding_holdout,rule_coverage_lt_1,2022,86,86,5,1,0.3824,0.0116,0.0,0.0,0.0,0.7558,0,20,65,1,Simple FCF coverage rule.
+expanding_holdout,rule_combo_accounting,2022,86,86,5,1,0.7647,0.0476,0.0,0.0,0.0,0.7558,0,20,65,1,"Payout, coverage, and dividend trend combined."
+expanding_holdout,xgb_full,2023,172,87,6,1,1.0,1.0,1.0,1.0,1.0,1.0,1,0,86,0,
+expanding_holdout,xgb_no_dps_yoy,2023,172,87,6,1,0.7674,0.0476,0.0,0.0,0.0,0.9655,0,2,84,1,
+expanding_holdout,rule_dps_yoy_lt_minus_5,2023,172,87,6,1,1.0,1.0,1.0,1.0,1.0,1.0,1,0,86,0,This is label-equivalent and should be treated as a leakage baseline.
+expanding_holdout,rule_payout_gt_100,2023,172,87,6,1,0.4826,0.0115,0.0,0.0,0.0,0.954,0,3,83,1,Simple accounting stress rule.
+expanding_holdout,rule_coverage_lt_1,2023,172,87,6,1,0.3779,0.0115,0.0,0.0,0.0,0.7471,0,21,65,1,Simple FCF coverage rule.
+expanding_holdout,rule_combo_accounting,2023,172,87,6,1,0.7558,0.0455,0.0,0.0,0.0,0.7471,0,21,65,1,"Payout, coverage, and dividend trend combined."
+expanding_holdout,xgb_full,2024,259,87,7,7,1.0,1.0,1.0,1.0,1.0,1.0,7,0,80,0,
+expanding_holdout,xgb_no_dps_yoy,2024,259,87,7,7,0.4437,0.1172,0.1818,0.25,0.1429,0.8966,1,3,77,6,
+expanding_holdout,rule_dps_yoy_lt_minus_5,2024,259,87,7,7,1.0,1.0,1.0,1.0,1.0,1.0,7,0,80,0,This is label-equivalent and should be treated as a leakage baseline.
+expanding_holdout,rule_payout_gt_100,2024,259,87,7,7,0.5527,0.1047,0.1818,0.25,0.1429,0.8966,1,3,77,6,Simple accounting stress rule.
+expanding_holdout,rule_coverage_lt_1,2024,259,87,7,7,0.667,0.1339,0.2667,0.1739,0.5714,0.7471,4,19,61,3,Simple FCF coverage rule.
+expanding_holdout,rule_combo_accounting,2024,259,87,7,7,0.8821,0.5031,0.2667,0.1739,0.5714,0.7471,4,19,61,3,"Payout, coverage, and dividend trend combined."
+expanding_holdout,xgb_full,2025,346,87,14,4,1.0,1.0,0.8889,0.8,1.0,0.9885,4,1,82,0,
+expanding_holdout,xgb_no_dps_yoy,2025,346,87,14,4,0.4352,0.0717,0.0,0.0,0.0,0.9195,0,3,80,4,
+expanding_holdout,rule_dps_yoy_lt_minus_5,2025,346,87,14,4,1.0,1.0,1.0,1.0,1.0,1.0,4,0,83,0,This is label-equivalent and should be treated as a leakage baseline.
+expanding_holdout,rule_payout_gt_100,2025,346,87,14,4,0.494,0.046,0.0,0.0,0.0,0.9425,0,1,82,4,Simple accounting stress rule.
+expanding_holdout,rule_coverage_lt_1,2025,346,87,14,4,0.5045,0.0464,0.08,0.0476,0.25,0.7356,1,20,63,3,Simple FCF coverage rule.
+expanding_holdout,rule_combo_accounting,2025,346,87,14,4,0.8117,0.245,0.08,0.0476,0.25,0.7356,1,20,63,3,"Payout, coverage, and dividend trend combined."
+leave_one_year_out,xgb_full,2021,347,86,13,5,1.0,1.0,1.0,1.0,1.0,1.0,5,0,81,0,
+leave_one_year_out,xgb_no_dps_yoy,2021,347,86,13,5,0.5383,0.1616,0.0,0.0,0.0,0.9302,0,1,80,5,
+leave_one_year_out,rule_dps_yoy_lt_minus_5,2021,347,86,13,5,1.0,1.0,1.0,1.0,1.0,1.0,5,0,81,0,This is label-equivalent and should be treated as a leakage baseline.
+leave_one_year_out,rule_payout_gt_100,2021,347,86,13,5,0.5,0.0581,0.0,0.0,0.0,0.9419,0,0,81,5,Simple accounting stress rule.
+leave_one_year_out,rule_coverage_lt_1,2021,347,86,13,5,0.5,0.0581,0.0,0.0,0.0,0.9419,0,0,81,5,Simple FCF coverage rule.
+leave_one_year_out,rule_combo_accounting,2021,347,86,13,5,0.9938,0.8333,0.0,0.0,0.0,0.9419,0,0,81,5,"Payout, coverage, and dividend trend combined."
+leave_one_year_out,xgb_full,2022,347,86,17,1,1.0,1.0,1.0,1.0,1.0,1.0,1,0,85,0,
+leave_one_year_out,xgb_no_dps_yoy,2022,347,86,17,1,0.2235,0.0149,0.0,0.0,0.0,0.8023,0,16,69,1,
+leave_one_year_out,rule_dps_yoy_lt_minus_5,2022,347,86,17,1,1.0,1.0,1.0,1.0,1.0,1.0,1,0,85,0,This is label-equivalent and should be treated as a leakage baseline.
+leave_one_year_out,rule_payout_gt_100,2022,347,86,17,1,0.4941,0.0116,0.0,0.0,0.0,0.9767,0,1,84,1,Simple accounting stress rule.
+leave_one_year_out,rule_coverage_lt_1,2022,347,86,17,1,0.3824,0.0116,0.0,0.0,0.0,0.7558,0,20,65,1,Simple FCF coverage rule.
+leave_one_year_out,rule_combo_accounting,2022,347,86,17,1,0.7647,0.0476,0.0,0.0,0.0,0.7558,0,20,65,1,"Payout, coverage, and dividend trend combined."
+leave_one_year_out,xgb_full,2023,346,87,17,1,1.0,1.0,1.0,1.0,1.0,1.0,1,0,86,0,
+leave_one_year_out,xgb_no_dps_yoy,2023,346,87,17,1,0.5349,0.0244,0.0,0.0,0.0,0.8621,0,11,75,1,
+leave_one_year_out,rule_dps_yoy_lt_minus_5,2023,346,87,17,1,1.0,1.0,1.0,1.0,1.0,1.0,1,0,86,0,This is label-equivalent and should be treated as a leakage baseline.
+leave_one_year_out,rule_payout_gt_100,2023,346,87,17,1,0.4826,0.0115,0.0,0.0,0.0,0.954,0,3,83,1,Simple accounting stress rule.
+leave_one_year_out,rule_coverage_lt_1,2023,346,87,17,1,0.3779,0.0115,0.0,0.0,0.0,0.7471,0,21,65,1,Simple FCF coverage rule.
+leave_one_year_out,rule_combo_accounting,2023,346,87,17,1,0.7558,0.0455,0.0,0.0,0.0,0.7471,0,21,65,1,"Payout, coverage, and dividend trend combined."
+leave_one_year_out,xgb_full,2024,346,87,11,7,1.0,1.0,1.0,1.0,1.0,1.0,7,0,80,0,
+leave_one_year_out,xgb_no_dps_yoy,2024,346,87,11,7,0.5911,0.124,0.0,0.0,0.0,0.8046,0,10,70,7,
+leave_one_year_out,rule_dps_yoy_lt_minus_5,2024,346,87,11,7,1.0,1.0,1.0,1.0,1.0,1.0,7,0,80,0,This is label-equivalent and should be treated as a leakage baseline.
+leave_one_year_out,rule_payout_gt_100,2024,346,87,11,7,0.5527,0.1047,0.1818,0.25,0.1429,0.8966,1,3,77,6,Simple accounting stress rule.
+leave_one_year_out,rule_coverage_lt_1,2024,346,87,11,7,0.667,0.1339,0.2667,0.1739,0.5714,0.7471,4,19,61,3,Simple FCF coverage rule.
+leave_one_year_out,rule_combo_accounting,2024,346,87,11,7,0.8821,0.5031,0.2667,0.1739,0.5714,0.7471,4,19,61,3,"Payout, coverage, and dividend trend combined."
+leave_one_year_out,xgb_full,2025,346,87,14,4,1.0,1.0,0.8889,0.8,1.0,0.9885,4,1,82,0,
+leave_one_year_out,xgb_no_dps_yoy,2025,346,87,14,4,0.4352,0.0717,0.0,0.0,0.0,0.9195,0,3,80,4,
+leave_one_year_out,rule_dps_yoy_lt_minus_5,2025,346,87,14,4,1.0,1.0,1.0,1.0,1.0,1.0,4,0,83,0,This is label-equivalent and should be treated as a leakage baseline.
+leave_one_year_out,rule_payout_gt_100,2025,346,87,14,4,0.494,0.046,0.0,0.0,0.0,0.9425,0,1,82,4,Simple accounting stress rule.
+leave_one_year_out,rule_coverage_lt_1,2025,346,87,14,4,0.5045,0.0464,0.08,0.0476,0.25,0.7356,1,20,63,3,Simple FCF coverage rule.
+leave_one_year_out,rule_combo_accounting,2025,346,87,14,4,0.8117,0.245,0.08,0.0476,0.25,0.7356,1,20,63,3,"Payout, coverage, and dividend trend combined."

@@ -12,6 +12,23 @@ load_dotenv()
 API_KEY = os.getenv("DART_API_KEY")
 engine  = create_engine("postgresql://localhost/ai_analyst")
 
+
+# ─────────────────────────────────────────────────────────────
+# DART 공통 숫자 파싱 유틸리티
+# ─────────────────────────────────────────────────────────────
+def parse_number(v) -> float | None:
+    """DART 응답값(쉼표·하이픈·공백 포함)을 float으로 변환."""
+    if v is None:
+        return None
+    v = str(v).replace(",", "").strip()
+    if v in ("-", "", "N/A", "null", "None"):
+        return None
+    try:
+        return float(v)
+    except (ValueError, TypeError):
+        return None
+
+
 # ─────────────────────────────────────────────────────────────
 # 0. 종목코드 → DART corp_code 변환
 #    우선순위: ① 세션 캐시 → ② DB corp_code_map → ③ corpCode.xml 다운로드
@@ -233,10 +250,16 @@ def get_dividend_per_share(corp_code: str, year: str, stock_code: str | None = N
             if res.get("status") != "000":
                 continue
             for item in res.get("list", []):
-                if "보통주" in item.get("se", "") and item.get("dps"):
-                    dps = item["dps"].replace(",", "").strip()
-                    if dps:
-                        return float(dps)
+                # 실제 응답 구조:
+                #   se        = "주당 현금배당금(원)"
+                #   stock_knd = "보통주"          ← 보통주 여부는 여기!
+                #   thstrm    = "1,444"           ← DPS 금액 (thstrm_amount 아님)
+                se        = item.get("se",        "")
+                stock_knd = item.get("stock_knd", "")
+                if "주당 현금배당금" in se and "보통주" in stock_knd:
+                    val = parse_number(item.get("thstrm", ""))
+                    if val and val > 0:
+                        return val
         except Exception:
             pass
     return None

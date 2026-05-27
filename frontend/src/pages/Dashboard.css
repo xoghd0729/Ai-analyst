@@ -1,0 +1,269 @@
+/* ── 전체 배경 ── */
+.db-root {
+  min-height: 100vh;
+  background: #F1F5F9;
+  font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+}
+
+/* ── 헤더 ── */
+.db-header {
+  background: linear-gradient(135deg, #1E3A5F 0%, #2563EB 100%);
+  padding: 28px 0 24px;
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.2);
+}
+.db-header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.db-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px;
+}
+.db-subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+}
+.db-date {
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+  background: rgba(255,255,255,0.12);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+/* ── 콘텐츠 영역 ── */
+.db-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+/* ── 요약 카드 3개 ── */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.sum-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 2px solid transparent;
+}
+.sum-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.sum-card.safe:hover    { border-color: #10B981; }
+.sum-card.caution:hover { border-color: #F59E0B; }
+.sum-card.danger:hover  { border-color: #EF4444; }
+.sum-emoji  { font-size: 24px; margin-bottom: 6px; }
+.sum-count  { font-size: 32px; font-weight: 800; color: #1E293B; line-height: 1; }
+.sum-label  { font-size: 14px; font-weight: 600; color: #475569; margin: 4px 0 2px; }
+.sum-desc   { font-size: 11px; color: #94A3B8; }
+.sum-card.safe    .sum-count { color: #059669; }
+.sum-card.caution .sum-count { color: #D97706; }
+.sum-card.danger  .sum-count { color: #DC2626; }
+
+/* ── 검색 + 필터 ── */
+.toolbar-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.search-wrap {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.search-icon  { font-size: 14px; color: #94A3B8; margin-right: 8px; }
+.search-box   {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 12px 0;
+  font-size: 14px;
+  color: #1E293B;
+  background: transparent;
+}
+.search-box::placeholder { color: #CBD5E1; }
+.search-clear {
+  background: none;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+}
+
+.filter-pills { display: flex; gap: 8px; }
+.pill {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #E2E8F0;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.pill:hover { border-color: #94A3B8; }
+.pill-active { background: #1E3A5F !important; border-color: #1E3A5F !important; color: #fff !important; }
+.pill-active.pill-safe    { background: #059669 !important; border-color: #059669 !important; }
+.pill-active.pill-caution { background: #D97706 !important; border-color: #D97706 !important; }
+.pill-active.pill-danger  { background: #DC2626 !important; border-color: #DC2626 !important; }
+
+/* ── 카드 그리드 ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+/* ── 종목 카드 ── */
+.stock-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border-left: 4px solid #E2E8F0;
+}
+.stock-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.stock-card.safe    { border-left-color: #10B981; }
+.stock-card.caution { border-left-color: #F59E0B; }
+.stock-card.danger  { border-left-color: #EF4444; }
+
+.sc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.sc-rank   { font-size: 11px; color: #94A3B8; margin-bottom: 3px; }
+.sc-name   { font-size: 16px; font-weight: 700; color: #1E293B; }
+.sc-sector { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+
+.sc-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.sc-badge.safe    { background: #D1FAE5; color: #065F46; }
+.sc-badge.caution { background: #FEF3C7; color: #92400E; }
+.sc-badge.danger  { background: #FEE2E2; color: #991B1B; }
+
+.sc-yield-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: #F8FAFC;
+  border-radius: 8px;
+}
+.sc-yield-label { font-size: 12px; color: #64748B; }
+.sc-yield-val   { font-size: 18px; font-weight: 800; color: #1E293B; }
+
+.sc-risk-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.sc-risk-label { font-size: 11px; color: #94A3B8; white-space: nowrap; }
+.sc-risk-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: #F1F5F9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.sc-risk-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+.bar-safe    { background: #10B981; }
+.bar-caution { background: #F59E0B; }
+.bar-danger  { background: #EF4444; }
+.sc-risk-pct { font-size: 12px; font-weight: 600; color: #475569; white-space: nowrap; }
+
+.sc-desc {
+  font-size: 12px;
+  color: #64748B;
+  margin-top: 4px;
+}
+
+.sc-contra {
+  margin-top: 10px;
+  padding: 7px 10px;
+  background: #FFFBEB;
+  border: 1px solid #FDE68A;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #92400E;
+  font-weight: 500;
+}
+
+/* ── 빈 상태 / 로딩 / 에러 ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94A3B8;
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.loading-screen, .error-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  color: #64748B;
+}
+.loading-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid #E2E8F0;
+  border-top-color: #2563EB;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-icon { font-size: 40px; }
+
+.db-footer-note {
+  margin-top: 32px;
+  font-size: 11px;
+  color: #CBD5E1;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .summary-row { gap: 8px; }
+  .sum-count { font-size: 24px; }
+  .toolbar-row { flex-direction: column; align-items: stretch; }
+  .filter-pills { justify-content: center; }
+  .card-grid { grid-template-columns: 1fr; }
+}

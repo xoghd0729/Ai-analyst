@@ -1,0 +1,16 @@
+{
+  "data_path": "/Users/gimtaehong/ai-analyst/data/us_dividend_dataset.csv",
+  "model_path": "/Users/gimtaehong/ai-analyst/models/us_dividend_cut_model.pkl",
+  "report_dir": "/Users/gimtaehong/ai-analyst/reports/us_model_validation",
+  "threshold": 0.3,
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "rows": 433,
+  "tickers": 87,
+  "cuts": 18
+}

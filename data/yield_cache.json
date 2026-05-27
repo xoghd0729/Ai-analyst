@@ -1,0 +1,316 @@
+{
+  "_comment": "수익률 + 배당성장률 캐시. source=yfinance 항목은 TTL 초과 시 재조회 대상.",
+  "_schema_version": "2.0",
+  "_updated": "2026-05-24",
+  "_ttl_hours": 24,
+  "_total_assets": 43,
+  "assets": {
+    "SCHD": {
+      "yield_pct": 3.6,
+      "div_growth_rate_pct": 10.2,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "VYM": {
+      "yield_pct": 2.9,
+      "div_growth_rate_pct": 6.1,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "DGRO": {
+      "yield_pct": 2.5,
+      "div_growth_rate_pct": 9.8,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "DGRW": {
+      "yield_pct": 2.0,
+      "div_growth_rate_pct": 8.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "VIG": {
+      "yield_pct": 1.8,
+      "div_growth_rate_pct": 8.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "NOBL": {
+      "yield_pct": 2.2,
+      "div_growth_rate_pct": 7.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "JEPI": {
+      "yield_pct": 7.5,
+      "div_growth_rate_pct": 0.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "JEPQ": {
+      "yield_pct": 9.0,
+      "div_growth_rate_pct": 0.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "SPYI": {
+      "yield_pct": 12.0,
+      "div_growth_rate_pct": 0.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "QYLD": {
+      "yield_pct": 11.5,
+      "div_growth_rate_pct": 0.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "HDV": {
+      "yield_pct": 4.0,
+      "div_growth_rate_pct": 5.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "SPYD": {
+      "yield_pct": 4.5,
+      "div_growth_rate_pct": 4.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "SPHD": {
+      "yield_pct": 4.8,
+      "div_growth_rate_pct": 3.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "O": {
+      "yield_pct": 5.5,
+      "div_growth_rate_pct": 2.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "VNQ": {
+      "yield_pct": 4.0,
+      "div_growth_rate_pct": 3.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "EQR": {
+      "yield_pct": 4.0,
+      "div_growth_rate_pct": 3.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance",
+      "stale": false
+    },
+    "FRT": {
+      "yield_pct": 4.2,
+      "div_growth_rate_pct": 2.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance",
+      "stale": false
+    },
+    "SPG": {
+      "yield_pct": 5.1,
+      "div_growth_rate_pct": 4.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance",
+      "stale": false
+    },
+    "PSA": {
+      "yield_pct": 4.3,
+      "div_growth_rate_pct": 3.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance",
+      "stale": false
+    },
+    "AMT": {
+      "yield_pct": 3.2,
+      "div_growth_rate_pct": 3.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance",
+      "stale": false
+    },
+    "SGOV": {
+      "yield_pct": 5.2,
+      "div_growth_rate_pct": 0.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "TLT": {
+      "yield_pct": 4.5,
+      "div_growth_rate_pct": 0.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "BND": {
+      "yield_pct": 3.5,
+      "div_growth_rate_pct": 0.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "AGG": {
+      "yield_pct": 3.8,
+      "div_growth_rate_pct": 0.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "SCHP": {
+      "yield_pct": 3.2,
+      "div_growth_rate_pct": 1.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "KO": {
+      "yield_pct": 3.1,
+      "div_growth_rate_pct": 4.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "JNJ": {
+      "yield_pct": 3.2,
+      "div_growth_rate_pct": 5.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "PG": {
+      "yield_pct": 2.5,
+      "div_growth_rate_pct": 5.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "XOM": {
+      "yield_pct": 3.4,
+      "div_growth_rate_pct": 3.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "CVX": {
+      "yield_pct": 4.1,
+      "div_growth_rate_pct": 4.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "ABBV": {
+      "yield_pct": 3.8,
+      "div_growth_rate_pct": 7.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "MCD": {
+      "yield_pct": 2.4,
+      "div_growth_rate_pct": 8.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "T": {
+      "yield_pct": 6.5,
+      "div_growth_rate_pct": 0.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "VZ": {
+      "yield_pct": 6.8,
+      "div_growth_rate_pct": 1.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "IBM": {
+      "yield_pct": 3.5,
+      "div_growth_rate_pct": 1.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "MO": {
+      "yield_pct": 8.5,
+      "div_growth_rate_pct": 3.0,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "PFE": {
+      "yield_pct": 6.5,
+      "div_growth_rate_pct": 2.5,
+      "updated_at": "2026-05-24",
+      "source": "yfinance+factsheet",
+      "stale": false
+    },
+    "448290": {
+      "yield_pct": 3.2,
+      "div_growth_rate_pct": 9.5,
+      "updated_at": "2026-05-24",
+      "source": "krx+factsheet",
+      "stale": false,
+      "name_kr": "TIGER 미국배당다우존스"
+    },
+    "385720": {
+      "yield_pct": 5.5,
+      "div_growth_rate_pct": 3.0,
+      "updated_at": "2026-05-24",
+      "source": "krx+factsheet",
+      "stale": false,
+      "name_kr": "TIGER 리츠부동산인프라"
+    },
+    "279530": {
+      "yield_pct": 4.8,
+      "div_growth_rate_pct": 3.5,
+      "updated_at": "2026-05-24",
+      "source": "krx+factsheet",
+      "stale": false,
+      "name_kr": "KODEX 고배당"
+    },
+    "211560": {
+      "yield_pct": 2.8,
+      "div_growth_rate_pct": 7.0,
+      "updated_at": "2026-05-24",
+      "source": "krx+factsheet",
+      "stale": false,
+      "name_kr": "TIGER 배당성장"
+    },
+    "441680": {
+      "yield_pct": 3.5,
+      "div_growth_rate_pct": 5.5,
+      "updated_at": "2026-05-24",
+      "source": "krx+factsheet",
+      "stale": false,
+      "name_kr": "KODEX 배당성장채권혼합"
+    },
+    "456680": {
+      "yield_pct": 4.5,
+      "div_growth_rate_pct": 3.0,
+      "updated_at": "2026-05-24",
+      "source": "krx+factsheet",
+      "stale": false,
+      "name_kr": "TIGER 미국MSCI리츠"
+    }
+  }
+}

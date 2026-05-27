@@ -3,7 +3,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 import os
 from dotenv import load_dotenv
-from groq import Groq
+from utils.ollama_client import ollama_call_with_retry as groq_call_with_retry
 from sqlalchemy import create_engine, text
 from pykrx import stock as krx
 from datetime import datetime, timedelta, date
@@ -11,8 +11,8 @@ from collectors.macro import get_macro_context
 from analyzers.yield_trap import analyze as yield_trap_analyze, get_metrics_from_db
 
 load_dotenv()
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-MODEL = "llama-3.3-70b-versatile"
+client = None   # Gemini는 클라이언트 객체 불필요 (호환용으로 None 유지)
+MODEL = "qwen2.5:14b"
 engine = create_engine("postgresql://localhost/ai_analyst")
 
 
@@ -244,11 +244,12 @@ Yield Trap 신호가 있으면 가설에 명시.
 - 지금 이 배당주에 투자해야 하는 경우 / 피해야 하는 경우 각 1가지 (수치 근거 포함)
 """
 
-    response = client.chat.completions.create(
+    response = groq_call_with_retry(
+        client,
         model=MODEL,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.2,
-        max_tokens=2500,
+        max_tokens=1000,   # 2500 → 1000 (토큰 절감)
     )
     return response.choices[0].message.content
 

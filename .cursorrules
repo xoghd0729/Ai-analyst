@@ -1,0 +1,158 @@
+# AI 현금흐름 운영체제 — Cursor 작업 규칙
+
+이 파일은 Cursor가 코드를 생성·수정할 때 반드시 따라야 하는 프로젝트 컨벤션이다.
+모든 요청에 대해 이 규칙을 먼저 적용하고, 그 다음에 사용자 지시를 수행한다.
+
+---
+
+## 1. 프로젝트 정체성
+
+**이름**: AI 현금흐름 운영체제 (AI Cashflow OS) v2.0.0
+**핵심 메시지**: "수익률 예측이 아니라, 미래 월급형 현금흐름을 설계·방어하는 시스템"
+**작업 디렉토리**: `~/ai-analyst/`
+
+배당 투자자의 진짜 질문("50세에 월 200만원 받으려면 지금 얼마를?")에 역산으로 답한다.
+
+---
+
+## 2. 기술 스택 (변경 금지)
+
+- API: FastAPI (uvicorn) — `api/main.py`
+- 분석: Pipe-and-Filter 18 필터 — `api/pipeline/`
+- ML: XGBoost + sklearn Pipeline — `models/kr_3class_model.pkl`
+- 설명: SHAP TreeExplainer — `utils/shap_explainer.py`
+- DB: PostgreSQL (SQLAlchemy ORM) + JSON/CSV 파일 폴백
+- 스케줄러: APScheduler (CronTrigger)
+- 프론트: React + Recharts — `frontend/src/`
+- 테스트: pytest — `tests/`
+
+새 라이브러리 추가 시 반드시 사용자에게 먼저 확인.
+
+---
+
+## 3. 디렉토리 규칙 (절대 위반 금지)
+
+- 새 유틸리티 함수 → `utils/` 에만
+- 새 API 엔드포인트 → `api/routers/portfolio.py` 또는 `api/routers/` 내 적절한 파일
+- 새 필터 → `api/pipeline/filters.py` 에 추가하고 `runner.py`의 실행 순서에 등록
+- 새 React 컴포넌트 → `frontend/src/components/` 에 작성 후 `Portfolio.jsx`에서 import
+- 새 테스트 → `tests/test_*.py` 패턴
+- 데이터 수집 스크립트 → `scripts/`
+- 임시 산출물 → `results/` 또는 `reports/`
+
+**디렉토리 새로 만들지 말 것**. 위 구조 안에서 작업한다.
+
+---
+
+## 4. 코딩 패턴 (반드시 준수)
+
+### 4-1. 한국어 인코딩
+Python 파일에 한국어 문자열을 넣을 때 Edit 툴이 한글을 깨뜨릴 수 있다. 의심스러우면 bash heredoc으로 파일을 다시 쓴다:
+```bash
+cat > path/to/file.py << 'EOF'
+# 한국어 코드
+EOF
+```
+
+### 4-2. DB-First + 파일 폴백 (db/repository.py 패턴)
+```python
+def get_xxx() -> dict:
+    try:
+        with Session(engine) as session:
+            rows = session.query(Model).all()
+            return {r.key: r.to_dict() for r in rows}
+    except Exception as e:
+        log.warning("DB 실패, 파일 폴백: %s", e)
+        return json.load(open("data/xxx.json"))
+```
+
+### 4-3. 필터 작성 패턴
+```python
+class NewFilter(BaseFilter):
+    name = "NewFilter"
+
+    def process(self, ctx: PipelineContext) -> None:
+        # ctx에서 이전 필터 결과 읽기
+        recs = ctx.recommendations
+        # 계산 후 ctx에 저장 (return 하지 않음)
+        ctx.new_result = some_calculation(recs)
+```
+
+### 4-4. 필터 에러 핸들링 (runner.py가 자동 처리)
+필터 내부에서 try/except로 다 잡지 말 것. runner가 잡고 `ctx.add_error()`로 기록한다.
+다만 외부 API 호출, 파일 IO 등 명백한 외부 의존성은 필터 내부에서 처리.
+
+### 4-5. 함수 시그니처 변경 금지
+다음 함수들은 다른 필터·테스트가 의존한다. 시그니처 변경 시 모든 호출처도 함께 수정:
+- `calc_fire_engine()` — utils/fire_engine.py
+- `run_monte_carlo()` — utils/monte_carlo.py
+- `calc_tax_optimizer()` — utils/tax_optimizer.py
+- `run_backtest()` — utils/backtesting.py
+- `explain_portfolio_risks()` — utils/shap_explainer.py
+
+---
+
+## 5. 세법 상수 (2026, 변경 금지)
+
+```python
+# utils/tax_optimizer.py
+ISA_ANNUAL_LIMIT     = 4_000  # 만원 — 구법 2,000 대비 2배
+ISA_TAX_FREE_GENERAL = 500    # 만원 — 구법 200 대비 2.5배
+ISA_TAX_FREE_YOUTH   = 1_000  # 만원 — 구법 400 대비 2.5배
+```
+
+세법 추가 시(예: 해외양도세, 종합과세 누진세율) 새 상수로 분리하고 위 값은 건드리지 않는다.
+
+---
+
+## 6. 테스트 정책
+
+- 새 유틸 함수 작성 시 반드시 `tests/test_{모듈명}.py` 동시 작성
+- 테스트 구조: `class Test{기능명}` — 메서드는 `test_{시나리오}` 형식
+- 최소 검증 항목: ReturnStructure / MathAccuracy / EdgeCases
+- 한국어 테스트 데이터 사용 시 fixture에서 `# -*- coding: utf-8 -*-` 명시
+- 실행: `pytest tests/test_파일.py -v --tb=short`
+
+---
+
+## 7. Pipeline 변경 시 체크리스트
+
+새 필터 추가할 때 빠뜨리면 안 되는 것:
+1. `api/pipeline/filters.py` 에 필터 클래스 작성
+2. `api/pipeline/context.py` 의 `PipelineContext`에 새 필드 추가
+3. `api/pipeline/runner.py` 의 `_build_pipeline()` 메서드에서 실행 순서에 등록
+4. `api/routers/portfolio.py` 의 `_to_response()`에 응답 포함
+5. 프론트엔드(`frontend/src/pages/Portfolio.jsx`)에서 사용한다면 컴포넌트 추가
+6. `tests/test_pipeline_runner.py` 에 필터 실행 검증 추가
+
+---
+
+## 8. 응답 스타일
+
+- 코드 변경 시 "왜 이렇게 했는지" 한국어로 짧게 설명 (3~5줄)
+- 큰 리팩토링은 변경 전/후 diff 형식으로 보여줄 것
+- 새 의존성 추가 시 반드시 `requirements.txt` 동시 업데이트
+- 한국어 로그 메시지는 OK, 단 변수명·함수명은 영어 snake_case
+
+---
+
+## 9. 진행 중인 마스터 플랜
+
+현재 "프로덕션급 핵심 2주 압축 플랜" 진행 중. 상세는:
+- `docs/EXECUTION_PLAN_2WEEKS.md` — 일별 작업 분해
+- `docs/ROADMAP_DATA_EXPANSION.md` — Week 1: 데이터 확장
+- `docs/ROADMAP_ENSEMBLE_MODEL.md` — Week 1.5: 앙상블 모델
+- `docs/ROADMAP_TAX_PRECISION.md` — Week 2: 세금 정밀화
+
+Cursor에서 작업 요청받으면 위 명세서를 먼저 읽고 컨텍스트 파악한 뒤 시작한다.
+
+---
+
+## 10. 금지사항
+
+- ❌ 새 디렉토리 생성 (위 8개 구조 외)
+- ❌ 1,000줄 이상 단일 파일 작성 (Pipe-and-Filter 분리 원칙 위반)
+- ❌ 글로벌 변수 사용 (PipelineContext 통해서만 상태 공유)
+- ❌ `print()` 디버깅 — `logging` 모듈 사용
+- ❌ Hardcoded 가격/수익률 — 데이터는 항상 `data/` 또는 DB에서
+- ❌ 영문 주석만 사용 — 비즈니스 로직 주석은 한국어 권장

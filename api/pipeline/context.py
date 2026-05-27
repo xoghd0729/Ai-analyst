@@ -1,0 +1,115 @@
+"""
+PipelineContext
+───────────────
+파이프라인 전 단계에 걸쳐 공유되는 단일 상태 컨테이너.
+
+왜 Context 패턴인가?
+  각 Filter 함수가 개별 return 값을 다음 함수에 넘기면
+  19단계 체인에서 함수 시그니처가 폭발적으로 복잡해진다.
+  Context 객체 하나를 공유하면 각 Filter는 필요한 필드만 읽고,
+  자신이 계산한 결과만 context에 쓰면 된다.
+  → 단계 추가/삭제가 context 필드 추가로만 끝난다.
+"""
+from __future__ import annotations
+from dataclasses import dataclass, field
+from typing import Any
+
+
+@dataclass
+class PortfolioRequest:
+    age:               int
+    annual_income:     int
+    monthly_target:    int
+    investable_amount: int
+    risk_tolerance:    str
+    archetype:         str = "혼합형"
+    monthly_savings:   float = 100.0
+    target_fire_age:   int   = 50
+
+
+@dataclass
+class PipelineContext:
+    """
+    파이프라인 공유 상태.
+    각 Filter는 자신이 필요한 필드를 읽고, 결과를 해당 필드에 저장한다.
+    None 이면 아직 해당 단계가 실행되지 않은 상태.
+    """
+    request: PortfolioRequest
+
+    # ── Step 1: 5축 비중 ────────────────────────────────────────
+    base_axis_w:  dict = field(default_factory=dict)
+    arch_axis_w:  dict = field(default_factory=dict)
+    axis_w:       dict = field(default_factory=dict)
+    etf_yields:   dict = field(default_factory=dict)
+    arch_cfg:     dict = field(default_factory=dict)
+
+    # ── Step 2: 거시 레짐 ───────────────────────────────────────
+    macro: dict = field(default_factory=dict)
+
+    # ── Step 3: 자산 선별 ───────────────────────────────────────
+    kr_stocks: list = field(default_factory=list)
+    us_stocks: list = field(default_factory=list)
+    etfs:      list = field(default_factory=list)
+
+    # ── Step 4: 비중 배분 결과 ──────────────────────────────────
+    recommendations: list = field(default_factory=list)
+
+    # ── Step 5: 포트폴리오 요약 수치 ───────────────────────────
+    total_annual:        float = 0.0
+    total_annual_net:    float = 0.0
+    total_monthly:       float = 0.0
+    total_monthly_net:   float = 0.0
+    avg_yield:           float = 0.0
+    avg_yield_net:       float = 0.0
+    avg_cap_gain:        float = 0.0
+    avg_total_return:    float = 0.0
+    avg_total_return_net:float = 0.0
+    vs_bank:             float = 0.0
+    achievement:         float = 0.0
+    needed_inv:          int   = 0
+    monthly_pay_weight:  float = 0.0
+
+    # ── Step 6: 배당 성장 시뮬레이션 ───────────────────────────
+    projection:     dict = field(default_factory=dict)
+    living_coverage:dict = field(default_factory=dict)
+
+    # ── Step 7: 리밸런싱 ────────────────────────────────────────
+    rebalancing_plan: dict = field(default_factory=dict)
+
+    # ── Step 8: 스트레스 테스트 ────────────────────────────────
+    stress:    dict = field(default_factory=dict)
+    fx_stress: dict = field(default_factory=dict)
+
+    # ── Step 9: 섹터 익스포저 ──────────────────────────────────
+    sector_exposure: dict = field(default_factory=dict)
+
+    # ── Step 10: 배당 캘린더 ───────────────────────────────────
+    dividend_calendar: dict = field(default_factory=dict)
+
+    # ── Step 11: ISA 전략 + 리스크 경보 ────────────────────────
+    isa:         dict = field(default_factory=dict)
+    risk_alerts: list = field(default_factory=list)
+
+    # ── Step 12: FIRE 역산 ──────────────────────────────────────
+    fire_plan: dict = field(default_factory=dict)
+
+    # ── Step 13: Monte Carlo ────────────────────────────────────
+    monte_carlo: dict = field(default_factory=dict)
+
+    # ── Step 14: 세금 최적화 ───────────────────────────────────
+    tax_optimizer_result: dict = field(default_factory=dict)
+
+    # ── Step 15: 행동편향 ──────────────────────────────────────
+    behavioral: dict = field(default_factory=dict)
+
+    # ── Step 16: Portfolio Health ───────────────────────────────
+    health: dict = field(default_factory=dict)
+
+    # ── Step 17: 스토리텔링 ────────────────────────────────────
+    storytelling: str = ""
+
+    # ── 메타 ──────────────────────────────────────────────────
+    errors: list[str] = field(default_factory=list)
+
+    def add_error(self, step: str, msg: str) -> None:
+        self.errors.append(f"[{step}] {msg}")

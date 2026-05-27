@@ -1,0 +1,64 @@
+{
+  "features": [
+    {
+      "name": "dps_yoy_pct",
+      "label_ko": "배당금 전년 대비 증감률",
+      "importance": 0.4064,
+      "rank": 1
+    },
+    {
+      "name": "div_to_ocf",
+      "label_ko": "배당/영업현금흐름 비율",
+      "importance": 0.1273,
+      "rank": 2
+    },
+    {
+      "name": "dividends_paid",
+      "label_ko": "배당금 지급액",
+      "importance": 0.1237,
+      "rank": 3
+    },
+    {
+      "name": "operating_cf",
+      "label_ko": "영업현금흐름",
+      "importance": 0.0651,
+      "rank": 4
+    },
+    {
+      "name": "dividend_coverage",
+      "label_ko": "배당 커버리지",
+      "importance": 0.058,
+      "rank": 5
+    },
+    {
+      "name": "capex",
+      "label_ko": "설비투자 (CapEx)",
+      "importance": 0.0578,
+      "rank": 6
+    },
+    {
+      "name": "fcf",
+      "label_ko": "잉여현금흐름 (FCF)",
+      "importance": 0.0565,
+      "rank": 7
+    },
+    {
+      "name": "ocf_to_capex",
+      "label_ko": "영업현금흐름/설비투자 비율",
+      "importance": 0.0452,
+      "rank": 8
+    },
+    {
+      "name": "payout_ratio",
+      "label_ko": "배당성향",
+      "importance": 0.0322,
+      "rank": 9
+    },
+    {
+      "name": "fcf_negative",
+      "label_ko": "FCF 마이너스 여부",
+      "importance": 0.0277,
+      "rank": 10
+    }
+  ]
+}

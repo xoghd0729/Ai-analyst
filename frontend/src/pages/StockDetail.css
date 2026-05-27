@@ -1,0 +1,389 @@
+/* ── 전체 ── */
+.sd-root {
+  min-height: 100vh;
+  background: #F1F5F9;
+  font-family: -apple-system, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+}
+
+/* ── 네비 ── */
+.sd-nav {
+  background: #fff;
+  padding: 14px 20px;
+  border-bottom: 1px solid #E2E8F0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #2563EB;
+  cursor: pointer;
+  font-weight: 500;
+  padding: 0;
+}
+.back-btn:hover { opacity: 0.7; }
+
+/* ── 콘텐츠 ── */
+.sd-content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 20px 60px;
+}
+
+/* ── 섹션 타이틀 ── */
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94A3B8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 28px 0 10px;
+}
+
+/* ── 히어로 카드 ── */
+.hero-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+.hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+.hero-biz  { font-size: 12px; color: #94A3B8; font-weight: 500; margin-bottom: 4px; }
+.hero-name { font-size: 26px; font-weight: 800; color: #1E293B; margin: 0 0 8px; }
+.hero-desc { font-size: 13px; color: #64748B; line-height: 1.6; margin: 0; max-width: 420px; }
+.hero-yield-box {
+  text-align: center;
+  background: #F0F9FF;
+  border-radius: 14px;
+  padding: 14px 18px;
+  flex-shrink: 0;
+}
+.hero-yield-val   { font-size: 28px; font-weight: 800; color: #0369A1; }
+.hero-yield-label { font-size: 11px; color: #0284C7; margin-top: 2px; }
+
+.verdict-banner {
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.verdict-emoji  { font-size: 28px; line-height: 1; }
+.verdict-title  { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+.verdict-action { font-size: 13px; opacity: 0.8; }
+
+.contra-banner {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: #FFFBEB;
+  border: 1.5px solid #FDE68A;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #92400E;
+  line-height: 1.5;
+}
+
+/* ── 위험 요인 카드 ── */
+.risk-factors {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rf-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  border-left: 4px solid #E2E8F0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.rf-card.rf-danger  { border-left-color: #EF4444; background: #FFFAFA; }
+.rf-card.rf-caution { border-left-color: #F59E0B; background: #FFFDF5; }
+.rf-card.rf-good    { border-left-color: #10B981; background: #F0FDF4; }
+
+.rf-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.rf-icon  { font-size: 18px; }
+.rf-title { font-size: 15px; font-weight: 700; color: #1E293B; }
+
+.rf-detail {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.7;
+  margin: 0 0 10px;
+}
+
+.rf-action {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1E293B;
+  background: #F1F5F9;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.rf-action-icon { flex-shrink: 0; }
+
+/* ── 배당 신호등 ── */
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.health-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  border-top: 3px solid #E2E8F0;
+  text-align: center;
+}
+.health-card.health-good    { border-top-color: #10B981; }
+.health-card.health-caution { border-top-color: #F59E0B; }
+.health-card.health-bad     { border-top-color: #EF4444; }
+.health-card.health-neutral { border-top-color: #CBD5E1; }
+.hc-icon    { font-size: 22px; margin-bottom: 6px; }
+.hc-label   { font-size: 11px; color: #94A3B8; font-weight: 500; margin-bottom: 6px; }
+.hc-value   { font-size: 18px; font-weight: 800; color: #1E293B; margin-bottom: 6px; }
+.hc-explain { font-size: 11px; color: #64748B; line-height: 1.5; }
+
+/* ── AI 위험도 ── */
+.risk-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.risk-gauge-wrap  { text-align: center; }
+.risk-gauge-svg   { width: 120px; height: 72px; }
+.risk-gauge-label { font-size: 11px; color: #94A3B8; margin-top: 4px; }
+.risk-right   { flex: 1; }
+.risk-verdict { font-size: 14px; color: #1E293B; line-height: 1.6; margin-bottom: 8px; font-weight: 500; }
+.risk-note    { font-size: 11px; color: #94A3B8; line-height: 1.5; }
+
+/* ── 배당 지급 구조 ── */
+.cashflow-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cf-step {
+  flex: 1;
+  min-width: 100px;
+  text-align: center;
+  padding: 12px 8px;
+  background: #F8FAFC;
+  border-radius: 12px;
+}
+.cf-step.positive { background: #D1FAE5; }
+.cf-step.negative { background: #FEE2E2; }
+.cf-step.cf-div   { background: #EFF6FF; }
+.cf-label { font-size: 11px; color: #64748B; margin-bottom: 6px; }
+.cf-val   { font-size: 14px; font-weight: 700; color: #1E293B; }
+.cf-op    { font-size: 20px; color: #94A3B8; font-weight: 300; flex-shrink: 0; }
+.cashflow-note {
+  font-size: 12px;
+  color: #94A3B8;
+  margin-top: 10px;
+  line-height: 1.5;
+  padding: 0 4px;
+}
+
+/* ── AI 투자의견 ── */
+.thesis-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.thesis-line {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.75;
+  margin: 0 0 4px;
+}
+.thesis-date {
+  margin-top: 16px;
+  font-size: 11px;
+  color: #CBD5E1;
+  text-align: right;
+}
+
+/* ── Thesis Timeline ── */
+.timeline-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.timeline-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #F1F5F9;
+}
+.tl-legend-item {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.tl-legend-item.safe    { background: #D1FAE5; color: #065F46; }
+.tl-legend-item.caution { background: #FEF3C7; color: #92400E; }
+.tl-legend-item.danger  { background: #FEE2E2; color: #991B1B; }
+.tl-legend-note {
+  font-size: 11px;
+  color: #94A3B8;
+  margin-left: auto;
+}
+
+.timeline-list { display: flex; flex-direction: column; }
+
+.tl-item {
+  display: flex;
+  gap: 14px;
+  position: relative;
+}
+.tl-line-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 20px;
+}
+.tl-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  flex-shrink: 0;
+  margin-top: 4px;
+  z-index: 1;
+}
+.tl-item.safe    .tl-dot { box-shadow: 0 0 0 2px #10B981; }
+.tl-item.caution .tl-dot { box-shadow: 0 0 0 2px #F59E0B; }
+.tl-item.danger  .tl-dot { box-shadow: 0 0 0 2px #EF4444; }
+
+.tl-vline {
+  width: 2px;
+  flex: 1;
+  background: #E2E8F0;
+  min-height: 20px;
+  margin: 4px 0;
+}
+.tl-body {
+  flex: 1;
+  padding-bottom: 18px;
+}
+.tl-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.tl-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.tl-change-tag {
+  font-size: 11px;
+  font-weight: 600;
+  background: #EFF6FF;
+  color: #2563EB;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid #BFDBFE;
+}
+.tl-date {
+  font-size: 11px;
+  color: #94A3B8;
+  margin-left: auto;
+}
+.tl-explain {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0 0 6px;
+}
+.tl-event-tag {
+  font-size: 11px;
+  color: #64748B;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 2px 8px;
+  display: inline-block;
+}
+.tl-item.tl-changed .tl-body {
+  background: #FAFAFA;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border-left: 3px solid #CBD5E1;
+}
+.tl-item.tl-changed.safe    .tl-body { border-left-color: #10B981; }
+.tl-item.tl-changed.caution .tl-body { border-left-color: #F59E0B; }
+.tl-item.tl-changed.danger  .tl-body { border-left-color: #EF4444; }
+
+/* ── 로딩 / 에러 ── */
+.loading-screen, .error-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  color: #64748B;
+}
+.loading-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid #E2E8F0;
+  border-top-color: #2563EB;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.sd-footer-note {
+  margin-top: 32px;
+  font-size: 11px;
+  color: #CBD5E1;
+  text-align: center;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .hero-top      { flex-direction: column; }
+  .health-grid   { grid-template-columns: 1fr; }
+  .risk-card     { flex-direction: column; text-align: center; }
+  .cashflow-card { flex-direction: column; }
+  .cf-op         { transform: rotate(90deg); }
+}

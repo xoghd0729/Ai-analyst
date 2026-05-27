@@ -1,0 +1,351 @@
+{
+  "_comment": "ETF 품질 스코어 캐시 — 팩트시트 및 5년 실적 기반 정적 기준값. score_etf()가 yfinance 실패 시 이 값을 fallback으로 사용.",
+  "_updated": "2026-05-25",
+  "_ttl_hours": 24,
+  "scores": {
+    "SCHD": {
+      "etf_quality_score": 87.0,
+      "grade": "PREMIUM",
+      "income_score": 95.0,
+      "growth_score": 85.0,
+      "stability_score": 80.0,
+      "expense_score": 100.0
+    },
+    "VYM": {
+      "etf_quality_score": 80.0,
+      "grade": "PREMIUM",
+      "income_score": 75.0,
+      "growth_score": 82.0,
+      "stability_score": 78.0,
+      "expense_score": 100.0
+    },
+    "DGRO": {
+      "etf_quality_score": 82.0,
+      "grade": "PREMIUM",
+      "income_score": 80.0,
+      "growth_score": 83.0,
+      "stability_score": 80.0,
+      "expense_score": 98.0
+    },
+    "DGRW": {
+      "etf_quality_score": 75.0,
+      "grade": "PASS",
+      "income_score": 70.0,
+      "growth_score": 80.0,
+      "stability_score": 72.0,
+      "expense_score": 72.0
+    },
+    "JEPI": {
+      "etf_quality_score": 72.0,
+      "grade": "PASS",
+      "income_score": 85.0,
+      "growth_score": 55.0,
+      "stability_score": 72.0,
+      "expense_score": 65.0
+    },
+    "JEPQ": {
+      "etf_quality_score": 68.0,
+      "grade": "PASS",
+      "income_score": 88.0,
+      "growth_score": 50.0,
+      "stability_score": 62.0,
+      "expense_score": 65.0
+    },
+    "SPYD": {
+      "etf_quality_score": 71.0,
+      "grade": "PASS",
+      "income_score": 72.0,
+      "growth_score": 65.0,
+      "stability_score": 72.0,
+      "expense_score": 93.0
+    },
+    "HDV": {
+      "etf_quality_score": 74.0,
+      "grade": "PASS",
+      "income_score": 70.0,
+      "growth_score": 72.0,
+      "stability_score": 78.0,
+      "expense_score": 91.0
+    },
+    "NOBL": {
+      "etf_quality_score": 78.0,
+      "grade": "PASS",
+      "income_score": 78.0,
+      "growth_score": 80.0,
+      "stability_score": 78.0,
+      "expense_score": 65.0
+    },
+    "SPHD": {
+      "etf_quality_score": 70.0,
+      "grade": "PASS",
+      "income_score": 75.0,
+      "growth_score": 58.0,
+      "stability_score": 78.0,
+      "expense_score": 72.0
+    },
+    "QYLD": {
+      "etf_quality_score": 52.0,
+      "grade": "CAUTION",
+      "income_score": 90.0,
+      "growth_score": 20.0,
+      "stability_score": 55.0,
+      "expense_score": 40.0
+    },
+    "O": {
+      "etf_quality_score": 72.0,
+      "grade": "PASS",
+      "income_score": 70.0,
+      "growth_score": 68.0,
+      "stability_score": 72.0,
+      "expense_score": 100.0
+    },
+    "VNQ": {
+      "etf_quality_score": 68.0,
+      "grade": "PASS",
+      "income_score": 60.0,
+      "growth_score": 65.0,
+      "stability_score": 65.0,
+      "expense_score": 88.0
+    },
+    "TLT": {
+      "etf_quality_score": 62.0,
+      "grade": "PASS",
+      "income_score": 55.0,
+      "growth_score": 45.0,
+      "stability_score": 72.0,
+      "expense_score": 85.0
+    },
+    "BND": {
+      "etf_quality_score": 70.0,
+      "grade": "PASS",
+      "income_score": 50.0,
+      "growth_score": 42.0,
+      "stability_score": 92.0,
+      "expense_score": 100.0
+    },
+    "AGG": {
+      "etf_quality_score": 71.0,
+      "grade": "PASS",
+      "income_score": 52.0,
+      "growth_score": 43.0,
+      "stability_score": 92.0,
+      "expense_score": 100.0
+    },
+    "SCHP": {
+      "etf_quality_score": 65.0,
+      "grade": "PASS",
+      "income_score": 48.0,
+      "growth_score": 40.0,
+      "stability_score": 88.0,
+      "expense_score": 100.0
+    },
+    "VIG": {
+      "etf_quality_score": 83.0,
+      "grade": "PREMIUM",
+      "income_score": 72.0,
+      "growth_score": 85.0,
+      "stability_score": 88.0,
+      "expense_score": 100.0
+    },
+    "SPYI": {
+      "etf_quality_score": 65.0,
+      "grade": "PASS",
+      "income_score": 95.0,
+      "growth_score": 30.0,
+      "stability_score": 62.0,
+      "expense_score": 40.0
+    },
+    "SGOV": {
+      "etf_quality_score": 78.0,
+      "grade": "PASS",
+      "income_score": 82.0,
+      "growth_score": 30.0,
+      "stability_score": 100.0,
+      "expense_score": 98.0
+    },
+    "448290": {
+      "etf_quality_score": 78.0,
+      "grade": "PASS",
+      "income_score": 80.0,
+      "growth_score": 75.0,
+      "stability_score": 75.0,
+      "expense_score": 100.0
+    },
+    "385720": {
+      "etf_quality_score": 72.0,
+      "grade": "PASS",
+      "income_score": 70.0,
+      "growth_score": 70.0,
+      "stability_score": 72.0,
+      "expense_score": 93.0
+    },
+    "279530": {
+      "etf_quality_score": 70.0,
+      "grade": "PASS",
+      "income_score": 72.0,
+      "growth_score": 65.0,
+      "stability_score": 70.0,
+      "expense_score": 95.0
+    },
+    "211560": {
+      "etf_quality_score": 68.0,
+      "grade": "PASS",
+      "income_score": 65.0,
+      "growth_score": 68.0,
+      "stability_score": 70.0,
+      "expense_score": 95.0
+    },
+    "441680": {
+      "etf_quality_score": 73.0,
+      "grade": "PASS",
+      "income_score": 68.0,
+      "growth_score": 75.0,
+      "stability_score": 72.0,
+      "expense_score": 95.0
+    },
+    "456680": {
+      "etf_quality_score": 67.0,
+      "grade": "PASS",
+      "income_score": 80.0,
+      "growth_score": 50.0,
+      "stability_score": 65.0,
+      "expense_score": 88.0
+    },
+    "KO": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "JNJ": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "PG": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "XOM": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "CVX": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "ABBV": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "MCD": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "T": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "VZ": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "IBM": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "MO": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "PFE": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "EQR": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "FRT": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "SPG": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "PSA": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    },
+    "AMT": {
+      "etf_quality_score": 53.8,
+      "grade": "CAUTION",
+      "income_score": 50.0,
+      "growth_score": 50.0,
+      "stability_score": 50.0,
+      "expense_score": 75.0
+    }
+  }
+}
