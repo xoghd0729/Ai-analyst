@@ -11,6 +11,7 @@ import MonteCarloChart     from '../components/MonteCarloChart'
 import CashflowMilestone   from '../components/CashflowMilestone'
 import YieldTrapWarning    from '../components/YieldTrapWarning'
 import PortfolioMonitor    from '../components/PortfolioMonitor'
+import BacktestChart       from '../components/BacktestChart'
 import './Portfolio.css'
 
 const RISK_OPTIONS = [
@@ -310,6 +311,44 @@ function generatePortfolioInsight(recs, form, achieveProb, p50Age, risks) {
 }
 
 
+// ── 데모 페르소나 3종 (캡스톤 발표용) ─────────────────────────
+// 각 페르소나 = "안전한 배당 + 주가 유지 + 복리" 철학의 3가지 인생 단계
+const PERSONAS = [
+  {
+    key:   'yunji',
+    icon:  '👩‍💼',
+    title: '28세 윤지',
+    label: '적립형 신입사원',
+    desc:  '월 100만원 적립 · 50세 FIRE 목표',
+    form:  {
+      age: 28, monthly_invest: 100, reserve: 1000,
+      monthly_target: 200, risk_tolerance: 'moderate',
+    },
+  },
+  {
+    key:   'minho',
+    icon:  '👨‍👩‍👧',
+    title: '42세 민호',
+    label: '균형형 가장',
+    desc:  '자산 1.5억 · 자녀 + 본인 노후',
+    form:  {
+      age: 42, monthly_invest: 100, reserve: 15000,
+      monthly_target: 250, risk_tolerance: 'conservative',
+    },
+  },
+  {
+    key:   'youngja',
+    icon:  '👵',
+    title: '55세 영자',
+    label: '인출형 은퇴 준비',
+    desc:  '자산 5억 · 즉시 월 200만원 인출',
+    form:  {
+      age: 55, monthly_invest: 0, reserve: 50000,
+      monthly_target: 200, risk_tolerance: 'conservative',
+    },
+  },
+]
+
 export default function Portfolio() {
   const [form, setForm] = useState({
     age:            25,
@@ -318,35 +357,51 @@ export default function Portfolio() {
     monthly_target: 50,
     risk_tolerance: 'moderate',
   })
-  const [result,  setResult]  = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState(null)
+  const [result,    setResult]    = useState(null)
+  const [loading,   setLoading]   = useState(false)
+  const [error,     setError]     = useState(null)
+  const [activePersona, setActivePersona] = useState(null)
 
-  const handleChange = (key, val) => setForm(f => ({ ...f, [key]: val }))
+  const handleChange = (key, val) => {
+    setForm(f => ({ ...f, [key]: val }))
+    setActivePersona(null)  // 수동 변경 시 페르소나 표시 해제
+  }
 
-  const handleSubmit = async () => {
+  // 단일 진실의 원천: form override를 받을 수 있게
+  const runRecommend = async (overrideForm) => {
+    const f = overrideForm || form
     setLoading(true); setError(null)
     try {
-      const investable = Number(form.monthly_invest) * 12 + Number(form.reserve)
+      const investable = Number(f.monthly_invest) * 12 + Number(f.reserve)
       const res = await api.post('/api/portfolio/recommend', {
-        age:               Number(form.age),
-        annual_income:     Number(form.monthly_invest) * 12,
-        monthly_target:    Number(form.monthly_target),
+        age:               Number(f.age),
+        annual_income:     Number(f.monthly_invest) * 12,
+        monthly_target:    Number(f.monthly_target),
         investable_amount: investable,
-        risk_tolerance:    form.risk_tolerance,
+        risk_tolerance:    f.risk_tolerance,
       })
       setResult({
         ...res.data,
-        monthly_invest: Number(form.monthly_invest),
-        reserve:        Number(form.reserve),
-        age:            Number(form.age),
-        monthly_target: Number(form.monthly_target),
+        monthly_invest: Number(f.monthly_invest),
+        reserve:        Number(f.reserve),
+        age:            Number(f.age),
+        monthly_target: Number(f.monthly_target),
       })
     } catch {
       setError('서버 연결 실패. FastAPI 서버를 확인하세요.')
     } finally {
       setLoading(false)
     }
+  }
+
+  // 폼 제출 (수동)
+  const handleSubmit = () => runRecommend()
+
+  // 페르소나 자동 입력 + 즉시 추천 실행
+  const handlePersonaClick = (persona) => {
+    setForm(persona.form)
+    setActivePersona(persona.key)
+    runRecommend(persona.form)
   }
 
   // ── 세후 수익률 + 복리 시뮬레이션 + Monte Carlo + AI 설명 ───
@@ -407,7 +462,15 @@ export default function Portfolio() {
   return (
     <div className="portfolio-page">
       <div className="page-header">
-        <div className="page-title">포트폴리오 설계</div>
+        <div className="page-title">
+          AI Cashflow OS
+          <span style={{
+            marginLeft: 12, fontSize: 13, fontWeight: 500, color: 'var(--text-sub)',
+            verticalAlign: 'middle',
+          }}>
+            — 미래 월급형 현금흐름을 설계·분석·방어·관리하는 시스템
+          </span>
+        </div>
         <div className="page-sub">
           배당수익률만이 아닌 <strong>Total Return (배당 + 자본차익)</strong>으로 은행 금리를 초과하는 현금흐름을 설계합니다
         </div>
@@ -417,6 +480,66 @@ export default function Portfolio() {
         {/* ── 입력 폼 ── */}
         <div className="card form-card">
           <h3 className="card-title">내 정보 입력</h3>
+
+          {/* ── 데모 페르소나 빠른 선택 (캡스톤 발표용) ── */}
+          <div style={{
+            display: 'flex', flexDirection: 'column', gap: 6,
+            padding: '12px 14px', marginBottom: 4,
+            background: 'rgba(79,142,247,.06)',
+            border: '1px dashed rgba(79,142,247,.35)',
+            borderRadius: 10,
+          }}>
+            <div style={{
+              fontSize: 11, fontWeight: 600, color: 'var(--text-sub)',
+              letterSpacing: 0.5, textTransform: 'uppercase',
+            }}>
+              ⚡ 빠른 데모 — 페르소나 선택
+            </div>
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6,
+            }}>
+              {PERSONAS.map(p => {
+                const active = activePersona === p.key
+                return (
+                  <button
+                    key={p.key}
+                    type="button"
+                    onClick={() => handlePersonaClick(p)}
+                    disabled={loading}
+                    title={`${p.title} — ${p.label}\n${p.desc}`}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                      gap: 2, padding: '8px 10px',
+                      background: active ? 'rgba(79,142,247,.15)' : 'var(--surface2)',
+                      border: `1px solid ${active ? 'var(--blue)' : 'var(--border)'}`,
+                      borderRadius: 8, cursor: loading ? 'wait' : 'pointer',
+                      transition: 'all 0.15s', textAlign: 'left',
+                      opacity: loading && !active ? 0.5 : 1,
+                    }}
+                    onMouseEnter={e => {
+                      if (!loading && !active) e.currentTarget.style.borderColor = 'var(--blue)'
+                    }}
+                    onMouseLeave={e => {
+                      if (!active) e.currentTarget.style.borderColor = 'var(--border)'
+                    }}
+                  >
+                    <div style={{ fontSize: 16 }}>{p.icon}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>
+                      {p.title}
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--text-sub)' }}>
+                      {p.label}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            {activePersona && (
+              <div style={{ fontSize: 11, color: 'var(--text-sub)', marginTop: 2 }}>
+                ✓ 페르소나 자동 입력 완료. 아래에서 값을 직접 조정해도 됩니다.
+              </div>
+            )}
+          </div>
 
           <div className="form-group">
             <label>나이</label>
@@ -919,23 +1042,56 @@ export default function Portfolio() {
               </div>
             )}
 
-            {/* 스토리텔링 */}
-            {result.storytelling && (
-              <div style={{
-                background: '#0f172a', borderRadius: 16, padding: '20px 24px',
-                border: '1px solid #1e293b', marginTop: 0,
-              }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', marginBottom: 12 }}>
-                  AI 분석 리포트
-                </div>
+            {/* 스토리텔링 — 백엔드가 다양한 형태로 반환 (string / {narrative: {...}}) */}
+            {(() => {
+              const story = result.storytelling
+              if (!story) return null
+
+              // 가능한 형태:
+              // 1. string                                  → 그대로 표시
+              // 2. { narrative: "..." }                    → narrative 표시
+              // 3. { narrative: { full_text: "..." } }     → full_text 표시
+              // 4. { narrative: { headline, summary, ... } } → 섹션별 표시
+              const extractText = (val) => {
+                if (!val) return ''
+                if (typeof val === 'string') return val
+                if (typeof val === 'object') {
+                  if (typeof val.full_text === 'string') return val.full_text
+                  // 섹션 모음이면 합치기
+                  const parts = ['headline', 'summary', 'strategy', 'future', 'risk', 'action']
+                    .map(k => typeof val[k] === 'string' ? val[k] : '')
+                    .filter(Boolean)
+                  if (parts.length) return parts.join('\n\n')
+                }
+                return ''
+              }
+
+              const text = typeof story === 'string'
+                ? story
+                : extractText(story.narrative) || extractText(story)
+
+              if (!text) return null
+
+              return (
                 <div style={{
-                  fontSize: 13, color: '#94a3b8', lineHeight: 1.8,
-                  whiteSpace: 'pre-line',
+                  background: '#0f172a', borderRadius: 16, padding: '20px 24px',
+                  border: '1px solid #1e293b', marginTop: 0,
                 }}>
-                  {result.storytelling}
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', marginBottom: 12 }}>
+                    AI 분석 리포트
+                  </div>
+                  <div style={{
+                    fontSize: 13, color: '#94a3b8', lineHeight: 1.8,
+                    whiteSpace: 'pre-line',
+                  }}>
+                    {text}
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
+
+            {/* ── 21년 백테스팅 — "이 추천이 과거에도 통했는가?" ── */}
+            <BacktestChart portfolio={result} startYear={2005} endYear={2024} />
 
             <PortfolioMonitor
               calendar={result.dividend_calendar}

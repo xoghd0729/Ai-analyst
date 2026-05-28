@@ -170,14 +170,60 @@ class RecommendationPipeline:
         return "배당 현금흐름 시작 단계"
 
     def _axis_summary(self) -> list:
-        from collections import defaultdict
-        axis_map = defaultdict(lambda: {"weight": 0, "count": 0, "tickers": []})
+        """
+        프론트엔드 (Portfolio.jsx) 가 기대하는 풍부한 구조로 반환.
+        필드: asset_class, label, weight_pct, avg_div_yield, avg_total_return, count
+
+        라이트 버전(weight/tickers)을 쓰던 회귀 버그 픽스 (Day 4).
+        """
+        agg: dict[str, dict] = {}
         for r in self.ctx.recommendations:
-            ax = r.get("axis", r.get("asset_class", "기타"))
-            axis_map[ax]["weight"] += r.get("weight_pct", 0)
-            axis_map[ax]["count"]  += 1
-            axis_map[ax]["tickers"].append(r.get("ticker", ""))
-        return [{"axis": k, **v} for k, v in axis_map.items()]
+            cls = r.get("asset_class") or r.get("axis") or "기타"
+            if cls not in agg:
+                agg[cls] = {
+                    "label":   r.get("asset_class_label", cls),
+                    "pct":     0.0,
+                    "dyields": [],
+                    "tr":      [],
+                    "count":   0,
+                    "tickers": [],
+                }
+            agg[cls]["pct"]     += float(r.get("weight_pct", 0) or 0)
+            dy = r.get("dividend_yield", r.get("expected_yield"))
+            if dy is not None:
+                try:
+                    agg[cls]["dyields"].append(float(dy))
+                except (TypeError, ValueError):
+                    pass
+            tr = r.get("total_return_pct", r.get("expected_total_return"))
+            if tr is not None:
+                try:
+                    agg[cls]["tr"].append(float(tr))
+                except (TypeError, ValueError):
+                    pass
+            agg[cls]["count"]   += 1
+            agg[cls]["tickers"].append(r.get("ticker", ""))
+
+        result = []
+        for cls, d in agg.items():
+            if d["count"] == 0:
+                continue
+            avg_dy = round(sum(d["dyields"]) / len(d["dyields"]), 2) if d["dyields"] else 0.0
+            avg_tr = round(sum(d["tr"])      / len(d["tr"]),      2) if d["tr"]      else 0.0
+            result.append({
+                "asset_class":      cls,
+                "axis":             cls,                 # 하위 호환
+                "label":            d["label"],
+                "weight_pct":       round(d["pct"], 1),
+                "weight":           round(d["pct"], 1),  # 하위 호환
+                "avg_div_yield":    avg_dy,
+                "avg_total_return": avg_tr,
+                "count":            d["count"],
+                "tickers":          d["tickers"],
+            })
+        # 비중 큰 순으로 정렬
+        result.sort(key=lambda x: -x["weight_pct"])
+        return result
 
     def _data_freshness(self) -> dict:
         import os
