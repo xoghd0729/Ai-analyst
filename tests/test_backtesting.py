@@ -312,3 +312,79 @@ class TestEdgeCases:
         """혼합 포트폴리오도 정상 결과 반환"""
         assert "cagr_pct" in mixed_result
         assert len(mixed_result["yearly_returns"]) == 6  # 2018-2023
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Data D1 — 합성 데이터 정직화 검증
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestDataQualityMeta:
+    """run_backtest() 반환의 data_quality 필드 검증."""
+
+    def test_data_quality_field_present(self):
+        """모든 백테스팅 응답에 data_quality 필드가 있어야 한다."""
+        r = run_backtest(
+            [{"ticker": "SCHD", "weight": 1.0}],
+            start_year=2005, end_year=2024, investable=10_000,
+        )
+        assert "data_quality" in r
+        dq = r["data_quality"]
+        for k in ["real_year_ratio_pct", "synthetic_year_ratio_pct",
+                  "tickers_with_synthetic", "by_ticker", "disclosure_message"]:
+            assert k in dq, f"data_quality에 {k} 필드 누락"
+
+    def test_synthetic_detected_for_schd_pre_inception(self):
+        """SCHD를 2005년부터 백테스팅하면 합성 데이터로 표시되어야 한다."""
+        r = run_backtest(
+            [{"ticker": "SCHD", "weight": 1.0}],
+            start_year=2005, end_year=2024, investable=10_000,
+        )
+        dq = r["data_quality"]
+        assert "SCHD" in dq["tickers_with_synthetic"], "SCHD가 합성 종목으로 표시되지 않음"
+        schd_info = dq["by_ticker"]["SCHD"]
+        assert schd_info["inception_year"] == 2011
+        assert schd_info["synthetic_years"] == 6   # 2005~2010
+        assert schd_info["real_years"]      == 14  # 2011~2024
+        assert len(schd_info["synthetic_sources"]) > 0
+        # 합성 비율 = 6 / 20 = 30%
+        assert 25.0 <= dq["synthetic_year_ratio_pct"] <= 35.0
+
+    def test_jepi_synthetic_unavailable_marked_nan(self):
+        """JEPI는 대용 ETF가 없어서 합성 불가 → nan_years로 표시."""
+        r = run_backtest(
+            [{"ticker": "JEPI", "weight": 1.0}],
+            start_year=2005, end_year=2024, investable=10_000,
+        )
+        dq = r["data_quality"]
+        assert "JEPI" not in dq["tickers_with_synthetic"]
+        jepi_info = dq["by_ticker"]["JEPI"]
+        assert jepi_info["inception_year"] == 2020
+        assert jepi_info.get("nan_years", 0) == 15  # 2005~2019
+        assert jepi_info.get("synthetic_sources", []) == []
+
+    def test_disclosure_message_korean_and_meaningful(self):
+        """디스클로저 메시지가 한국어로 의미있게 생성되어야 한다."""
+        r = run_backtest(
+            [{"ticker": "SCHD", "weight": 0.5},
+             {"ticker": "KO",   "weight": 0.5}],
+            start_year=2005, end_year=2024, investable=10_000,
+        )
+        msg = r["data_quality"]["disclosure_message"]
+        assert isinstance(msg, str) and len(msg) > 10
+        assert any(c in msg for c in "가나다라마바사아자차카타파하"), \
+            "디스클로저에 한국어가 없음"
+        assert "%" in msg, "비율 표시 누락"
+
+    def test_long_history_stock_no_synthetic(self):
+        """KO 같이 1919년 상장 종목은 합성 없이 전기간 실데이터."""
+        r = run_backtest(
+            [{"ticker": "KO", "weight": 1.0}],
+            start_year=2005, end_year=2024, investable=10_000,
+        )
+        dq = r["data_quality"]
+        assert "KO" not in dq["tickers_with_synthetic"]
+        ko_info = dq["by_ticker"]["KO"]
+        assert ko_info["synthetic_years"] == 0
+        assert ko_info["real_years"]      == 20
+        assert dq["real_year_ratio_pct"]  == 100.0
+        assert dq["synthetic_year_ratio_pct"] == 0.0

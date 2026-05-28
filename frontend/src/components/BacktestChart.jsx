@@ -253,10 +253,65 @@ export default function BacktestChart({ portfolio, startYear = 2005, endYear = 2
         </div>
       )}
 
-      {/* 학술 정직성 주석 */}
-      <div style={{ marginTop: 10, fontSize: 10, color: '#475569', textAlign: 'right' }}>
-        * 일부 ETF(SCHD·DGRO·JEPI 등)의 상장 이전 연도는 동일 카테고리 ETF 수익률로 합성 적용
-      </div>
+      {/* 데이터 품질 — 합성 데이터 비율 (Data D1: 정직화) */}
+      {data.data_quality && (
+        <div style={{
+          marginTop: 10, padding: '10px 14px', background: '#0a1020',
+          borderRadius: 8, border: '1px solid #1e293b',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            fontSize: 11, color: '#94a3b8', marginBottom: 6,
+          }}>
+            <span style={{
+              padding: '2px 8px', borderRadius: 999, fontSize: 10,
+              background: 'rgba(52,211,153,.15)', color: '#34d399',
+              border: '1px solid rgba(52,211,153,.3)',
+            }}>
+              실데이터 {data.data_quality.real_year_ratio_pct}%
+            </span>
+            {data.data_quality.synthetic_year_ratio_pct > 0 && (
+              <span style={{
+                padding: '2px 8px', borderRadius: 999, fontSize: 10,
+                background: 'rgba(251,191,36,.15)', color: '#fbbf24',
+                border: '1px solid rgba(251,191,36,.3)',
+              }}>
+                합성 {data.data_quality.synthetic_year_ratio_pct}%
+              </span>
+            )}
+            <span style={{ color: '#64748b' }}>
+              데이터 정직성 메타
+            </span>
+          </div>
+          <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.5 }}>
+            {data.data_quality.disclosure_message}
+          </div>
+          {data.data_quality.tickers_with_synthetic?.length > 0 && (
+            <details style={{ marginTop: 6, cursor: 'pointer' }}>
+              <summary style={{ fontSize: 10, color: '#6366f1' }}>
+                종목별 데이터 출처 보기
+              </summary>
+              <div style={{ marginTop: 6, fontSize: 10, color: '#94a3b8', lineHeight: 1.6 }}>
+                {data.data_quality.tickers_with_synthetic.map(ticker => {
+                  const info = data.data_quality.by_ticker?.[ticker]
+                  if (!info) return null
+                  return (
+                    <div key={ticker} style={{ marginTop: 4 }}>
+                      <span style={{ color: '#cbd5e1', fontWeight: 600 }}>{ticker}</span>
+                      {' '}({info.inception_year}년 상장, 실 {info.real_years}년 / 합성 {info.synthetic_years}년)
+                      {info.synthetic_sources?.length > 0 && (
+                        <span style={{ color: '#64748b' }}>
+                          {' → '}합성 출처: {info.synthetic_sources.join(', ')}
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </details>
+          )}
+        </div>
+      )}
     </div>
   )
 }
