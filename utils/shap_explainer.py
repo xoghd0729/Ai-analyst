@@ -192,14 +192,23 @@ def explain_prediction(
         explainer   = shap.TreeExplainer(xgb_model)
         shap_values = explainer.shap_values(X_transformed)
 
-        # 다중 클래스: shap_values shape = (n_classes, n_samples, n_features)
-        # 예측 클래스의 SHAP values 추출
+        # 다중 클래스 SHAP 출력은 shap 버전마다 형태가 다름:
+        #   구버전: list[n_classes] of (n_samples, n_features)
+        #   신버전: ndarray (n_samples, n_features, n_classes)
+        # 예측 클래스의 기여도를 버전 무관하게 추출.
+        n_classes = len(CLASS_NAMES)
         if isinstance(shap_values, list):
-            sv = shap_values[pred_idx][0]
-        elif shap_values.ndim == 3:
-            sv = shap_values[pred_idx][0]
+            sv = np.asarray(shap_values[pred_idx])[0]
         else:
-            sv = shap_values[0]
+            arr = np.asarray(shap_values)
+            if arr.ndim == 3:
+                if arr.shape[-1] == n_classes:        # (samples, features, classes)
+                    sv = arr[0, :, pred_idx]
+                else:                                  # (classes, samples, features)
+                    sv = arr[pred_idx, 0, :]
+            else:                                       # 이진/단일: (samples, features)
+                sv = arr[0]
+        sv = np.asarray(sv).ravel()
 
         # 상위 기여 피처 (절댓값 기준 정렬)
         feat_contributions = sorted(
