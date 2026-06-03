@@ -111,6 +111,9 @@ def load_corp_codes():
         print(f"  ⚠️ corpCode.xml 다운로드 실패: {e}")
 
 
+SEED_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "training_universe_expanded.csv")
+
+
 def select_training_stocks() -> list[str]:
     """
     ML 학습용 종목 선별.
@@ -122,6 +125,15 @@ def select_training_stocks() -> list[str]:
     DANGER 종목은 실제로 배당을 삭감한 사례가 많아
     모델이 "삭감 직전 재무 패턴"을 학습하는 데 핵심 데이터다.
     """
+    # ── 확장 seed 우선: training_universe_expanded.csv 가 있으면 그걸 사용 ──
+    if os.path.exists(SEED_CSV):
+        sdf = pd.read_csv(SEED_CSV, encoding="utf-8-sig", dtype={"stock_code": str})
+        codes = sdf["stock_code"].astype(str).str.zfill(6).tolist()
+        print(f"\n  [확장 seed 사용] {SEED_CSV}")
+        print(f"  → 학습 대상 {len(codes)}개 종목 (source 분포: "
+              + ", ".join(f"{k}={v}" for k, v in sdf['source'].value_counts().items()) + ")")
+        return codes
+
     if not os.path.exists(RANKING_CSV):
         print("  ⚠️ ranking.csv 없음 → run_all.py 먼저 실행 필요")
         return []
@@ -207,6 +219,7 @@ END_YEAR   = 2025
 ACCOUNT_MAP = {
     # 손익계산서
     "매출액":                      "revenue",
+    "영업수익":                    "revenue",   # 금융주(은행·보험·증권) 매출 계정
     "당기순이익":                  "net_income",
     "영업이익":                    "op_income",
     # 현금흐름표
@@ -221,6 +234,12 @@ ACCOUNT_MAP = {
     "배당금지급":                  "dividends_paid",
     "배당금 지급":                 "dividends_paid",
     "배당금의 지급":               "dividends_paid",
+    # 재무상태표 (신규 피처용)
+    "부채총계":                    "total_liab",
+    "자본총계":                    "total_equity",
+    # 이자비용 (이자보상배율용)
+    "이자비용":                    "interest_expense",
+    "금융비용":                    "interest_expense",
 }
 
 
@@ -428,6 +447,10 @@ def collect_stock_history(stock: dict, start: int, end: int) -> list[dict]:
             "operating_cf":    fin.get("operating_cf"),
             "capex":           fin.get("capex"),
             "dividends_paid":  fin.get("dividends_paid"),
+            # 신규 피처 raw
+            "total_liab":      fin.get("total_liab"),
+            "total_equity":    fin.get("total_equity"),
+            "interest_expense": fin.get("interest_expense"),
             # DPS
             "dps": dps,
         }
@@ -456,6 +479,14 @@ def collect_stock_history(stock: dict, start: int, end: int) -> list[dict]:
             row["dividend_coverage"] = row["fcf"] / abs(divp)
         else:
             row["dividend_coverage"] = None
+
+        # 부채비율 (%) = 부채총계 / 자본총계 × 100
+        tl = fin.get("total_liab"); te = fin.get("total_equity")
+        row["debt_ratio"] = (abs(tl) / abs(te) * 100) if (tl is not None and te and te != 0) else None
+
+        # 이자보상배율 = 영업이익 / 이자비용
+        opi = fin.get("op_income"); ie = fin.get("interest_expense")
+        row["interest_coverage"] = (opi / abs(ie)) if (opi is not None and ie and abs(ie) > 0) else None
 
         collected = [k for k, v in row.items() if v is not None and k not in ("stock_code", "name", "year")]
         print(f"→ {len(collected)}개 필드 수집 ✓")
@@ -538,6 +569,14 @@ def label_dividend_cuts(df: pd.DataFrame) -> pd.DataFrame:
     df["label3"] = df.apply(_label3, axis=1)
     df = df.drop(columns=["_cut_next"])
 
+    # 매출 성장률(%) = 전년 대비 매출 변화율
+    df["revenue"] = pd.to_numeric(df["revenue"], errors="coerce")
+    df["_rev_prev"] = df.groupby("stock_code")["revenue"].shift(1)
+    df["revenue_yoy_pct"] = (
+        (df["revenue"] - df["_rev_prev"]) / df["_rev_prev"].abs() * 100
+    ).round(2)
+    df = df.drop(columns=["_rev_prev"])
+
     return df
 
 
@@ -550,6 +589,9 @@ COL_ORDER = [
     "revenue", "op_income", "net_income",
     "operating_cf", "capex", "fcf",
     "dividends_paid", "payout_ratio", "dividend_coverage",
+    "total_liab", "total_equity", "debt_ratio",
+    "interest_expense", "interest_coverage",
+    "revenue_yoy_pct",
     "dps", "dps_prev", "dps_yoy_pct",
     "dividend_cut",
     "label3",   # 0=INTACT, 1=WEAKENING, 2=BROKEN (t+1 forward-looking)
@@ -568,6 +610,12 @@ COL_KR = {
     "dividends_paid":    "배당지급액(원)",
     "payout_ratio":      "배당성향(%)",
     "dividend_coverage": "배당커버리지",
+    "total_liab":        "부채총계(원)",
+    "total_equity":      "자본총계(원)",
+    "debt_ratio":        "부채비율(%)",
+    "interest_expense":  "이자비용(원)",
+    "interest_coverage": "이자보상배율",
+    "revenue_yoy_pct":   "매출성장률(%)",
     "dps":               "DPS(원)",
     "dps_prev":          "전년DPS(원)",
     "dps_yoy_pct":       "DPS변화율(%)",
@@ -641,10 +689,40 @@ def main():
     # corp_code XML 한 번에 로드 (캐시)
     load_corp_codes()
 
-    all_rows = []
+    # ── 체크포인트 + 이어받기 ────────────────────────────────
+    # 종목별로 받는 즉시 CKPT에 append 저장.
+    # 재실행 시 이미 받은 종목은 건너뜀 → 네트워크 끊겨도 누적/복구.
+    CKPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data",
+                        "dividend_dataset_partial.csv")
+    done_codes: set[str] = set()
+    all_rows: list[dict] = []
+    if os.path.exists(CKPT):
+        try:
+            prev = pd.read_csv(CKPT, encoding="utf-8-sig", dtype={"stock_code": str})
+            prev["stock_code"] = prev["stock_code"].astype(str).str.zfill(6)
+            all_rows = prev.to_dict("records")
+            done_codes = set(prev["stock_code"].unique())
+            print(f"\n  ♻️  체크포인트 발견: {len(done_codes)}개 종목 이어받기 "
+                  f"(남은 {len(STOCKS) - len(done_codes)}개)")
+        except Exception as e:
+            print(f"  ⚠️ 체크포인트 읽기 실패({e}) → 처음부터")
+
+    def _append_ckpt(rows: list[dict]) -> None:
+        if not rows:
+            return
+        rdf = pd.DataFrame(rows)
+        header = not os.path.exists(CKPT)
+        rdf.to_csv(CKPT, mode="a", header=header, index=False, encoding="utf-8-sig")
+
     for stock in STOCKS:
+        code = str(stock["stock_code"]).zfill(6)
+        if code in done_codes:
+            continue
         rows = collect_stock_history(stock, START_YEAR, END_YEAR)
-        all_rows.extend(rows)
+        if rows:
+            all_rows.extend(rows)
+            _append_ckpt(rows)        # ← 종목 단위 즉시 저장
+        done_codes.add(code)
         # 종목 간 API 부하 분산
         time.sleep(1)
 

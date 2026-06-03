@@ -54,6 +54,9 @@ FEATURE_LABEL_KO = {
     "ocf_to_capex":      "영업CF/설비투자 비율",
     "payout_ratio":      "배당성향(%)",
     "dps_yoy_pct":       "배당금 전년 대비 증감률",
+    "debt_ratio":        "부채비율(%)",
+    "interest_coverage": "이자보상배율",
+    "revenue_yoy_pct":   "매출 성장률(%)",
 }
 
 CLASS_NAMES = ["INTACT", "WEAKENING", "BROKEN"]

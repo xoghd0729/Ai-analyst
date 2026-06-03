@@ -24,3 +24,12 @@ Thumbs.db
 
 # 로그
 *.log
+build_dataset.py.bak
+data/dividend_dataset_partial.csv
+reports/.Rhistory
+*.bak
+
+build_dataset.py.bak
+data/dividend_dataset_partial.csv
+reports/.Rhistory
+*.bak

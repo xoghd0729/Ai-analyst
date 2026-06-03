@@ -1,0 +1,119 @@
+{
+  "generated_at": "2026-06-02T09:40:42.329863+00:00",
+  "csv": "/sessions/gallant-intelligent-carson/mnt/ai-analyst/data/dividend_dataset.csv",
+  "checks": [
+    {
+      "name": "min_rows",
+      "ok": true,
+      "level": "OK",
+      "msg": "행 1709 (최소 300)"
+    },
+    {
+      "name": "min_stocks",
+      "ok": true,
+      "level": "OK",
+      "msg": "종목 166 (최소 40)"
+    },
+    {
+      "name": "missing:op_income",
+      "ok": false,
+      "level": "WARN",
+      "msg": "op_income 결측 60.9% (노이즈 후보)"
+    },
+    {
+      "name": "missing:net_income",
+      "ok": false,
+      "level": "WARN",
+      "msg": "net_income 결측 64.7% (노이즈 후보)"
+    },
+    {
+      "name": "missing:payout_ratio",
+      "ok": false,
+      "level": "WARN",
+      "msg": "payout_ratio 결측 70.6% (노이즈 후보)"
+    },
+    {
+      "name": "missing:interest_coverage",
+      "ok": false,
+      "level": "WARN",
+      "msg": "interest_coverage 결측 68.1% (노이즈 후보)"
+    },
+    {
+      "name": "outlier:payout_ratio",
+      "ok": false,
+      "level": "WARN",
+      "msg": "배당성향 |값|>1000.0: 4행"
+    },
+    {
+      "name": "outlier:debt_ratio",
+      "ok": false,
+      "level": "WARN",
+      "msg": "부채비율 |값|>2000.0: 7행"
+    },
+    {
+      "name": "year_duplicates",
+      "ok": true,
+      "level": "OK",
+      "msg": "종목×연도 중복 0행"
+    },
+    {
+      "name": "label:dividend_cut",
+      "ok": true,
+      "level": "OK",
+      "msg": "dividend_cut 값 [np.float64(0.0), np.float64(1.0)]"
+    },
+    {
+      "name": "label:label3",
+      "ok": true,
+      "level": "OK",
+      "msg": "label3 값 [np.float64(0.0), np.float64(1.0), np.float64(2.0)]"
+    },
+    {
+      "name": "class:WEAKENING",
+      "ok": true,
+      "level": "OK",
+      "msg": "WEAKENING 155건 (최소 30)"
+    },
+    {
+      "name": "class:BROKEN",
+      "ok": true,
+      "level": "OK",
+      "msg": "BROKEN 293건 (최소 50)"
+    }
+  ],
+  "grade": "WARN",
+  "n_rows": 1709,
+  "n_stocks": 166,
+  "missing_pct": {
+    "stock_code": 0.0,
+    "name": 0.0,
+    "year": 0.0,
+    "revenue": 41.3,
+    "op_income": 60.9,
+    "net_income": 64.7,
+    "operating_cf": 19.2,
+    "capex": 13.8,
+    "fcf": 22.3,
+    "dividends_paid": 28.5,
+    "payout_ratio": 70.6,
+    "dividend_coverage": 39.2,
+    "total_liab": 10.4,
+    "total_equity": 12.1,
+    "debt_ratio": 12.3,
+    "interest_expense": 32.8,
+    "interest_coverage": 68.1,
+    "revenue_yoy_pct": 51.1,
+    "dps": 27.4,
+    "dps_prev": 34.6,
+    "dps_yoy_pct": 39.4,
+    "dividend_cut": 24.3,
+    "label3": 31.9
+  },
+  "class_dist": {
+    "0": 715,
+    "2": 293,
+    "1": 155
+  },
+  "n_fail": 0,
+  "n_warn": 6
+}

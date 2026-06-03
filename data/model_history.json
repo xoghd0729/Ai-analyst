@@ -1,0 +1,81 @@
+[
+  {
+    "timestamp": "2026-06-02T10:48:48.813549+00:00",
+    "n_rows": 1163,
+    "n_stocks": 150,
+    "class_dist": {
+      "INTACT": 715,
+      "WEAKENING": 155,
+      "BROKEN": 293
+    },
+    "weakening_f1": 0.3052,
+    "weighted_f1": 0.6467,
+    "accuracy": 0.6093,
+    "n_features": 13,
+    "top_feature": "dps_yoy_pct"
+  },
+  {
+    "timestamp": "2026-06-02T14:09:36.184220+00:00",
+    "n_rows": 1679,
+    "n_stocks": 210,
+    "class_dist": {
+      "INTACT": 1033,
+      "WEAKENING": 235,
+      "BROKEN": 411
+    },
+    "weakening_f1": 0.31,
+    "weighted_f1": 0.5092,
+    "accuracy": 0.4853,
+    "n_features": 13,
+    "top_feature": "dps_yoy_pct"
+  },
+  {
+    "timestamp": "2026-06-02T14:17:44.743239+00:00",
+    "n_rows": 1679,
+    "n_stocks": 210,
+    "class_dist": {
+      "INTACT": 1033,
+      "WEAKENING": 235,
+      "BROKEN": 411
+    },
+    "weakening_f1": 0.2537,
+    "weighted_f1": 0.7408,
+    "accuracy": 0.7367,
+    "n_features": 13,
+    "top_feature": "dps_yoy_pct"
+  },
+  {
+    "timestamp": "2026-06-03T05:07:58.790542+00:00",
+    "n_rows": 1679,
+    "n_stocks": 210,
+    "class_dist": {
+      "INTACT": 1033,
+      "WEAKENING": 235,
+      "BROKEN": 411
+    },
+    "weakening_f1": 0.212,
+    "weighted_f1": 0.7471,
+    "accuracy": 0.7594,
+    "n_features": 13,
+    "top_feature": "dps_yoy_pct",
+    "cv_method": "GroupKFold(stock)"
+  },
+  {
+    "timestamp": "2026-06-03T05:15:45.006430+00:00",
+    "n_rows": 1679,
+    "n_stocks": 210,
+    "class_dist": {
+      "INTACT": 1033,
+      "WEAKENING": 235,
+      "BROKEN": 411
+    },
+    "weakening_f1": 0.2713,
+    "weighted_f1": 0.738,
+    "accuracy": 0.7308,
+    "risk_pr_auc": 0.8014,
+    "risk_roc_auc": 0.8005,
+    "n_features": 13,
+    "top_feature": "dps_yoy_pct",
+    "cv_method": "GroupKFold(stock)"
+  }
+]
