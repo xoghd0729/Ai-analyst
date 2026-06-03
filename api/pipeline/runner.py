@@ -142,6 +142,7 @@ class RecommendationPipeline:
             "dividend_calendar": ctx.dividend_calendar,
             "fire_plan":         ctx.fire_plan,
             "monte_carlo":       ctx.monte_carlo,
+            "survival":          ctx.survival,
             "tax_optimizer":     ctx.tax_optimizer_result,
             "behavioral_finance":ctx.behavioral,
             "yield_traps":       ctx.yield_traps,

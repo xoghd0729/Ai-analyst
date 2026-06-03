@@ -346,6 +346,32 @@ class MonteCarloFilter(BaseFilter):
 
 
 # ═══════════════════════════════════════════════════════════════
+# Filter 13-b — 포트폴리오 생존확률 (ML + 상관충격 통합 헤드라인)
+# ═══════════════════════════════════════════════════════════════
+class SurvivalFilter(BaseFilter):
+    """
+    흩어진 ML(P_BROKEN/P_WEAKENING)·Monte Carlo·집중도를 '생존확률' 단일
+    지표로 통합. 종목별 ML 확률로 배당컷 해저드를 구동하고, 섹터·국가
+    공통충격으로 상관 배당컷을 반영해 '겉은 분산, 실제는 집중'을 드러낸다.
+    "20년간 목표 월배당 유지 확률 84%" 형태의 헤드라인 숫자 생성.
+    """
+    name = "Survival"
+
+    def process(self, ctx: PipelineContext) -> None:
+        try:
+            from utils.survival import run_survival
+            ctx.survival = run_survival(
+                recommendations = ctx.recommendations,
+                years           = 20,
+                n_simulations   = 2000,
+                monthly_target  = float(ctx.request.monthly_target),
+                macro_regime    = ctx.macro,
+            )
+        except Exception as e:
+            ctx.add_error(self.name, str(e))
+
+
+# ═══════════════════════════════════════════════════════════════
 # Filter 14 — 세금 최적화 엔진 (2026 세법 적용)
 # ═══════════════════════════════════════════════════════════════
 class TaxOptimizerFilter(BaseFilter):
@@ -533,6 +559,7 @@ PIPELINE_FILTERS: list[type[BaseFilter]] = [
     RiskAlertFilter,         # 11. ISA + 리스크 경보
     FireEngineFilter,        # 12. FIRE 역산
     MonteCarloFilter,        # 13. Monte Carlo (Macro 연동)
+    SurvivalFilter,          # 13-b. 생존확률 (ML+상관충격 통합)
     TaxOptimizerFilter,      # 14. 세금 최적화 (2026)
     BehavioralFinanceFilter, # 15. 행동편향
     YieldTrapFilter,         # 16. Yield Trap 감지

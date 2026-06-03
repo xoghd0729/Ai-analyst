@@ -96,6 +96,9 @@ class PipelineContext:
     # ── Step 13: Monte Carlo ────────────────────────────────────
     monte_carlo: dict = field(default_factory=dict)
 
+    # ── Step 13-b: 생존확률 (ML+상관충격 통합 헤드라인 지표) ─────
+    survival: dict = field(default_factory=dict)
+
     # ── Step 14: 세금 최적화 ───────────────────────────────────
     tax_optimizer_result: dict = field(default_factory=dict)
 
