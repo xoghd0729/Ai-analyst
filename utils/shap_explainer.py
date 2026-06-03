@@ -42,6 +42,55 @@ log = logging.getLogger(__name__)
 
 BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "kr_3class_model.pkl")
+DATASET_PATH = os.path.join(BASE_DIR, "data", "dividend_dataset.csv")
+
+# 종목별 최신 연도 피처 캐시 (SHAP 입력용 — 실제 재무값 공급)
+_FEATURE_CACHE: dict | None = None
+
+
+def _load_latest_features() -> dict:
+    """dividend_dataset.csv에서 종목별 '최신 연도' 13개 피처를 로드.
+
+    SHAP 설명은 실제 재무값이 있어야 의미가 있다. 추천 데이터(ranking 기반)에는
+    원시 재무값이 없으므로, 학습 데이터셋에서 종목별 최신 행을 끌어와 공급한다.
+    파생 피처(div_to_ocf, fcf_negative, ocf_to_capex)도 여기서 계산한다.
+    """
+    global _FEATURE_CACHE
+    if _FEATURE_CACHE is not None:
+        return _FEATURE_CACHE
+    out: dict = {}
+    try:
+        import pandas as pd
+        df = pd.read_csv(DATASET_PATH, dtype={"stock_code": str})
+        df = df.sort_values(["stock_code", "year"])
+        latest = df.groupby("stock_code").tail(1)
+        for _, r in latest.iterrows():
+            code = str(r["stock_code"]).zfill(6)
+            ocf = float(r.get("operating_cf") or 0)
+            capex = float(r.get("capex") or 0)
+            fcf = r.get("fcf")
+            divp = float(r.get("dividends_paid") or 0)
+            feat = {
+                "fcf":               float(fcf) if pd.notna(fcf) else 0.0,
+                "dividends_paid":    divp,
+                "dividend_coverage": float(r.get("dividend_coverage") or 0),
+                "operating_cf":      ocf,
+                "capex":             capex,
+                "payout_ratio":      float(r.get("payout_ratio") or 0),
+                "dps_yoy_pct":       float(r.get("dps_yoy_pct") or 0),
+                "debt_ratio":        float(r.get("debt_ratio") or 0),
+                "interest_coverage": float(r.get("interest_coverage") or 0),
+                "revenue_yoy_pct":   float(r.get("revenue_yoy_pct") or 0),
+                # 파생 피처 (학습 시 build_features와 동일 정의)
+                "div_to_ocf":        divp / (abs(ocf) + 1),
+                "fcf_negative":      1 if (pd.notna(fcf) and float(fcf) < 0) else 0,
+                "ocf_to_capex":      ocf / (abs(capex) + 1),
+            }
+            out[code] = feat
+    except Exception as e:
+        log.warning("최신 피처 로드 실패: %s", e)
+    _FEATURE_CACHE = out
+    return out
 
 FEATURE_LABEL_KO = {
     "fcf":               "잉여현금흐름(FCF)",
@@ -71,14 +120,22 @@ def _load_model() -> Optional[dict]:
     if not os.path.exists(MODEL_PATH):
         log.warning("모델 파일 없음: %s", MODEL_PATH)
         return None
+    # 모델은 train_kr_3class.py 에서 joblib.dump 로 저장됨 → joblib.load 우선.
+    # (일반 pickle.load 로 읽으면 'No module named Pipeline' 등 클래스 해석 실패)
     try:
-        with open(MODEL_PATH, "rb") as f:
-            bundle = pickle.load(f)
+        import joblib
+        bundle = joblib.load(MODEL_PATH)
         _model_cache = bundle
         return bundle
-    except Exception as e:
-        log.error("모델 로드 실패: %s", e)
-        return None
+    except Exception as e_joblib:
+        try:
+            with open(MODEL_PATH, "rb") as f:
+                bundle = pickle.load(f)
+            _model_cache = bundle
+            return bundle
+        except Exception as e:
+            log.error("모델 로드 실패: joblib(%s) / pickle(%s)", e_joblib, e)
+            return None
 
 
 def explain_prediction(
@@ -198,16 +255,27 @@ def explain_portfolio_risks(recommendations: list[dict]) -> list[dict]:
             })
             continue
 
-        # 종목 피처 데이터 구성 (ranking.csv 데이터에서 추출)
-        stock_data = {
-            "fcf":               rec.get("fcf", 0),
-            "dividends_paid":    rec.get("dividends_paid", 0),
-            "dividend_coverage": rec.get("dividend_coverage", 1.0),
-            "operating_cf":      rec.get("operating_cf", 0),
-            "capex":             rec.get("capex", 0),
-            "payout_ratio":      rec.get("payout_ratio", 50),
-            "dps_yoy_pct":       rec.get("dps_yoy_pct") or rec.get("latest_yoy_pct", 0),
-        }
+        # 종목 피처: 학습 데이터셋의 최신 연도 실제 재무값 우선 (13개 전부 공급)
+        code = str(rec.get("stock_code", "")).zfill(6)
+        feats = _load_latest_features().get(code, {})
+        if feats:
+            stock_data = dict(feats)
+        else:
+            # 폴백: 추천 데이터에 있는 값만 (없으면 explain_prediction이 0 처리)
+            stock_data = {
+                "fcf":               rec.get("fcf", 0),
+                "dividends_paid":    rec.get("dividends_paid", 0),
+                "dividend_coverage": rec.get("dividend_coverage", 1.0),
+                "operating_cf":      rec.get("operating_cf", 0),
+                "capex":             rec.get("capex", 0),
+                "payout_ratio":      rec.get("payout_ratio", 50),
+                "dps_yoy_pct":       rec.get("dps_yoy_pct") or rec.get("latest_yoy_pct", 0),
+            }
+        # 추천 데이터에 더 최신 값이 있으면 덮어쓰기 (실시간 우선)
+        for k in ("dps_yoy_pct", "payout_ratio"):
+            v = rec.get(k)
+            if v is not None:
+                stock_data[k] = v
 
         explanation = explain_prediction(stock_data)
         results.append({

@@ -178,3 +178,25 @@ GROQ_API_KEY=...
          ↓
 7. DB 저장 → API → 프론트엔드 렌더링
 ```
+
+## 데이터 운영 (자동 확장 · 재학습)
+
+KRX 스크래핑(pykrx/FDR)은 KRX 로그인 차단으로 사용 불가 →  유니버스 확장은 **DART 전용**으로 동작한다. 모든 수집은 종목별 체크포인트로 이어받기를 지원하므로 네트워크가 끊겨도 재실행하면 누적된다.
+
+```bash
+# 무인 한 방: 유니버스 확장 → 수집 → 검증 게이트 → 재학습
+caffeinate -i python scripts/auto_update.py --skip-expand
+
+# 또는 단계별
+python scripts/expand_universe.py --max-add 60      # DART 배당공시로 배당주 누적 편입
+caffeinate -i python build_dataset.py               # 체크포인트 이어받기 수집
+python utils/data_validator.py                       # 결측/이상치/라벨 QA 게이트
+python train_kr_3class.py                            # 재학습 + 성능 history 기록
+python scripts/forward_backtest.py                   # Out-of-Time 검증 (미래 일반화 확인)
+```
+
+### 검증 철학 (KR vs US)
+
+- **KR**: 삭감 22% → 검증된 3-class ML. 종목단위 GroupKFold(누수 차단) + Forward Backtest(PR-AUC 0.80, 상위 20% 정밀도 0.96).
+- **US**: 삭감 4%(희소) → ML 부적합을 실측(PR-AUC 0.05). 룰베이스 배당안전성 점수(`utils/us_dividend_safety.py`, US payout 기준)로 분리.
+- 위험 경고 = `P_WEAKENING + P_BROKEN ≥ top20_cut`(모델 bundle에 저장, 96% 정밀도 검증).
