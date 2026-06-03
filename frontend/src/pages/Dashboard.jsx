@@ -44,12 +44,15 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(null)
   const [filter,  setFilter]  = useState('전체')
+  const [country, setCountry] = useState('all')  // 'all' | 'kr' | 'us'
   const [search,  setSearch]  = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
+    setLoading(true)
     Promise.all([
-      api.get('/api/ranking').catch(() => ({ data: { items: [] } })),
+      api.get(`/api/ranking?country=${country}&limit=100`)
+         .catch(() => ({ data: { items: [] } })),
       api.get('/api/portfolio/thesis').catch(() => null),
     ]).then(([r, t]) => {
       const rankItems  = r.data?.items || []
@@ -57,16 +60,16 @@ export default function Dashboard() {
       if (t?.data?.all_stocks) {
         t.data.all_stocks.forEach(s => { thesisMap[s.stock_code] = s })
       }
-      // thesis 데이터로 enrichment
+      // thesis 데이터로 enrichment (한국 종목만 thesis 매칭)
       const merged = rankItems.map(item => ({
         ...item,
-        ...(thesisMap[item.stock_code] || {}),
+        ...(item.country !== 'us' ? (thesisMap[item.stock_code] || {}) : {}),
       }))
       setItems(merged)
     })
     .catch(() => setError('서버에 연결할 수 없습니다. FastAPI 서버를 먼저 실행해주세요.'))
     .finally(() => setLoading(false))
-  }, [])
+  }, [country])
 
   const filtered = items.filter(item => {
     const st = getStatus(item)
@@ -139,7 +142,7 @@ export default function Dashboard() {
             <span className="search-icon">🔍</span>
             <input
               className="search-box"
-              placeholder="종목명 검색 (예: 삼성, KT)"
+              placeholder="종목명 검색 (예: 삼성, SCHD)"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -156,6 +159,39 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* ── 국가 필터 ── */}
+        <div style={{
+          display: 'flex', gap: 8, marginBottom: 14,
+          alignItems: 'center', flexWrap: 'wrap',
+        }}>
+          <span style={{ fontSize: 12, color: 'var(--text-sub)', marginRight: 4 }}>
+            🌐 국가
+          </span>
+          {[
+            { key: 'all', label: '전체', flag: '🌏' },
+            { key: 'kr',  label: '한국', flag: '🇰🇷' },
+            { key: 'us',  label: '미국', flag: '🇺🇸' },
+          ].map(c => {
+            const active = country === c.key
+            return (
+              <button
+                key={c.key}
+                onClick={() => setCountry(c.key)}
+                style={{
+                  padding: '6px 14px',
+                  background: active ? 'rgba(79,142,247,.15)' : 'transparent',
+                  border: `1px solid ${active ? 'var(--blue)' : 'var(--border)'}`,
+                  color: active ? '#60a5fa' : 'var(--text-sub)',
+                  borderRadius: 999, fontSize: 12, fontWeight: 600,
+                  cursor: 'pointer', transition: 'all 0.15s',
+                }}
+              >
+                {c.flag} {c.label}
+              </button>
+            )
+          })}
+        </div>
+
         {/* ── 종목 카드 그리드 ── */}
         {filtered.length === 0 ? (
           <div className="empty-state">
@@ -168,19 +204,34 @@ export default function Dashboard() {
               const st      = getStatus(item)
               const risk    = getRisk(item)
               const yld     = getYield(item)
-              const sector  = SECTOR_MAP[item.stock_code] || '국내주식'
+              const isUS    = item.country === 'us'
+              const sector  = isUS
+                ? (item.sector || '미국주식')
+                : (SECTOR_MAP[item.stock_code] || '국내주식')
               const isContra = item.contradiction
 
               return (
                 <div
-                  key={item.stock_code}
+                  key={`${item.country || 'kr'}-${item.stock_code}`}
                   className={`stock-card ${st.cls}`}
-                  onClick={() => navigate(`/stock/${item.stock_code}`)}
+                  onClick={() => !isUS && navigate(`/stock/${item.stock_code}`)}
+                  style={{ cursor: isUS ? 'default' : 'pointer' }}
                 >
                   {/* 카드 상단 */}
                   <div className="sc-top">
                     <div className="sc-left">
-                      <div className="sc-rank">#{item.rank || idx + 1}</div>
+                      <div className="sc-rank">
+                        #{item.rank || idx + 1}
+                        <span style={{
+                          marginLeft: 6, fontSize: 11, fontWeight: 600,
+                          padding: '1px 6px', borderRadius: 4,
+                          background: isUS ? 'rgba(99,102,241,.15)' : 'rgba(239,68,68,.12)',
+                          color:      isUS ? '#a5b4fc' : '#fca5a5',
+                          border:     `1px solid ${isUS ? 'rgba(99,102,241,.3)' : 'rgba(239,68,68,.25)'}`,
+                        }}>
+                          {isUS ? '🇺🇸 US' : '🇰🇷 KR'}
+                        </span>
+                      </div>
                       <div className="sc-name">{item.name}</div>
                       <div className="sc-sector">{sector}</div>
                     </div>

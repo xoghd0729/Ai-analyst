@@ -49,6 +49,15 @@ logging.basicConfig(
 )
 log = logging.getLogger("backfill_kr")
 
+# pykrx 내부 로깅 억제 (알려진 버그: logging.info() 호출 시 string formatting 오류)
+logging.getLogger("pykrx").setLevel(logging.CRITICAL)
+logging.getLogger("pykrx.website").setLevel(logging.CRITICAL)
+logging.getLogger("pykrx.website.comm").setLevel(logging.CRITICAL)
+logging.getLogger("pykrx.website.comm.util").setLevel(logging.CRITICAL)
+# requests 경고도 억제
+import warnings
+warnings.filterwarnings("ignore")
+
 
 def fetch_yearly_price_return(ticker: str, year: int) -> float | None:
     """
@@ -81,6 +90,11 @@ def fetch_yearly_price_return(ticker: str, year: int) -> float | None:
 def fetch_yearly_dividend_yield(ticker: str, year: int) -> float | None:
     """
     pykrx로 특정 종목의 특정 연도 배당수익률.
+
+    주의 (2026.05 기준):
+      KRX get_market_fundamental API가 빈 JSON 반환하여
+      실질적으로 동작 안 함. None 반환.
+      배당 데이터는 dividend_dataset.csv (DART 기반) 사용 권장.
     """
     try:
         from pykrx import stock
@@ -88,13 +102,16 @@ def fetch_yearly_dividend_yield(ticker: str, year: int) -> float | None:
         return None
 
     try:
+        # KRX API 직접 호출 — 실패 시 silent
         df = stock.get_market_fundamental(
             f"{year}1231", f"{year}1231", ticker
         )
-        if df.empty or "DIV" not in df.columns:
+        if df is None or df.empty or "DIV" not in df.columns:
             return None
-        return round(float(df.iloc[0]["DIV"]), 2)
+        val = float(df.iloc[0]["DIV"])
+        return round(val, 2) if val > 0 else None
     except Exception:
+        # KRX 서버 응답 형식 오류·rate limit·종목 누락 등 모두 조용히 패스
         return None
 
 
@@ -102,9 +119,14 @@ def backfill_ticker(
     ticker: str, name: str,
     start_year: int = 2005, end_year: int = 2024,
     sleep_sec: float = 0.3,
+    fetch_div: bool = False,
 ) -> dict:
     """
     단일 종목에 대해 start_year~end_year 연도별 데이터 수집.
+
+    Args:
+        fetch_div: KRX 배당 API 호출 여부. 기본 False (2026.05 기준 동작 안 함).
+                   배당 데이터는 dividend_dataset.csv 사용 권장.
     """
     yearly_returns: dict[int, float] = {}
     yearly_divs: dict[int, float] = {}
@@ -112,7 +134,7 @@ def backfill_ticker(
 
     for year in range(start_year, end_year + 1):
         ret = fetch_yearly_price_return(ticker, year)
-        div = fetch_yearly_dividend_yield(ticker, year)
+        div = fetch_yearly_dividend_yield(ticker, year) if fetch_div else None
 
         if ret is not None:
             yearly_returns[year] = ret
@@ -149,6 +171,10 @@ def main():
     parser.add_argument("--start", type=int, default=2005)
     parser.add_argument("--end",   type=int, default=2024)
     parser.add_argument("--sleep", type=float, default=0.3)
+    parser.add_argument(
+        "--with-divs", action="store_true",
+        help="KRX 배당 API 호출 (기본 OFF, 2026.05 기준 서버 불안정)",
+    )
     parser.add_argument(
         "--input",
         type=str,
@@ -188,6 +214,7 @@ def main():
                 ticker, name,
                 start_year=args.start, end_year=args.end,
                 sleep_sec=args.sleep,
+                fetch_div=args.with_divs,
             )
             results[ticker] = info
             log.info("  → 가격 %d년 / 배당 %d년 / 누락 %d년 / 커버리지 %.1f%%",

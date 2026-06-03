@@ -71,6 +71,64 @@ def root():
         "status":  "ok",
         "message": "AI 현금흐름 운영체제 API v2.0",
         "docs":    "/docs",
+        "health":  "/api/health",
+    }
+
+
+@app.get("/api/health", tags=["시스템"])
+def health_check():
+    """
+    헬스 체크 엔드포인트.
+
+    발표 시 청중에게 "API 살아있다" 즉시 보여주거나,
+    UptimeRobot 같은 모니터링 서비스가 5분마다 호출.
+
+    상태 코드는 항상 200. 내부 status 필드로 세부 OK/DEGRADED 표시.
+    """
+    import os
+    from datetime import datetime
+
+    checks = {}
+    overall = "ok"
+
+    BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    # 1. 데이터 파일 존재 여부
+    data_files = {
+        "approved_universe": "data/approved_universe_kr_v2.json",
+        "asset_metadata":    "data/asset_metadata.json",
+        "ml_scoring":        "data/ml_scoring_results.csv",
+        "ranking":           "data/ranking.csv",
+    }
+    for name, path in data_files.items():
+        full = os.path.join(BASE, path)
+        checks[f"file_{name}"] = "ok" if os.path.exists(full) else "missing"
+        if not os.path.exists(full):
+            overall = "degraded"
+
+    # 2. ML 모델 로드 가능 여부
+    model_path = os.path.join(BASE, "models", "kr_3class_model.pkl")
+    checks["ml_model"] = "ok" if os.path.exists(model_path) else "missing"
+    if not os.path.exists(model_path):
+        overall = "degraded"
+
+    # 3. 파이프라인 import 가능 여부 (구조 검증)
+    try:
+        from api.pipeline.runner import RecommendationPipeline  # noqa: F401
+        checks["pipeline"] = "ok"
+    except Exception as e:
+        checks["pipeline"] = f"error: {type(e).__name__}"
+        overall = "degraded"
+
+    return {
+        "status":    overall,
+        "service":   "AI Cashflow OS",
+        "version":   "2.0.0",
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "checks":    checks,
+        "uptime_message":
+            "✅ 시스템 정상 동작 중" if overall == "ok"
+            else "⚠️ 일부 컴포넌트 누락 — 추천 결과 제한될 수 있음",
     }
 
 

@@ -1,6 +1,6 @@
 {
   "_comment": "ETF 품질 스코어 캐시 — 팩트시트 및 5년 실적 기반 정적 기준값. score_etf()가 yfinance 실패 시 이 값을 fallback으로 사용.",
-  "_updated": "2026-05-25",
+  "_updated": "2026-06-01",
   "_ttl_hours": 24,
   "scores": {
     "SCHD": {
@@ -212,11 +212,11 @@
       "expense_score": 88.0
     },
     "KO": {
-      "etf_quality_score": 53.8,
-      "grade": "CAUTION",
-      "income_score": 50.0,
-      "growth_score": 50.0,
-      "stability_score": 50.0,
+      "etf_quality_score": 78.2,
+      "grade": "PASS",
+      "income_score": 70.0,
+      "growth_score": 85.0,
+      "stability_score": 85.0,
       "expense_score": 75.0
     },
     "JNJ": {

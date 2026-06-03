@@ -311,6 +311,21 @@ function generatePortfolioInsight(recs, form, achieveProb, p50Age, risks) {
 }
 
 
+// ── 섹션 네비게이션 정의 (sticky sidebar) ────────────────────
+// 각 섹션의 id 와 라벨. id는 결과 화면의 <div id="..."> 에 매핑.
+const RESULT_SECTIONS = [
+  { id: 'sec-hero',       icon: '🎯', label: '목표 달성률' },
+  { id: 'sec-recs',       icon: '📋', label: '추천 종목' },
+  { id: 'sec-axis',       icon: '📐', label: '4축 배분' },
+  { id: 'sec-growth',     icon: '📈', label: '복리 성장' },
+  { id: 'sec-cashflow',   icon: '💰', label: '월별 현금흐름' },
+  { id: 'sec-backtest',   icon: '📊', label: '21년 백테스팅' },
+  { id: 'sec-montecarlo', icon: '🎲', label: 'Monte Carlo' },
+  { id: 'sec-health',     icon: '❤️', label: '건강 진단' },
+  { id: 'sec-monitor',    icon: '📍', label: '관리 대시보드' },
+]
+
+
 // ── 데모 페르소나 3종 (캡스톤 발표용) ─────────────────────────
 // 각 페르소나 = "안전한 배당 + 주가 유지 + 복리" 철학의 3가지 인생 단계
 const PERSONAS = [
@@ -597,12 +612,64 @@ export default function Portfolio() {
           {error && <div className="error-box" style={{ marginTop: 12 }}>{error}</div>}
         </div>
 
+        {/* ── 섹션 네비게이션 — 결과 있을 때만 floating sidebar ── */}
+        {result && (
+          <nav
+            aria-label="섹션 빠른 점프"
+            style={{
+              position: 'fixed', right: 16, top: '50%',
+              transform: 'translateY(-50%)',
+              display: 'flex', flexDirection: 'column', gap: 4,
+              padding: '10px 8px',
+              background: 'rgba(15, 23, 42, 0.92)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid #1e293b',
+              borderRadius: 12,
+              zIndex: 50,
+              maxHeight: '80vh', overflowY: 'auto',
+            }}
+          >
+            <div style={{
+              fontSize: 9, color: '#64748b', fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: 0.6,
+              textAlign: 'center', marginBottom: 4,
+            }}>
+              빠른 이동
+            </div>
+            {RESULT_SECTIONS.map(s => (
+              <a
+                key={s.id}
+                href={`#${s.id}`}
+                onClick={(e) => {
+                  e.preventDefault()
+                  const el = document.getElementById(s.id)
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '6px 10px', borderRadius: 8,
+                  fontSize: 11, color: '#cbd5e1',
+                  textDecoration: 'none', cursor: 'pointer',
+                  transition: 'background 0.15s',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(79,142,247,.15)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                title={s.label}
+              >
+                <span style={{ fontSize: 14 }}>{s.icon}</span>
+                <span>{s.label}</span>
+              </a>
+            ))}
+          </nav>
+        )}
+
         {/* ── 결과 ── */}
         {result ? (
           <div className="result-section">
 
             {/* HERO */}
-            <div className="hero-card">
+            <div id="sec-hero" className="hero-card">
               <div className="hero-grid">
 
                 {/* ① Monte Carlo 달성 확률 — 메인 지표 */}
@@ -716,10 +783,42 @@ export default function Portfolio() {
               </div>
             )}
 
-            {/* 4축 구성 요약 */}
+            {/* 4축 구성 요약 + 분산 근거 설명 */}
             {result.axis_summary?.length > 0 && (
-              <div className="card">
+              <div id="sec-axis" className="card" style={{ scrollMarginTop: 16 }}>
                 <h3 className="card-title">📐 4축 자산 배분 요약</h3>
+
+                {/* 분산 근거 한 줄 — "왜 종목당 비중이 작은지" 답 */}
+                {(() => {
+                  const recs = result.recommendations || []
+                  const totalCount = recs.length
+                  if (totalCount === 0) return null
+                  const maxRec = recs.reduce(
+                    (best, r) => (r.weight_pct > best.weight_pct ? r : best),
+                    recs[0]
+                  )
+                  const avgWeight = totalCount > 0 ? (100 / totalCount).toFixed(1) : '0'
+                  return (
+                    <div style={{
+                      marginBottom: 14, padding: '10px 14px',
+                      background: 'rgba(79,142,247,.06)',
+                      borderRadius: 8, border: '1px solid rgba(79,142,247,.2)',
+                      fontSize: 12, color: '#94a3b8', lineHeight: 1.6,
+                    }}>
+                      <div style={{ color: '#cbd5e1', fontWeight: 600, marginBottom: 4 }}>
+                        ⚖️ 분산 방식 — 자산군 비중 × 종목 점수 비례
+                      </div>
+                      총 <strong style={{ color: '#60a5fa' }}>{totalCount}개</strong> 종목,
+                      평균 <strong style={{ color: '#60a5fa' }}>{avgWeight}%</strong> 비중.
+                      최대 비중 <strong style={{ color: '#60a5fa' }}>
+                      {maxRec.ticker} ({maxRec.weight_pct?.toFixed(1)}%)
+                      </strong>.
+                      <br/>
+                      단일 종목 의존을 줄여 한 종목이 배당 삭감해도 전체 영향 최소화.
+                    </div>
+                  )
+                })()}
+
                 <div className="axis-summary-grid">
                   {result.axis_summary.map((ax, i) => (
                     <div key={i} className="axis-item"
@@ -738,7 +837,7 @@ export default function Portfolio() {
             )}
 
             {/* 복리 성장 그래프 */}
-            <div className="card">
+            <div id="sec-growth" className="card" style={{ scrollMarginTop: 16 }}>
               <h3 className="card-title">
                 📈 복리 성장 곡선
                 <span className="title-sub">매달 {result.monthly_invest}만원 × 배당 재투자 · 세후 기준</span>
@@ -892,7 +991,7 @@ export default function Portfolio() {
             </div>
 
             {/* 추천 종목 테이블 */}
-            <div className="card">
+            <div id="sec-recs" className="card" style={{ scrollMarginTop: 16 }}>
               <h3 className="card-title">📋 종목별 적립 배분</h3>
               <YieldTrapWarning yieldTraps={result.yield_traps || []} />
               <table className="rec-table">
@@ -971,14 +1070,18 @@ export default function Portfolio() {
             {/* ══ 신규 분석 패널 ══════════════════════════════════════ */}
 
             {/* 현금흐름 마일스톤 — "내 인생이 어떻게 변하나" */}
-            <CashflowMilestone
-              summary={result.summary}
-              fire_plan={result.fire_plan}
-            />
+            <div id="sec-cashflow" style={{ scrollMarginTop: 16 }}>
+              <CashflowMilestone
+                summary={result.summary}
+                fire_plan={result.fire_plan}
+              />
+            </div>
 
             {/* Portfolio Health OS 레이더 차트 */}
             {result.portfolio_health && (
-              <HealthRadarChart health={result.portfolio_health} />
+              <div id="sec-health" style={{ scrollMarginTop: 16 }}>
+                <HealthRadarChart health={result.portfolio_health} />
+              </div>
             )}
 
             {/* 배당 캘린더 히트맵 */}
@@ -988,19 +1091,21 @@ export default function Portfolio() {
 
             {/* Monte Carlo 밴드 차트 (백엔드 MC 결과 우선, 없으면 프론트 mc) */}
             {(result.monte_carlo?.p50_monthly || mc?.fanData) && (
-              <MonteCarloChart
-                monteCarlo={result.monte_carlo || {
-                  p10_monthly: mc.fanData?.map(d => d.p10) || [],
-                  p50_monthly: mc.fanData?.map(d => d.p50) || [],
-                  p90_monthly: mc.fanData?.map(d => d.p90) || [],
-                  years: mc.fanData?.map((_, i) => i + 1) || [],
-                  p50_final: mc.fanData?.[mc.fanData.length-1]?.p50 || 0,
-                  p10_final: mc.fanData?.[mc.fanData.length-1]?.p10 || 0,
-                  confidence_at_target: mc.achieveProb || 0,
-                  expected_cut_events: 0,
-                }}
-                monthlyTarget={result.monthly_target}
-              />
+              <div id="sec-montecarlo" style={{ scrollMarginTop: 16 }}>
+                <MonteCarloChart
+                  monteCarlo={result.monte_carlo || {
+                    p10_monthly: mc.fanData?.map(d => d.p10) || [],
+                    p50_monthly: mc.fanData?.map(d => d.p50) || [],
+                    p90_monthly: mc.fanData?.map(d => d.p90) || [],
+                    years: mc.fanData?.map((_, i) => i + 1) || [],
+                    p50_final: mc.fanData?.[mc.fanData.length-1]?.p50 || 0,
+                    p10_final: mc.fanData?.[mc.fanData.length-1]?.p10 || 0,
+                    confidence_at_target: mc.achieveProb || 0,
+                    expected_cut_events: 0,
+                  }}
+                  monthlyTarget={result.monthly_target}
+                />
+              </div>
             )}
 
             {/* 행동편향 진단 요약 */}
@@ -1091,14 +1196,18 @@ export default function Portfolio() {
             })()}
 
             {/* ── 21년 백테스팅 — "이 추천이 과거에도 통했는가?" ── */}
-            <BacktestChart portfolio={result} startYear={2005} endYear={2024} />
+            <div id="sec-backtest" style={{ scrollMarginTop: 16 }}>
+              <BacktestChart portfolio={result} startYear={2005} endYear={2024} />
+            </div>
 
-            <PortfolioMonitor
-              calendar={result.dividend_calendar}
-              rebalancingPlan={result.rebalancing_plan}
-              recommendations={result.recommendations}
-              projection={result.projection}
-            />
+            <div id="sec-monitor" style={{ scrollMarginTop: 16 }}>
+              <PortfolioMonitor
+                calendar={result.dividend_calendar}
+                rebalancingPlan={result.rebalancing_plan}
+                recommendations={result.recommendations}
+                projection={result.projection}
+              />
+            </div>
 
           </div>
         ) : (

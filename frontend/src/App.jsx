@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-do
 import Dashboard from './pages/Dashboard'
 import StockDetail from './pages/StockDetail'
 import Portfolio from './pages/Portfolio'
+import ErrorBoundary from './components/ErrorBoundary'
 import './App.css'
 
 export default function App() {
@@ -24,15 +25,17 @@ export default function App() {
         </nav>
 
         <main className="main-content">
-          <Routes>
-            {/* 메인 = AI 포트폴리오 설계 (캡스톤 핵심 데모) */}
-            <Route path="/" element={<Portfolio />} />
-            {/* 종목 랭킹은 보조 메뉴 */}
-            <Route path="/ranking" element={<Dashboard />} />
-            {/* 하위 호환: 기존 링크 보호 */}
-            <Route path="/portfolio" element={<Navigate to="/" replace />} />
-            <Route path="/stock/:code" element={<StockDetail />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              {/* 메인 = AI 포트폴리오 설계 (캡스톤 핵심 데모) */}
+              <Route path="/" element={<Portfolio />} />
+              {/* 종목 랭킹은 보조 메뉴 */}
+              <Route path="/ranking" element={<Dashboard />} />
+              {/* 하위 호환: 기존 링크 보호 */}
+              <Route path="/portfolio" element={<Navigate to="/" replace />} />
+              <Route path="/stock/:code" element={<StockDetail />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
       </div>
     </BrowserRouter>

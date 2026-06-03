@@ -86,6 +86,37 @@ _SP500_RETURNS_FALLBACK_2005_2024 = {
 # yfinance로부터 연도별 수익률을 계산해 캐시하는 메모리 저장소
 _HISTORICAL_DATA: dict[str, dict[int, float]] = {}
 
+# ── 한국 종목 백필 데이터 (pykrx 수집 결과) 캐시 ──────────────
+# scripts/backfill_kr_history.py 가 만든 data/kr_historical_returns.json 을
+# 첫 호출 시 한 번 로드. 섹터 평균(_KR_SECTOR_RETURNS) 보다 우선 적용됨.
+_KR_REAL_RETURNS_CACHE: dict[str, dict[int, float]] | None = None
+
+
+def _load_kr_real_returns(ticker: str) -> dict[int, float] | None:
+    """
+    한국 종목 ticker의 실데이터(연도별 가격 수익률) 반환.
+    data/kr_historical_returns.json (pykrx 백필 결과) 활용.
+
+    파일 없거나 종목 없으면 None.
+    """
+    global _KR_REAL_RETURNS_CACHE
+    if _KR_REAL_RETURNS_CACHE is None:
+        import os, json
+        base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(base, "data", "kr_historical_returns.json")
+        try:
+            with open(path, encoding="utf-8") as f:
+                raw = json.load(f)
+            # JSON 키는 문자열이므로 int로 변환
+            _KR_REAL_RETURNS_CACHE = {
+                t: {int(y): float(v) for y, v in info.get("yearly_returns", {}).items()}
+                for t, info in raw.items()
+            }
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            _KR_REAL_RETURNS_CACHE = {}
+
+    return _KR_REAL_RETURNS_CACHE.get(ticker)
+
 # ── 자산별 상장 연도 & 합성 매핑 (Day 8 / Data D1: 정직화) ─────
 # 학술적 정직성을 위해 각 종목의 실제 상장 연도를 명시한다.
 # 상장 이전 연도의 수익률은 동일 카테고리의 선행 ETF로부터 합성됨을 표시.
@@ -282,6 +313,13 @@ def _get_asset_yearly_returns(ticker: str, asset_class: str) -> dict[int, float]
     # 1. 정적 테이블에 있으면 바로 반환
     if ticker in _ASSET_HIST_RETURNS:
         return _ASSET_HIST_RETURNS[ticker]
+
+    # 1-b. (Data D2 후속) 한국 종목 백필 데이터 우선 사용
+    #      pykrx로 수집한 kr_historical_returns.json 가 있으면 섹터 평균보다 우선
+    kr_real = _load_kr_real_returns(ticker)
+    if kr_real:
+        _HISTORICAL_DATA[ticker] = kr_real
+        return kr_real
 
     # 2. yfinance로 실제 데이터 시도
     try:

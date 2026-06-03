@@ -33,3 +33,4 @@ build_dataset.py.bak
 data/dividend_dataset_partial.csv
 reports/.Rhistory
 *.bak
+dividend_dataset.xlsx
