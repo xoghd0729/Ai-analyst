@@ -66,17 +66,15 @@ class TestPipelineContext:
         assert ctx.etfs == []
 
     def test_context_add_error_method(self):
-        """add_error() 메서드가 pipeline_errors에 기록"""
+        """add_error() 메서드가 errors 리스트에 기록"""
         req = make_request()
         ctx = PipelineContext(request=req)
-        # pipeline_errors 필드가 있는지 확인 (있으면 add_error 테스트)
-        if hasattr(ctx, "add_error"):
-            ctx.add_error("TestFilter", "test error message")
-            assert hasattr(ctx, "pipeline_errors")
-        elif hasattr(ctx, "pipeline_errors"):
-            # 직접 추가 가능한 경우
-            ctx.pipeline_errors.append({"step": "TestFilter", "error": "test error"})
-            assert len(ctx.pipeline_errors) == 1
+        assert hasattr(ctx, "errors")
+        assert ctx.errors == []
+        ctx.add_error("TestFilter", "test error message")
+        assert len(ctx.errors) == 1
+        assert "TestFilter" in ctx.errors[0]
+        assert "test error message" in ctx.errors[0]
 
     def test_request_fields_accessible(self):
         req = make_request(age=28, investable_amount=3000, risk_tolerance="aggressive")

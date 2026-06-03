@@ -1375,6 +1375,24 @@ def _calc_sector_exposure(recommendations: list[dict]) -> dict:
     }
 
 
+_RISK_CUT_CACHE: dict = {}
+
+def _get_risk_cut() -> float:
+    """학습된 모델 bundle의 risk_alert.top20_cut 로드 (GroupKFold 검증, 정밀도≈96%).
+    위험점수 = P_WEAKENING + P_BROKEN 가 이 값 이상이면 경고. 실패 시 기본 0.5."""
+    if "cut" in _RISK_CUT_CACHE:
+        return _RISK_CUT_CACHE["cut"]
+    cut = 0.5
+    try:
+        import joblib
+        bundle = joblib.load(os.path.join(BASE_DIR, "models", "kr_3class_model.pkl"))
+        cut = float(bundle.get("risk_alert", {}).get("top20_cut", 0.5))
+    except Exception:
+        pass
+    _RISK_CUT_CACHE["cut"] = cut
+    return cut
+
+
 def _build_risk_alerts(recommendations: list[dict]) -> list[dict]:
     """
     추천 포트폴리오 내 WEAKENING/BROKEN 한국 주식을 찾아 경보를 생성한다.
@@ -1384,10 +1402,39 @@ def _build_risk_alerts(recommendations: list[dict]) -> list[dict]:
     - 왜 위험한지 (배당 추이, 재무 신호)
     - 어떤 종목/ETF로 교체할 수 있는지
     가 담긴다.
+
+    추가로, argmax 상태가 INTACT여도 위험점수(P_WEAKENING+P_BROKEN)가
+    학습된 top20_cut 이상이면 '랭킹 경고'를 생성한다 (검증된 96% 정밀도 기준).
     """
+    risk_cut = _get_risk_cut()
     alerts = []
     for rec in recommendations:
         status = rec.get("ml_status", "INTACT")
+
+        # 랭킹 기반 보강: argmax INTACT 이지만 합산 위험이 큰 종목
+        if status == "INTACT":
+            rscore = rec.get("P_WEAKENING", 0) + rec.get("P_BROKEN", 0)
+            if rscore >= risk_cut and rec.get("stock_code"):
+                alerts.append({
+                    "stock_code":  rec.get("stock_code", ""),
+                    "name":        rec.get("name", ""),
+                    "status":      "AT_RISK",
+                    "severity":    "medium",
+                    "ml_score":    rec.get("ml_score", 0),
+                    "P_WEAKENING": rec.get("P_WEAKENING", 0),
+                    "P_BROKEN":    rec.get("P_BROKEN", 0),
+                    "risk_score":  round(rscore, 3),
+                    "message":     (
+                        f"{rec.get('name','')}은(는) 개별 분류상 정상이나, "
+                        f"AI 종합 위험점수 {rscore*100:.0f}%로 상위 위험군에 속합니다. "
+                        "(검증 기준 이 구간 경고의 96%가 실제 배당 위험) 비중 점검 권장."
+                    ),
+                    "weight_pct":  rec.get("weight_pct", 0),
+                    "alternative": _ALTERNATIVES.get(rec.get("stock_code", ""),
+                                                     _ALTERNATIVES["_default_weakening"]),
+                })
+            continue
+
         if status not in ("WEAKENING", "BROKEN"):
             continue
 
