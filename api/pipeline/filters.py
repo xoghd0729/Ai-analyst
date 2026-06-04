@@ -359,13 +359,24 @@ class SurvivalFilter(BaseFilter):
 
     def process(self, ctx: PipelineContext) -> None:
         try:
-            from utils.survival import run_survival
+            from utils.survival import run_survival, survival_optimal_compare
+            ach = None
+            if isinstance(ctx.monte_carlo, dict):
+                ach = ctx.monte_carlo.get("confidence_at_target")
             ctx.survival = run_survival(
-                recommendations = ctx.recommendations,
-                years           = 20,
-                n_simulations   = 2000,
-                monthly_target  = float(ctx.request.monthly_target),
-                macro_regime    = ctx.macro,
+                recommendations  = ctx.recommendations,
+                years            = 20,
+                n_simulations    = 2000,
+                monthly_target   = float(ctx.request.monthly_target),
+                macro_regime     = ctx.macro,
+                achievement_prob = ach,
+            )
+            # 현재 vs 분산보정 비교 (표시용 — 실제 배분은 안 바꿈)
+            ctx.survival["compare"] = survival_optimal_compare(
+                ctx.recommendations,
+                monthly_target   = float(ctx.request.monthly_target),
+                macro_regime     = ctx.macro,
+                achievement_prob = ach,
             )
         except Exception as e:
             ctx.add_error(self.name, str(e))

@@ -321,6 +321,7 @@ const RESULT_SECTIONS = [
   { id: 'sec-cashflow',   icon: '💰', label: '월별 현금흐름' },
   { id: 'sec-backtest',   icon: '📊', label: '21년 백테스팅' },
   { id: 'sec-montecarlo', icon: '🎲', label: 'Monte Carlo' },
+  { id: 'sec-survival',   icon: '🛡️', label: '소득 지속성' },
   { id: 'sec-health',     icon: '❤️', label: '건강 진단' },
   { id: 'sec-monitor',    icon: '📍', label: '관리 대시보드' },
 ]
@@ -1107,6 +1108,79 @@ export default function Portfolio() {
                 />
               </div>
             )}
+
+            {/* 포트폴리오 생존확률 (ML + 상관충격 통합 헤드라인) */}
+            {result.survival?.survival_probability != null && (() => {
+              const s = result.survival
+              const score = s.income_sustainability_score ?? s.survival_probability
+              const color = score >= 75 ? '#34d399' : score >= 55 ? '#fbbf24' : '#f87171'
+              const weightMap = Object.fromEntries(s.concentration_groups || [])
+              const cmp = s.compare
+              return (
+                <div id="sec-survival" className="card" style={{ scrollMarginTop: 16 }}>
+                  <h3 className="card-title">
+                    🛡️ 소득 지속성 점수
+                    <span className="title-sub">ML·Monte Carlo·집중도 통합 — "이 월배당이 20년 뒤에도 나오는가"</span>
+                  </h3>
+                  <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap', padding: '8px 4px' }}>
+                    <div style={{ textAlign: 'center', minWidth: 140 }}>
+                      <div style={{ fontSize: 52, fontWeight: 800, color, lineHeight: 1.1 }}>{score}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted, #94a3b8)', marginTop: 4 }}>소득 지속성 점수 / 100</div>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 220, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      <div><div style={{ fontSize: 11, color: 'var(--text-muted,#94a3b8)' }}>20년 지속 확률</div>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>{s.survival_probability}%</div></div>
+                      <div><div style={{ fontSize: 11, color: 'var(--text-muted,#94a3b8)' }}>만기 유지 확률</div>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>{s.endpoint_probability}%</div></div>
+                      <div><div style={{ fontSize: 11, color: 'var(--text-muted,#94a3b8)' }}>지속 기준선</div>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>{s.threshold_monthly_만원}만원</div></div>
+                      <div><div style={{ fontSize: 11, color: 'var(--text-muted,#94a3b8)' }}>비관 시 최악연도</div>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>{s.p10_worst_real}만원</div></div>
+                    </div>
+                  </div>
+
+                  {s.risk_contribution?.length > 0 && (
+                    <div style={{ marginTop: 14 }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted,#94a3b8)', marginBottom: 6 }}>
+                        위험 기여도 (비중이 아니라 실제 위험) — 비중과 다르면 숨은 집중
+                      </div>
+                      <div style={{ display: 'flex', height: 12, borderRadius: 6, overflow: 'hidden' }}>
+                        {s.risk_contribution.map(([g, pct], i) => (
+                          <div key={g} title={`${g} 위험 ${pct}%`} style={{
+                            width: `${pct}%`,
+                            background: ['#f87171','#fbbf24','#4f8ef7','#34d399','#a78bfa','#94a3b8'][i % 6],
+                          }} />
+                        ))}
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 6, fontSize: 11 }}>
+                        {s.risk_contribution.slice(0, 5).map(([g, pct]) => (
+                          <span key={g} style={{ color: 'var(--text-muted,#94a3b8)' }}>
+                            {g}: 위험 <b style={{ color: '#e2e8f0' }}>{pct}%</b>
+                            <span style={{ opacity: .5 }}> (비중 {weightMap[g] ?? 0}%)</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {cmp && cmp.delta_survival > 0 && (
+                    <div style={{ marginTop: 14, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap',
+                                  background: 'rgba(52,211,153,.08)', border: '1px solid rgba(52,211,153,.25)',
+                                  borderRadius: 10, padding: '10px 14px' }}>
+                      <div style={{ fontSize: 13 }}>
+                        현재 생존 <b>{cmp.current.survival}%</b>
+                        <span style={{ opacity: .6 }}> → </span>
+                        분산보정 시 <b style={{ color: '#34d399' }}>{cmp.optimized.survival}%</b>
+                      </div>
+                      <div style={{ fontSize: 12, color: '#34d399', fontWeight: 700 }}>+{cmp.delta_survival}%p</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted,#94a3b8)' }}>{cmp.note}</div>
+                    </div>
+                  )}
+
+                  <div className="chart-note" style={{ marginTop: 10 }}>💡 {s.summary}</div>
+                </div>
+              )
+            })()}
 
             {/* 행동편향 진단 요약 */}
             {result.behavioral_finance?.bias_count > 0 && (

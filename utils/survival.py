@@ -100,6 +100,7 @@ def run_survival(
     macro_regime: Optional[dict] = None,
     correlated: bool = True,
     ml_driven: bool = True,
+    achievement_prob: Optional[float] = None,   # 목표 달성확률(Monte Carlo) — 종합점수용
 ) -> dict:
     rng = random.Random(seed)
 
@@ -218,8 +219,31 @@ def run_survival(
                   key=lambda x: -x[1])
     hhi = round(sum((w / total_w) ** 2 for w in group_weight.values()), 3)
 
+    # ── Risk Contribution: 비중이 아니라 '위험 기여도' ─────────────
+    # 위험 = 비중 × (개별 해저드 + 그룹 공통충격). "KR 28%인데 위험 52%" 를 드러냄.
+    risk_by_group: dict[str, float] = {}
+    for a in assets:
+        eff = a["ml_h"] + _GROUP_SHOCK_PROB.get(a["grp"], _GROUP_SHOCK_PROB["default"])
+        risk_by_group[a["grp"]] = risk_by_group.get(a["grp"], 0.0) + a["invest"] * eff
+    risk_total = sum(risk_by_group.values()) or 1.0
+    risk_contribution = sorted(
+        ((g, round(r / risk_total * 100, 1)) for g, r in risk_by_group.items()),
+        key=lambda x: -x[1])
+
     surv = round(strict_hits / n * 100, 1)
+    endp = round(endpoint_hits / n * 100, 1)
+
+    # ── 소득 지속성 점수 (사용자용 헤드라인) ───────────────────────
+    # '지속성' = 생존(전기간) + 만기유지. 야망 목표 달성률(FIRE)은 별도 축이라
+    # 점수에 섞지 않는다(섞으면 91% 지속이 0% 달성에 끌려 내려감). 집중도 페널티만 가미.
+    base_score = 0.6 * surv + 0.4 * endp
+    conc_penalty = max(0.0, (hhi - 0.30)) * 40.0    # 집중 과도 시 소폭 감점
+    income_score = round(max(0.0, min(100.0, base_score - conc_penalty)))
+
     return {
+        "income_sustainability_score": income_score,   # 0~100, 사용자 헤드라인
+        "achievement_prob":  round(float(achievement_prob), 1) if achievement_prob is not None else None,
+        "risk_contribution": risk_contribution,         # [(그룹, 위험기여%)] — 비중과 다름
         "survival_probability":  surv,                     # 전 기간 목표 유지 확률(%)
         "endpoint_probability":  round(endpoint_hits / n * 100, 1),
         "threshold_monthly_만원": round(threshold, 1),
@@ -230,18 +254,66 @@ def run_survival(
         "concentration_groups":  conc,                      # [(그룹, 비중%)]
         "ml_driven":             ml_driven,
         "correlated":            correlated,
-        "summary":               _summary(surv, hhi, conc, threshold),
+        "summary":               _summary(surv, hhi, conc, risk_contribution, threshold),
     }
 
 
-def _summary(surv: float, hhi: float, conc: list, threshold: float) -> str:
-    top = conc[0] if conc else ("", 0)
+def _summary(surv: float, hhi: float, conc: list, risk_contrib: list, threshold: float) -> str:
     risk = "높음" if hhi >= 0.4 else ("보통" if hhi >= 0.25 else "낮음")
     msg = (f"20년간 월배당 소득({threshold:.0f}만원 이상) 지속 확률 {surv:.0f}%. "
            f"집중위험 {risk}(HHI {hhi}).")
-    if hhi >= 0.4 and top[1] >= 40:
-        msg += f" '{top[0]}' 비중 {top[1]:.0f}%가 동시 배당컷에 취약 — 분산 권장."
+    # 비중 대비 위험 기여가 큰 그룹을 짚는다 ("28%인데 위험 52%")
+    weight_map = dict(conc)
+    for g, rpct in risk_contrib[:1]:
+        wpct = weight_map.get(g, 0)
+        if rpct >= 35 and rpct >= wpct * 1.4:
+            msg += f" '{g}'는 비중 {wpct:.0f}%지만 위험 기여 {rpct:.0f}% — 분산 효과 점검 필요."
     return msg
+
+
+def survival_optimal_compare(
+    recommendations: list[dict],
+    monthly_target: float = 0.0,
+    macro_regime: Optional[dict] = None,
+    achievement_prob: Optional[float] = None,
+) -> dict:
+    """현재 배분 vs '분산 보정' 배분의 생존확률 비교 (표시용, 실제 배분은 안 바꿈).
+    KR 개별주(kr_stock/financial/cyclical) 비중 30%를 분산 자산(ETF/방어)으로 이전한
+    가상 포트폴리오의 생존확률을 함께 계산해, 차별점을 눈으로 보여준다.
+    """
+    cur = run_survival(recommendations, monthly_target=monthly_target,
+                       macro_regime=macro_regime, achievement_prob=achievement_prob)
+
+    KR_IND = {"kr_stock", "kr_financial", "kr_cyclical"}
+    DIVERSE = ("div_etf", "bond", "us_stock", "reit")
+    variant = [dict(r) for r in recommendations]
+    freed = 0.0
+    for r in variant:
+        if _shock_group(r) in KR_IND:
+            amt = float(r.get("invest_amount_만원", 0) or 0)
+            cut = amt * 0.30
+            r["invest_amount_만원"] = amt - cut
+            freed += cut
+    # 분산 자산에 비례 배분
+    targets = [r for r in variant if _shock_group(r) in DIVERSE]
+    if targets and freed > 0:
+        base = sum(float(r.get("invest_amount_만원", 0) or 0) for r in targets) or 1.0
+        for r in targets:
+            share = float(r.get("invest_amount_만원", 0) or 0) / base
+            r["invest_amount_만원"] = float(r.get("invest_amount_만원", 0) or 0) + freed * share
+
+    opt = run_survival(variant, monthly_target=monthly_target,
+                       macro_regime=macro_regime, achievement_prob=achievement_prob)
+    return {
+        "current":   {"survival": cur["survival_probability"],
+                      "income_score": cur["income_sustainability_score"],
+                      "hhi": cur["concentration_hhi"]},
+        "optimized": {"survival": opt["survival_probability"],
+                      "income_score": opt["income_sustainability_score"],
+                      "hhi": opt["concentration_hhi"]},
+        "delta_survival": round(opt["survival_probability"] - cur["survival_probability"], 1),
+        "note": "KR 개별주 비중 30%를 분산자산으로 이전한 가상 배분과 비교 (표시용).",
+    }
 
 
 # ── 자체 테스트 (numpy 불필요, 합성 포트폴리오) ────────────────
