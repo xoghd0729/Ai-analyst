@@ -327,39 +327,50 @@ const RESULT_SECTIONS = [
 ]
 
 
-// ── 데모 페르소나 3종 (캡스톤 발표용) ─────────────────────────
-// 각 페르소나 = "안전한 배당 + 주가 유지 + 복리" 철학의 3가지 인생 단계
+// ── 데모 페르소나 4종 (캡스톤 발표용 · 나이 단계별) ──────────────
+// 같은 시스템이 인생 단계(25·35·45·60)에 따라 다른 배분·생존확률을 내는지 보여줌
 const PERSONAS = [
   {
-    key:   'yunji',
-    icon:  '👩‍💼',
-    title: '28세 윤지',
-    label: '적립형 신입사원',
-    desc:  '월 100만원 적립 · 50세 FIRE 목표',
+    key:   'age25',
+    icon:  '🧑‍🎓',
+    title: '25세 사회초년생',
+    label: '적립 시작 · 성장형',
+    desc:  '월 50만원 적립 · 자산 500만 · 장기 복리',
     form:  {
-      age: 28, monthly_invest: 100, reserve: 1000,
+      age: 25, monthly_invest: 50, reserve: 500,
+      monthly_target: 200, risk_tolerance: 'aggressive',
+    },
+  },
+  {
+    key:   'age35',
+    icon:  '👩‍💼',
+    title: '35세 직장인',
+    label: '자산 형성 · 균형형',
+    desc:  '월 100만원 적립 · 자산 5천만 · 45세 목표',
+    form:  {
+      age: 35, monthly_invest: 100, reserve: 5000,
       monthly_target: 200, risk_tolerance: 'moderate',
     },
   },
   {
-    key:   'minho',
+    key:   'age45',
     icon:  '👨‍👩‍👧',
-    title: '42세 민호',
-    label: '균형형 가장',
-    desc:  '자산 1.5억 · 자녀 + 본인 노후',
+    title: '45세 중년 가장',
+    label: '노후 준비 본격 · 균형형',
+    desc:  '월 150만원 적립 · 자산 2억 · 본인+자녀',
     form:  {
-      age: 42, monthly_invest: 100, reserve: 15000,
-      monthly_target: 250, risk_tolerance: 'conservative',
+      age: 45, monthly_invest: 150, reserve: 20000,
+      monthly_target: 250, risk_tolerance: 'moderate',
     },
   },
   {
-    key:   'youngja',
-    icon:  '👵',
-    title: '55세 영자',
-    label: '인출형 은퇴 준비',
+    key:   'age60',
+    icon:  '👴',
+    title: '60세 은퇴자',
+    label: '인출 · 안정형',
     desc:  '자산 5억 · 즉시 월 200만원 인출',
     form:  {
-      age: 55, monthly_invest: 0, reserve: 50000,
+      age: 60, monthly_invest: 0, reserve: 50000,
       monthly_target: 200, risk_tolerance: 'conservative',
     },
   },
@@ -512,7 +523,7 @@ export default function Portfolio() {
               ⚡ 빠른 데모 — 페르소나 선택
             </div>
             <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6,
+              display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6,
             }}>
               {PERSONAS.map(p => {
                 const active = activePersona === p.key
@@ -1164,16 +1175,31 @@ export default function Portfolio() {
                   )}
 
                   {cmp && cmp.delta_survival > 0 && (
-                    <div style={{ marginTop: 14, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap',
-                                  background: 'rgba(52,211,153,.08)', border: '1px solid rgba(52,211,153,.25)',
-                                  borderRadius: 10, padding: '10px 14px' }}>
-                      <div style={{ fontSize: 13 }}>
-                        현재 생존 <b>{cmp.current.survival}%</b>
-                        <span style={{ opacity: .6 }}> → </span>
-                        분산보정 시 <b style={{ color: '#34d399' }}>{cmp.optimized.survival}%</b>
+                    <div style={{ marginTop: 14, background: 'rgba(52,211,153,.08)',
+                                  border: '1px solid rgba(52,211,153,.25)', borderRadius: 10, padding: '12px 14px' }}>
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                        <div style={{ fontSize: 13 }}>
+                          현재 생존 <b>{cmp.current.survival}%</b>
+                          <span style={{ opacity: .6 }}> → </span>
+                          분산보정 시 <b style={{ color: '#34d399' }}>{cmp.optimized.survival}%</b>
+                        </div>
+                        <div style={{ fontSize: 12, color: '#34d399', fontWeight: 700 }}>+{cmp.delta_survival}%p</div>
                       </div>
-                      <div style={{ fontSize: 12, color: '#34d399', fontWeight: 700 }}>+{cmp.delta_survival}%p</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted,#94a3b8)' }}>{cmp.note}</div>
+                      {cmp.actions?.length > 0 && (
+                        <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                          {cmp.actions.map((a, i) => (
+                            <span key={i} style={{
+                              fontSize: 11, fontWeight: 600, borderRadius: 6, padding: '3px 8px',
+                              background: a.type === 'trim' ? 'rgba(248,113,113,.15)' : 'rgba(52,211,153,.15)',
+                              color: a.type === 'trim' ? '#f87171' : '#34d399',
+                            }}>
+                              {a.type === 'trim' ? '−' : '+'} {a.label} {a.pct_of_total}%p
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div style={{ fontSize: 12, color: 'var(--text-muted,#cbd5e1)', marginTop: 8 }}>💡 {cmp.action_summary}</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted,#94a3b8)', marginTop: 4, opacity: .7 }}>{cmp.note}</div>
                     </div>
                   )}
 
