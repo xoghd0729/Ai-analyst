@@ -104,7 +104,7 @@ class TestReturnStructure:
         return calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=8_000,
-            investor_age=35,
+            current_age=35,
             annual_income_만원=5_000,
         )
 
@@ -153,7 +153,7 @@ class TestISA2026InResult:
         result = calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=8_000,
-            investor_age=35,
+            current_age=35,
             annual_income_만원=5_000,
         )
         isa = result["isa_strategy"]
@@ -165,9 +165,9 @@ class TestISA2026InResult:
         result = calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=8_000,
-            investor_age=35,
+            current_age=35,
             annual_income_만원=5_000,
-            is_youth=False,
+            is_youth_isa=False,
         )
         isa = result["isa_strategy"]
         assert isa.get("tax_free_limit_만원") == 500, \
@@ -178,9 +178,9 @@ class TestISA2026InResult:
         result = calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=8_000,
-            investor_age=28,  # 청년
+            current_age=28,  # 청년
             annual_income_만원=4_000,
-            is_youth=True,
+            is_youth_isa=True,
         )
         isa = result["isa_strategy"]
         assert isa.get("tax_free_limit_만원") == 1_000, \
@@ -204,7 +204,7 @@ class TestComprehensiveTaxLogic:
         result = calc_tax_optimizer(
             recommendations=small_recs,
             investable_amount=1_000,
-            investor_age=35,
+            current_age=35,
         )
         ct = result["comprehensive_tax"]
         assert ct["is_over_threshold"] is False
@@ -216,7 +216,7 @@ class TestComprehensiveTaxLogic:
         result = calc_tax_optimizer(
             recommendations=LARGE_RECS,
             investable_amount=30_000,
-            investor_age=50,
+            current_age=50,
             annual_income_만원=8_000,
         )
         ct = result["comprehensive_tax"]
@@ -229,7 +229,7 @@ class TestComprehensiveTaxLogic:
         result = calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=8_000,
-            investor_age=35,
+            current_age=35,
         )
         ct = result["comprehensive_tax"]
         annual_div = ct["annual_div_gross_만원"]
@@ -252,7 +252,7 @@ class TestTaxRateLogic:
         result = calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=8_000,
-            investor_age=35,
+            current_age=35,
         )
         rate = result["effective_tax_rate_pct"]
         # 퍼센트 표현 or 소수 표현 모두 허용
@@ -263,7 +263,7 @@ class TestTaxRateLogic:
         result = calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=8_000,
-            investor_age=35,
+            current_age=35,
         )
         assert result["optimized_tax_rate_pct"] <= result["effective_tax_rate_pct"] + 0.1, \
             "최적화 후 세율이 현재 세율보다 높음 — 절세 로직 오류"
@@ -273,7 +273,7 @@ class TestTaxRateLogic:
         result = calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=8_000,
-            investor_age=35,
+            current_age=35,
         )
         assert result["total_annual_saving_만원"] >= 0
 
@@ -282,7 +282,7 @@ class TestTaxRateLogic:
         result = calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=8_000,
-            investor_age=35,
+            current_age=35,
         )
         assert result["5yr_cumulative_saving_만원"] >= result["total_annual_saving_만원"]
 
@@ -297,7 +297,7 @@ class TestEdgeCases:
         result = calc_tax_optimizer(
             recommendations=[],
             investable_amount=0,
-            investor_age=35,
+            current_age=35,
         )
         assert "tax_health_score" in result
 
@@ -306,7 +306,7 @@ class TestEdgeCases:
         result = calc_tax_optimizer(
             recommendations=SAMPLE_RECS,
             investable_amount=1_000,
-            investor_age=20,
+            current_age=20,
         )
         assert "isa_strategy" in result
 
@@ -315,7 +315,7 @@ class TestEdgeCases:
         result = calc_tax_optimizer(
             recommendations=LARGE_RECS,
             investable_amount=30_000,
-            investor_age=45,
+            current_age=45,
             annual_income_만원=10_000,
         )
         assert "priority_actions" in result

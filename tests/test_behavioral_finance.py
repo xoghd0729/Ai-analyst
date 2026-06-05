@@ -71,7 +71,7 @@ BALANCED_PORTFOLIO = [
 
 EMPTY_SUMMARY = {}
 TYPICAL_SUMMARY = {"avg_yield": 4.0, "avg_yield_net": 3.4}
-HIGH_YIELD_SUMMARY = {"avg_yield": 9.0, "avg_yield_net": 7.6}
+HIGH_YIELD_SUMMARY = {"avg_yield": 9.0, "avg_yield_net": 7.0}  # gap 2.0%p (종합과세 고배당 = 환상 명확)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -254,10 +254,12 @@ class TestRiskAlertInteraction:
             YIELD_ILLUSION_PORTFOLIO, risk_alerts, HIGH_YIELD_SUMMARY,
         )
         anchoring = next(
-            (b for b in result["biases"] if "고집" in b["name"] or "anchor" in b["name"].lower()),
+            (b for b in result["biases"]
+             if b.get("id") == "dividend_anchoring" or "앵커" in b["name"]
+             or "고집" in b["name"] or "anchor" in b["name"].lower()),
             None,
         )
-        assert anchoring is not None, "배당 고집 탐지 항목이 없음"
+        assert anchoring is not None, "배당 앵커링 탐지 항목이 없음"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
