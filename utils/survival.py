@@ -158,10 +158,12 @@ def run_survival(
     min_reals: list[float] = []
     final_reals: list[float] = []
 
+    min_noms: list[float] = []
     for _ in range(n_simulations):
         current_yields = [a["dy"] for a in assets]
         survived_all = True
-        min_real = float("inf")
+        min_nominal = float("inf")
+        final_nominal = 0.0
         final_real = 0.0
 
         for t in range(1, years + 1):
@@ -199,19 +201,22 @@ def run_survival(
 
             monthly_nominal = annual_net_total / 12.0
             monthly_real = monthly_nominal / ((1 + cpi_rate / 100.0) ** t)
-            if monthly_real < threshold:
+            # 생존(소득 지속성) = '명목' 소득이 기준선 이상 유지 = 배당컷 보호.
+            # (물가 방어는 별도 지표로 분리 — 섞으면 채권형이 안 깎여도 점수가 0이 됨)
+            if monthly_nominal < threshold:
                 survived_all = False
-            min_real = min(min_real, monthly_real)
+            min_nominal = min(min_nominal, monthly_nominal)
+            final_nominal = monthly_nominal
             final_real = monthly_real
 
         if survived_all:
             strict_hits += 1
-        if final_real >= threshold:
+        if final_nominal >= threshold:
             endpoint_hits += 1
-        min_reals.append(min_real)
+        min_noms.append(min_nominal)
         final_reals.append(final_real)
 
-    min_reals.sort()
+    min_noms.sort()
     final_reals.sort()
     n = n_simulations
     total_w = sum(group_weight.values()) or 1.0
@@ -220,7 +225,6 @@ def run_survival(
     hhi = round(sum((w / total_w) ** 2 for w in group_weight.values()), 3)
 
     # ── Risk Contribution: 비중이 아니라 '위험 기여도' ─────────────
-    # 위험 = 비중 × (개별 해저드 + 그룹 공통충격). "KR 28%인데 위험 52%" 를 드러냄.
     risk_by_group: dict[str, float] = {}
     for a in assets:
         eff = a["ml_h"] + _GROUP_SHOCK_PROB.get(a["grp"], _GROUP_SHOCK_PROB["default"])
@@ -230,28 +234,54 @@ def run_survival(
         ((g, round(r / risk_total * 100, 1)) for g, r in risk_by_group.items()),
         key=lambda x: -x[1])
 
-    surv = round(strict_hits / n * 100, 1)
-    endp = round(endpoint_hits / n * 100, 1)
+    # 확률은 99%로 캡 — '100% = 절대 안 망함'으로 들리는 것 방지 (금융 신뢰도)
+    surv = min(99.0, round(strict_hits / n * 100, 1))
+    endp = min(99.0, round(endpoint_hits / n * 100, 1))
 
-    # ── 소득 지속성 점수 (사용자용 헤드라인) ───────────────────────
-    # '지속성' = 생존(전기간) + 만기유지. 야망 목표 달성률(FIRE)은 별도 축이라
-    # 점수에 섞지 않는다(섞으면 91% 지속이 0% 달성에 끌려 내려감). 집중도 페널티만 가미.
-    base_score = 0.6 * surv + 0.4 * endp
-    conc_penalty = max(0.0, (hhi - 0.30)) * 40.0    # 집중 과도 시 소폭 감점
-    income_score = round(max(0.0, min(100.0, base_score - conc_penalty)))
+    # ── 인플레이션 방어 (생존과 분리된 별도 축) ────────────────────
+    # 20년 후 '실질' 월배당이 초기 대비 얼마나 구매력을 지키나.
+    p50_final_real = final_reals[int(n * 0.50)]
+    infl_ratio = (p50_final_real / init_monthly) if init_monthly > 0 else 0.0
+    infl_score = round(max(0.0, min(100.0, infl_ratio * 100)))
+    infl_level = "강" if infl_ratio >= 1.0 else ("보통" if infl_ratio >= 0.8 else "약")
+
+    # ── 배당컷 위험 (포트폴리오 가중 ML 해저드) ────────────────────
+    cut_w = sum(a["invest"] * a["ml_h"] for a in assets) / (sum(a["invest"] for a in assets) or 1.0)
+    cut_level = "높음" if cut_w >= 0.18 else ("중간" if cut_w >= 0.10 else "낮음")
+
+    # ── 소득 지속성 점수 (생존+만기, 집중 페널티) ──────────────────
+    # 100점 만점은 신뢰도를 깎으므로 95로 캡 (기관도 만점 잘 안 씀)
+    income_score = round(max(0.0, min(95.0, 0.6 * surv + 0.4 * endp - max(0.0, hhi - 0.30) * 40.0)))
+
+    # ── 단일 헤드라인: AI 현금흐름 건강도 (모든 축 통합) ───────────
+    ach = float(achievement_prob) if achievement_prob is not None else endp
+    conc_quality = max(0.0, min(100.0, (1 - hhi) * 100))
+    health = round(0.40 * surv + 0.25 * ach + 0.20 * infl_score + 0.15 * conc_quality)
+    health = max(0, min(95, health))   # 만점(100) 회피 — 신뢰도
+    grade = ("A+" if health >= 85 else "A" if health >= 75 else "B" if health >= 62
+             else "C" if health >= 50 else "D")
 
     return {
-        "income_sustainability_score": income_score,   # 0~100, 사용자 헤드라인
+        "health_score":      health,            # ★ 단일 헤드라인 점수 0~100
+        "health_grade":      grade,
+        "sub_metrics": {                         # 헤드라인 아래 분해 지표
+            "achievement":      round(ach, 1),
+            "survival":         surv,
+            "cut_risk_level":   cut_level,
+            "inflation_level":  infl_level,
+            "inflation_score":  infl_score,
+        },
+        "income_sustainability_score": income_score,
         "achievement_prob":  round(float(achievement_prob), 1) if achievement_prob is not None else None,
-        "risk_contribution": risk_contribution,         # [(그룹, 위험기여%)] — 비중과 다름
-        "survival_probability":  surv,                     # 전 기간 목표 유지 확률(%)
-        "endpoint_probability":  round(endpoint_hits / n * 100, 1),
+        "risk_contribution": risk_contribution,
+        "survival_probability":  surv,
+        "endpoint_probability":  endp,
         "threshold_monthly_만원": round(threshold, 1),
         "initial_monthly_만원":   round(init_monthly, 1),
-        "p10_worst_real":        round(min_reals[int(n * 0.10)], 1),  # 비관 시 최악연도 실질 월배당
-        "p50_final_real":        round(final_reals[int(n * 0.50)], 1),
-        "concentration_hhi":     hhi,                       # 0~1, 높을수록 집중
-        "concentration_groups":  conc,                      # [(그룹, 비중%)]
+        "p10_worst_monthly":     round(min_noms[int(n * 0.10)], 1),   # 비관 시 최악연도 명목 월배당
+        "p50_final_real":        round(p50_final_real, 1),            # 20년 후 실질(구매력)
+        "concentration_hhi":     hhi,
+        "concentration_groups":  conc,
         "ml_driven":             ml_driven,
         "correlated":            correlated,
         "summary":               _summary(surv, hhi, conc, risk_contribution, threshold),
@@ -286,24 +316,56 @@ def survival_optimal_compare(
 
     KR_IND = {"kr_stock", "kr_financial", "kr_cyclical"}
     DIVERSE = ("div_etf", "bond", "us_stock", "reit")
+    total_invest = sum(float(r.get("invest_amount_만원", 0) or 0) for r in recommendations) or 1.0
     variant = [dict(r) for r in recommendations]
     freed = 0.0
+    trim_by_group: dict[str, float] = {}      # 줄인 금액(그룹별)
     for r in variant:
-        if _shock_group(r) in KR_IND:
+        g = _shock_group(r)
+        if g in KR_IND:
             amt = float(r.get("invest_amount_만원", 0) or 0)
             cut = amt * 0.30
             r["invest_amount_만원"] = amt - cut
             freed += cut
+            trim_by_group[g] = trim_by_group.get(g, 0.0) + cut
     # 분산 자산에 비례 배분
     targets = [r for r in variant if _shock_group(r) in DIVERSE]
+    add_by_group: dict[str, float] = {}
     if targets and freed > 0:
         base = sum(float(r.get("invest_amount_만원", 0) or 0) for r in targets) or 1.0
         for r in targets:
             share = float(r.get("invest_amount_만원", 0) or 0) / base
-            r["invest_amount_만원"] = float(r.get("invest_amount_만원", 0) or 0) + freed * share
+            added = freed * share
+            r["invest_amount_만원"] = float(r.get("invest_amount_만원", 0) or 0) + added
+            g = _shock_group(r)
+            add_by_group[g] = add_by_group.get(g, 0.0) + added
 
     opt = run_survival(variant, monthly_target=monthly_target,
                        macro_regime=macro_regime, achievement_prob=achievement_prob)
+
+    # ── 실행 가능한 행동 제안 생성 ───────────────────────────────
+    _LABEL = {"kr_stock": "KR 개별주", "kr_financial": "KR 금융주", "kr_cyclical": "KR 경기민감주",
+              "div_etf": "배당 ETF", "bond": "방어형(채권)", "us_stock": "US 개별주", "reit": "리츠"}
+    MIN_PCT = 2.0   # 2%p 미만 자잘한 이전은 숨김 (데모 가독성)
+    trims = [(g, a) for g, a in sorted(trim_by_group.items(), key=lambda x: -x[1])
+             if a / total_invest * 100 >= MIN_PCT]
+    adds  = [(g, a) for g, a in sorted(add_by_group.items(), key=lambda x: -x[1])
+             if a / total_invest * 100 >= MIN_PCT][:3]   # 옮길 곳은 상위 3개만
+    actions = ([{"type": "trim", "group": g, "label": _LABEL.get(g, g),
+                 "amount_만원": round(a), "pct_of_total": round(a / total_invest * 100, 1)}
+                for g, a in trims]
+               + [{"type": "add", "group": g, "label": _LABEL.get(g, g),
+                   "amount_만원": round(a), "pct_of_total": round(a / total_invest * 100, 1)}
+                  for g, a in adds])
+
+    delta = round(opt["survival_probability"] - cur["survival_probability"], 1)
+    trim_txt = ", ".join(f"{_LABEL.get(g,g)} {round(a/total_invest*100)}%p" for g, a in trims)
+    add_txt  = ", ".join(_LABEL.get(g, g) for g, _ in adds)
+    action_summary = (
+        f"{trim_txt} 줄여 {add_txt}로 옮기면 생존확률 {delta:+.0f}%p 개선"
+        if trims and delta > 0 else "현재 배분이 이미 균형적입니다."
+    )
+
     return {
         "current":   {"survival": cur["survival_probability"],
                       "income_score": cur["income_sustainability_score"],
@@ -311,8 +373,10 @@ def survival_optimal_compare(
         "optimized": {"survival": opt["survival_probability"],
                       "income_score": opt["income_sustainability_score"],
                       "hhi": opt["concentration_hhi"]},
-        "delta_survival": round(opt["survival_probability"] - cur["survival_probability"], 1),
-        "note": "KR 개별주 비중 30%를 분산자산으로 이전한 가상 배분과 비교 (표시용).",
+        "delta_survival": delta,
+        "actions": actions,                  # 실행 가능한 구체적 이전 제안
+        "action_summary": action_summary,
+        "note": "KR 개별주 비중 30%를 분산자산으로 이전한 가상 배분과 비교 (표시용, 실제 배분 불변).",
     }
 
 
@@ -346,6 +410,6 @@ if __name__ == "__main__":
         print(f"\n[{label}]")
         print(f"  생존확률 {r['survival_probability']}% | 만기유지 {r['endpoint_probability']}% "
               f"| HHI {r['concentration_hhi']}")
-        print(f"  기준 {r['threshold_monthly_만원']}만원 | P10최악 {r['p10_worst_real']} "
+        print(f"  기준 {r['threshold_monthly_만원']}만원 | P10최악 {r['p10_worst_monthly']} "
               f"| P50만기 {r['p50_final_real']}")
         print(f"  {r['summary']}")
