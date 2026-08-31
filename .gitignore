@@ -37,3 +37,5 @@ dividend_dataset.xlsx
 data/users.json
 data/auth_tokens.json
 data/saved_portfolios.json
+.venv/
+.venv/
