@@ -21,10 +21,47 @@ class PortfolioRequest:
     annual_income:     int
     monthly_target:    int
     investable_amount: int
-    risk_tolerance:    str
-    archetype:         str = "혼합형"
+    risk_tolerance:    str   = ""      # 빈 문자열이면 __post_init__에서 자동 결정
+    archetype:         str   = ""      # 빈 문자열이면 __post_init__에서 자동 결정
     monthly_savings:   float = 100.0
+    savings_growth:    float = 0.0     # 적립 연 증가율(%) — 소득 상승 반영
     target_fire_age:   int   = 50
+
+    def __post_init__(self) -> None:
+        """
+        risk_tolerance / archetype 미입력 시 나이·자본·적립액으로 자동 결정.
+
+        전략표:
+          age < 35  → 성장형(aggressive)   : 복리 성장 우선, 적립 비중 높음
+          35-50     → 균형형(moderate)     : 배당+성장 혼합
+          50+       → 배당안정형(conservative): 안정 현금흐름 우선
+
+        자본 보정:
+          investable < 1000만 → 한 단계 더 성장 방향으로 (자본 작으면 적립이 핵심)
+          investable >= 5000만 → 한 단계 안정 방향으로 (목돈 방어 우선)
+        """
+        if not self.risk_tolerance or not self.archetype:
+            # 나이 기준 기본값
+            if self.age < 35:
+                risk, arch = "aggressive", "성장형"
+            elif self.age < 50:
+                risk, arch = "moderate", "혼합형"
+            else:
+                risk, arch = "conservative", "안정형"
+
+            # 자본 보정
+            inv = self.investable_amount
+            if inv < 1000:                      # 1000만 미만 → 더 공격적
+                if risk == "moderate":
+                    risk, arch = "aggressive", "성장형"
+            elif inv >= 5000 and self.age >= 45: # 5000만+ & 45세+ → 더 안정적
+                if risk == "moderate":
+                    risk, arch = "conservative", "안정형"
+
+            if not self.risk_tolerance:
+                self.risk_tolerance = risk
+            if not self.archetype:
+                self.archetype = arch
 
 
 @dataclass
@@ -50,6 +87,9 @@ class PipelineContext:
     kr_stocks: list = field(default_factory=list)
     us_stocks: list = field(default_factory=list)
     etfs:      list = field(default_factory=list)
+
+    # ── Step 3-b: 개인화 랭킹 ──────────────────────────────────
+    target_yield: float = 0.0   # 목표수익률 역산값 (monthly_target/investable_amount)
 
     # ── Step 4: 비중 배분 결과 ──────────────────────────────────
     recommendations: list = field(default_factory=list)
@@ -91,7 +131,12 @@ class PipelineContext:
     risk_alerts: list = field(default_factory=list)
 
     # ── Step 12: FIRE 역산 ──────────────────────────────────────
-    fire_plan: dict = field(default_factory=dict)
+    fire_plan:    dict = field(default_factory=dict)
+
+    # ── Step 12-b: FIRE 역산 (Reverse) ──────────────────────────
+    # 현재 조건 → 목표 달성을 위한 필요 적립금/자산/목표 조정 역산
+    # 실패해도 pipeline 전체에 영향 없음 (optional 결과)
+    reverse_fire: dict = field(default_factory=dict)
 
     # ── Step 13: Monte Carlo ────────────────────────────────────
     monte_carlo: dict = field(default_factory=dict)

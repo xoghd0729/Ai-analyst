@@ -17,9 +17,9 @@ import { useState } from 'react'
 const MONTH_LABELS = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']
 
 function getHeatColor(amount, maxAmount) {
-  if (!amount || amount <= 0) return { bg: '#0f172a', text: '#334155', isDry: true }
+  if (!amount || amount <= 0) return { bg: '#ffffff', text: '#c8d0dc', isDry: true }
   const ratio = Math.min(amount / maxAmount, 1)
-  if (ratio >= 0.8) return { bg: '#065f46', text: '#34d399', isDry: false }
+  if (ratio >= 0.8) return { bg: '#065f46', text: '#059669', isDry: false }
   if (ratio >= 0.6) return { bg: '#064e3b', text: '#6ee7b7', isDry: false }
   if (ratio >= 0.4) return { bg: '#1e3a2f', text: '#86efac', isDry: false }
   if (ratio >= 0.2) return { bg: '#1a2e23', text: '#bbf7d0', isDry: false }
@@ -40,13 +40,13 @@ export default function DividendCalendarHeatmap({ calendar }) {
 
   return (
     <div style={{
-      background: '#0f172a', borderRadius: 16, padding: '20px 24px',
-      border: '1px solid #1e293b',
+      background: '#ffffff', borderRadius: 16, padding: '20px 24px',
+      border: '1px solid #dfe3ea',
     }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0' }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#283143' }}>
             배당 캘린더
           </div>
           <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
@@ -55,7 +55,7 @@ export default function DividendCalendarHeatmap({ calendar }) {
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: 11, color: '#64748b' }}>연간 합계</div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#34d399' }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#059669' }}>
             {totalAnnual.toFixed(1)}만원
           </div>
         </div>
@@ -82,7 +82,7 @@ export default function DividendCalendarHeatmap({ calendar }) {
                 borderRadius:  10,
                 padding:       '10px 12px',
                 cursor:        'pointer',
-                border:        `1px solid ${isHovered ? '#3b82f6' : isDry ? '#1e293b' : '#1e3a2f'}`,
+                border:        `1px solid ${isHovered ? '#3b82f6' : isDry ? '#dfe3ea' : '#1e3a2f'}`,
                 transition:    'all 0.2s',
                 position:      'relative',
               }}
@@ -91,7 +91,7 @@ export default function DividendCalendarHeatmap({ calendar }) {
             >
               <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>{label}</div>
               {isDry ? (
-                <div style={{ fontSize: 13, color: '#334155', fontWeight: 600 }}>—</div>
+                <div style={{ fontSize: 13, color: '#c8d0dc', fontWeight: 600 }}>—</div>
               ) : (
                 <div style={{ fontSize: 15, fontWeight: 700, color: text }}>
                   {amount.toFixed(1)}만
@@ -102,9 +102,9 @@ export default function DividendCalendarHeatmap({ calendar }) {
               {isHovered && tickers.length > 0 && (
                 <div style={{
                   position: 'absolute', bottom: '100%', left: 0, zIndex: 50,
-                  background: '#1e293b', borderRadius: 8,
+                  background: '#dfe3ea', borderRadius: 8,
                   padding: '8px 10px', minWidth: 140,
-                  border: '1px solid #334155', marginBottom: 4,
+                  border: '1px solid #c8d0dc', marginBottom: 4,
                   boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
                 }}>
                   <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>
@@ -133,12 +133,12 @@ export default function DividendCalendarHeatmap({ calendar }) {
         gap: 8, marginTop: 14,
       }}>
         {[
-          { label: '월 평균', value: `${avgMonthly.toFixed(1)}만원`, color: '#34d399' },
-          { label: '배당 없는 달', value: `${dryMonths}개월`, color: dryMonths >= 3 ? '#ef4444' : dryMonths >= 1 ? '#fbbf24' : '#34d399' },
+          { label: '월 평균', value: `${avgMonthly.toFixed(1)}만원`, color: '#059669' },
+          { label: '배당 없는 달', value: `${dryMonths}개월`, color: dryMonths >= 3 ? '#ef4444' : dryMonths >= 1 ? '#d97706' : '#059669' },
           { label: '배당 있는 달', value: `${12 - dryMonths}개월`, color: '#6366f1' },
         ].map(stat => (
           <div key={stat.label} style={{
-            background: '#1e293b', borderRadius: 8, padding: '8px 12px', textAlign: 'center',
+            background: '#dfe3ea', borderRadius: 8, padding: '8px 12px', textAlign: 'center',
           }}>
             <div style={{ fontSize: 10, color: '#64748b' }}>{stat.label}</div>
             <div style={{ fontSize: 14, fontWeight: 700, color: stat.color, marginTop: 2 }}>
@@ -153,7 +153,7 @@ export default function DividendCalendarHeatmap({ calendar }) {
         <div style={{
           marginTop: 12, padding: '8px 12px',
           background: '#1c1917', borderRadius: 8,
-          border: '1px solid #78350f', fontSize: 12, color: '#fbbf24',
+          border: '1px solid #78350f', fontSize: 12, color: '#d97706',
         }}>
           ⚠️ 배당 공백 {dryMonths}개월 — 월배당 ETF(JEPI·JEPQ) 추가 편입으로 균등화 권장
         </div>

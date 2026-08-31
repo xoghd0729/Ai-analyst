@@ -48,7 +48,7 @@ export default class ErrorBoundary extends Component {
       <div style={{
         maxWidth: 720, margin: '40px auto', padding: '32px 28px',
         background: '#1a1230', borderRadius: 16,
-        border: '1px solid #4c1d95', color: '#e2e8f0',
+        border: '1px solid #4c1d95', color: '#283143',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Pretendard", sans-serif',
       }}>
         <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
@@ -62,7 +62,7 @@ export default class ErrorBoundary extends Component {
 
         {this.state.error && (
           <details style={{
-            background: '#0f0a1f', padding: '12px 14px', borderRadius: 8,
+            background: '#fef2f2', padding: '12px 14px', borderRadius: 8,
             border: '1px solid #312e81', marginBottom: 16,
             fontSize: 12, color: '#94a3b8',
           }}>

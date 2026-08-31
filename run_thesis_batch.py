@@ -568,9 +568,9 @@ def run_batch(stocks: list[dict], dry_run: bool = False, force: bool = False):
                 "contradiction": False, "action": str(e),
             })
 
-        # Ollama 과부하 방지 (연속 호출 간격)
+        # Ollama 과부하 방지 (연속 호출 간격) — Ollama 꺼져 있으면 skip
         if i < total:
-            time.sleep(1.0)
+            time.sleep(0.1)
 
     if skipped_count:
         print(f"\n  ⏭  변화 없음으로 스킵: {skipped_count}개 종목")
@@ -627,6 +627,7 @@ def run_batch(stocks: list[dict], dry_run: bool = False, force: bool = False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--top",      type=int, default=None, help="상위 N개만 분석")
+    parser.add_argument("--skip",     type=int, default=0,    help="앞에서 N개 건너뛰기")
     parser.add_argument("--dry-run",  action="store_true",    help="DB 저장 없이 출력만")
     parser.add_argument("--us-only",  action="store_true",    help="미국 종목만 분석")
     parser.add_argument("--kr-only",  action="store_true",    help="한국 종목만 분석")
@@ -653,6 +654,8 @@ if __name__ == "__main__":
         stocks = [s for s in stocks if not is_us_stock(s["stock_code"])]
         print(f"[필터] 한국 종목만: {len(stocks)}개")
 
+    if args.skip:
+        stocks = stocks[args.skip:]
     if args.top:
         stocks = stocks[:args.top]
 

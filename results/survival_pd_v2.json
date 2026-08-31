@@ -1,0 +1,79 @@
+{
+  "version": "v2_meaningful_cut",
+  "label": "meaningful_cut_30pct",
+  "event_rate": 0.0586,
+  "n_stocks": 226,
+  "prauc": 0.065,
+  "roc": 0.523,
+  "c_index": 0.484,
+  "features": [
+    "dividend_coverage",
+    "payout_ratio",
+    "debt_ratio",
+    "interest_coverage",
+    "revenue_yoy_pct",
+    "ni_to_ta",
+    "ebit_to_ta",
+    "eq_to_tl",
+    "rev_to_ta",
+    "fcf_to_ta",
+    "ocf_to_ta",
+    "fcf_negative",
+    "altman_z",
+    "dividend_coverage_chg",
+    "debt_ratio_chg",
+    "payout_ratio_chg",
+    "t_index"
+  ],
+  "ebm_importance": {},
+  "examples": [
+    {
+      "code": "071050",
+      "name": "한국금융지주",
+      "hazard": 0.0002,
+      "1y": 100.0,
+      "3y": 99.9,
+      "5y": 99.9
+    },
+    {
+      "code": "005940",
+      "name": "005940",
+      "hazard": 0.0003,
+      "1y": 100.0,
+      "3y": 99.9,
+      "5y": 99.9
+    },
+    {
+      "code": "002320",
+      "name": "002320",
+      "hazard": 0.0003,
+      "1y": 100.0,
+      "3y": 99.9,
+      "5y": 99.9
+    },
+    {
+      "code": "042700",
+      "name": "042700",
+      "hazard": 0.8952,
+      "1y": 10.5,
+      "3y": 0.1,
+      "5y": 0.0
+    },
+    {
+      "code": "000670",
+      "name": "000670",
+      "hazard": 0.7162,
+      "1y": 28.4,
+      "3y": 2.3,
+      "5y": 0.2
+    },
+    {
+      "code": "001630",
+      "name": "001630",
+      "hazard": 0.7141,
+      "1y": 28.6,
+      "3y": 2.3,
+      "5y": 0.2
+    }
+  ]
+}

@@ -25,7 +25,7 @@ from typing import Optional
 log = logging.getLogger(__name__)
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL    = os.getenv("OLLAMA_MODEL", "exaone3.5:7.8b")
+OLLAMA_MODEL    = os.getenv("OLLAMA_MODEL", "qwen3:14b")
 
 THESIS_THRESHOLDS = {"BROKEN": 0.55, "WEAKENING": 0.30}
 

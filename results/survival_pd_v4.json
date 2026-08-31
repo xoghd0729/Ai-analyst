@@ -1,0 +1,1825 @@
+{
+  "version": "v4_tabpfn_cox",
+  "model": "TabPFN v8.1.0",
+  "n_stocks": 226,
+  "event_rate_1yr": 0.0586,
+  "event_rate_3yr": 0.1458,
+  "scores": {
+    "tabpfn_1yr": {
+      "roc": 0.575,
+      "pr_auc": 0.083,
+      "c_index": 0.468
+    },
+    "tabpfn_3yr": {
+      "roc": 0.585,
+      "pr_auc": 0.185
+    },
+    "ensemble": {
+      "roc": 0.583,
+      "c_index": 0.482
+    },
+    "3tier": {
+      "roc": 0.565,
+      "c_index": 0.477
+    },
+    "altman_bench": {
+      "roc": 0.58,
+      "n": 400
+    },
+    "cox_ph": {
+      "c_index": 0.576,
+      "n_stocks": 226,
+      "n_events": 81
+    }
+  },
+  "stock_risk": {
+    "000020": {
+      "hazard_pct": 0.9514,
+      "tier": "T3",
+      "survival_1y": 4.9,
+      "survival_3y": 0.0,
+      "name": "000020"
+    },
+    "000030": {
+      "hazard_pct": 0.0113,
+      "tier": "T3",
+      "survival_1y": 98.9,
+      "survival_3y": 96.6,
+      "name": "000030"
+    },
+    "000060": {
+      "hazard_pct": 0.2737,
+      "tier": "T3",
+      "survival_1y": 72.6,
+      "survival_3y": 38.3,
+      "name": "000060"
+    },
+    "000070": {
+      "hazard_pct": 0.5036,
+      "tier": "T3",
+      "survival_1y": 49.6,
+      "survival_3y": 12.2,
+      "name": "000070"
+    },
+    "000080": {
+      "hazard_pct": 0.7611,
+      "tier": "T3",
+      "survival_1y": 23.9,
+      "survival_3y": 1.4,
+      "name": "하이트진로"
+    },
+    "000100": {
+      "hazard_pct": 0.4696,
+      "tier": "T3",
+      "survival_1y": 53.0,
+      "survival_3y": 14.9,
+      "name": "000100"
+    },
+    "000110": {
+      "hazard_pct": 0.0672,
+      "tier": "T3",
+      "survival_1y": 93.3,
+      "survival_3y": 81.2,
+      "name": "000110"
+    },
+    "000120": {
+      "hazard_pct": 0.1142,
+      "tier": "T3",
+      "survival_1y": 88.6,
+      "survival_3y": 69.5,
+      "name": "CJ대한통운"
+    },
+    "000140": {
+      "hazard_pct": 0.0745,
+      "tier": "T3",
+      "survival_1y": 92.6,
+      "survival_3y": 79.3,
+      "name": "000140"
+    },
+    "000150": {
+      "hazard_pct": 0.2648,
+      "tier": "T3",
+      "survival_1y": 73.5,
+      "survival_3y": 39.7,
+      "name": "000150"
+    },
+    "000210": {
+      "hazard_pct": 0.1482,
+      "tier": "T3",
+      "survival_1y": 85.2,
+      "survival_3y": 61.8,
+      "name": "000210"
+    },
+    "000220": {
+      "hazard_pct": 0.8543,
+      "tier": "T3",
+      "survival_1y": 14.6,
+      "survival_3y": 0.3,
+      "name": "000220"
+    },
+    "000240": {
+      "hazard_pct": 0.5271,
+      "tier": "T3",
+      "survival_1y": 47.3,
+      "survival_3y": 10.6,
+      "name": "000240"
+    },
+    "000250": {
+      "hazard_pct": 0.6462,
+      "tier": "T3",
+      "survival_1y": 35.4,
+      "survival_3y": 4.4,
+      "name": "000250"
+    },
+    "000270": {
+      "hazard_pct": 0.2008,
+      "tier": "T3",
+      "survival_1y": 79.9,
+      "survival_3y": 51.0,
+      "name": "기아"
+    },
+    "000320": {
+      "hazard_pct": 0.0162,
+      "tier": "T3",
+      "survival_1y": 98.4,
+      "survival_3y": 95.2,
+      "name": "000320"
+    },
+    "000370": {
+      "hazard_pct": 0.1897,
+      "tier": "T2",
+      "survival_1y": 81.0,
+      "survival_3y": 53.2,
+      "name": "한화손해보험"
+    },
+    "000390": {
+      "hazard_pct": 0.5215,
+      "tier": "T3",
+      "survival_1y": 47.9,
+      "survival_3y": 11.0,
+      "name": "000390"
+    },
+    "000430": {
+      "hazard_pct": 0.6494,
+      "tier": "T3",
+      "survival_1y": 35.1,
+      "survival_3y": 4.3,
+      "name": "000430"
+    },
+    "000440": {
+      "hazard_pct": 0.0194,
+      "tier": "T3",
+      "survival_1y": 98.1,
+      "survival_3y": 94.3,
+      "name": "000440"
+    },
+    "000480": {
+      "hazard_pct": 0.5206,
+      "tier": "T3",
+      "survival_1y": 47.9,
+      "survival_3y": 11.0,
+      "name": "000480"
+    },
+    "000590": {
+      "hazard_pct": 0.2502,
+      "tier": "T3",
+      "survival_1y": 75.0,
+      "survival_3y": 42.2,
+      "name": "000590"
+    },
+    "000640": {
+      "hazard_pct": 0.2818,
+      "tier": "T3",
+      "survival_1y": 71.8,
+      "survival_3y": 37.0,
+      "name": "000640"
+    },
+    "000660": {
+      "hazard_pct": 0.6753,
+      "tier": "T3",
+      "survival_1y": 32.5,
+      "survival_3y": 3.4,
+      "name": "000660"
+    },
+    "000670": {
+      "hazard_pct": 0.919,
+      "tier": "T3",
+      "survival_1y": 8.1,
+      "survival_3y": 0.1,
+      "name": "000670"
+    },
+    "000700": {
+      "hazard_pct": 0.0259,
+      "tier": "T3",
+      "survival_1y": 97.4,
+      "survival_3y": 92.4,
+      "name": "000700"
+    },
+    "000720": {
+      "hazard_pct": 0.3781,
+      "tier": "T3",
+      "survival_1y": 62.2,
+      "survival_3y": 24.0,
+      "name": "000720"
+    },
+    "000810": {
+      "hazard_pct": 0.1741,
+      "tier": "T3",
+      "survival_1y": 82.6,
+      "survival_3y": 56.3,
+      "name": "삼성화재"
+    },
+    "000850": {
+      "hazard_pct": 0.5522,
+      "tier": "T3",
+      "survival_1y": 44.8,
+      "survival_3y": 9.0,
+      "name": "000850"
+    },
+    "000860": {
+      "hazard_pct": 0.8704,
+      "tier": "T3",
+      "survival_1y": 13.0,
+      "survival_3y": 0.2,
+      "name": "000860"
+    },
+    "000880": {
+      "hazard_pct": 0.0834,
+      "tier": "T3",
+      "survival_1y": 91.7,
+      "survival_3y": 77.0,
+      "name": "000880"
+    },
+    "000910": {
+      "hazard_pct": 0.3474,
+      "tier": "T3",
+      "survival_1y": 65.3,
+      "survival_3y": 27.8,
+      "name": "000910"
+    },
+    "000950": {
+      "hazard_pct": 0.0486,
+      "tier": "T3",
+      "survival_1y": 95.1,
+      "survival_3y": 86.1,
+      "name": "000950"
+    },
+    "000970": {
+      "hazard_pct": 0.8211,
+      "tier": "T3",
+      "survival_1y": 17.9,
+      "survival_3y": 0.6,
+      "name": "000970"
+    },
+    "000990": {
+      "hazard_pct": 0.1595,
+      "tier": "T3",
+      "survival_1y": 84.0,
+      "survival_3y": 59.4,
+      "name": "DB하이텍"
+    },
+    "001040": {
+      "hazard_pct": 0.1968,
+      "tier": "T3",
+      "survival_1y": 80.3,
+      "survival_3y": 51.8,
+      "name": "CJ"
+    },
+    "001060": {
+      "hazard_pct": 0.6413,
+      "tier": "T3",
+      "survival_1y": 35.9,
+      "survival_3y": 4.6,
+      "name": "001060"
+    },
+    "001120": {
+      "hazard_pct": 0.1401,
+      "tier": "T3",
+      "survival_1y": 86.0,
+      "survival_3y": 63.6,
+      "name": "001120"
+    },
+    "001130": {
+      "hazard_pct": 0.5069,
+      "tier": "T3",
+      "survival_1y": 49.3,
+      "survival_3y": 12.0,
+      "name": "001130"
+    },
+    "001200": {
+      "hazard_pct": 0.0826,
+      "tier": "T3",
+      "survival_1y": 91.7,
+      "survival_3y": 77.2,
+      "name": "001200"
+    },
+    "001230": {
+      "hazard_pct": 0.8049,
+      "tier": "T3",
+      "survival_1y": 19.5,
+      "survival_3y": 0.7,
+      "name": "001230"
+    },
+    "001270": {
+      "hazard_pct": 0.2753,
+      "tier": "T3",
+      "survival_1y": 72.5,
+      "survival_3y": 38.1,
+      "name": "001270"
+    },
+    "001390": {
+      "hazard_pct": 0.2826,
+      "tier": "T3",
+      "survival_1y": 71.7,
+      "survival_3y": 36.9,
+      "name": "001390"
+    },
+    "001420": {
+      "hazard_pct": 0.0591,
+      "tier": "T3",
+      "survival_1y": 94.1,
+      "survival_3y": 83.3,
+      "name": "001420"
+    },
+    "001430": {
+      "hazard_pct": 0.532,
+      "tier": "T3",
+      "survival_1y": 46.8,
+      "survival_3y": 10.3,
+      "name": "001430"
+    },
+    "001440": {
+      "hazard_pct": 0.3887,
+      "tier": "T3",
+      "survival_1y": 61.1,
+      "survival_3y": 22.8,
+      "name": "001440"
+    },
+    "001450": {
+      "hazard_pct": 0.0526,
+      "tier": "T3",
+      "survival_1y": 94.7,
+      "survival_3y": 85.0,
+      "name": "001450"
+    },
+    "001460": {
+      "hazard_pct": 0.732,
+      "tier": "T3",
+      "survival_1y": 26.8,
+      "survival_3y": 1.9,
+      "name": "001460"
+    },
+    "001500": {
+      "hazard_pct": 0.2575,
+      "tier": "T3",
+      "survival_1y": 74.3,
+      "survival_3y": 40.9,
+      "name": "001500"
+    },
+    "001510": {
+      "hazard_pct": 0.0842,
+      "tier": "T3",
+      "survival_1y": 91.6,
+      "survival_3y": 76.8,
+      "name": "001510"
+    },
+    "001530": {
+      "hazard_pct": 0.7409,
+      "tier": "T3",
+      "survival_1y": 25.9,
+      "survival_3y": 1.7,
+      "name": "001530"
+    },
+    "001630": {
+      "hazard_pct": 0.6737,
+      "tier": "T3",
+      "survival_1y": 32.6,
+      "survival_3y": 3.5,
+      "name": "001630"
+    },
+    "001680": {
+      "hazard_pct": 0.3603,
+      "tier": "T3",
+      "survival_1y": 64.0,
+      "survival_3y": 26.2,
+      "name": "001680"
+    },
+    "001720": {
+      "hazard_pct": 0.0777,
+      "tier": "T3",
+      "survival_1y": 92.2,
+      "survival_3y": 78.4,
+      "name": "001720"
+    },
+    "001740": {
+      "hazard_pct": 0.4324,
+      "tier": "T3",
+      "survival_1y": 56.8,
+      "survival_3y": 18.3,
+      "name": "001740"
+    },
+    "001750": {
+      "hazard_pct": 0.1126,
+      "tier": "T3",
+      "survival_1y": 88.7,
+      "survival_3y": 69.9,
+      "name": "001750"
+    },
+    "001770": {
+      "hazard_pct": 0.8818,
+      "tier": "T3",
+      "survival_1y": 11.8,
+      "survival_3y": 0.2,
+      "name": "001770"
+    },
+    "001790": {
+      "hazard_pct": 0.2664,
+      "tier": "T3",
+      "survival_1y": 73.4,
+      "survival_3y": 39.5,
+      "name": "001790"
+    },
+    "001800": {
+      "hazard_pct": 0.1951,
+      "tier": "T3",
+      "survival_1y": 80.5,
+      "survival_3y": 52.1,
+      "name": "001800"
+    },
+    "001810": {
+      "hazard_pct": 0.3879,
+      "tier": "T3",
+      "survival_1y": 61.2,
+      "survival_3y": 22.9,
+      "name": "001810"
+    },
+    "001820": {
+      "hazard_pct": 0.9263,
+      "tier": "T3",
+      "survival_1y": 7.4,
+      "survival_3y": 0.0,
+      "name": "001820"
+    },
+    "001940": {
+      "hazard_pct": 0.0332,
+      "tier": "T3",
+      "survival_1y": 96.7,
+      "survival_3y": 90.4,
+      "name": "001940"
+    },
+    "002020": {
+      "hazard_pct": 0.2478,
+      "tier": "T3",
+      "survival_1y": 75.2,
+      "survival_3y": 42.6,
+      "name": "002020"
+    },
+    "002030": {
+      "hazard_pct": 0.7911,
+      "tier": "T3",
+      "survival_1y": 20.9,
+      "survival_3y": 0.9,
+      "name": "002030"
+    },
+    "002100": {
+      "hazard_pct": 0.587,
+      "tier": "T3",
+      "survival_1y": 41.3,
+      "survival_3y": 7.0,
+      "name": "002100"
+    },
+    "002140": {
+      "hazard_pct": 0.1182,
+      "tier": "T3",
+      "survival_1y": 88.2,
+      "survival_3y": 68.6,
+      "name": "002140"
+    },
+    "002150": {
+      "hazard_pct": 0.5482,
+      "tier": "T3",
+      "survival_1y": 45.2,
+      "survival_3y": 9.2,
+      "name": "002150"
+    },
+    "002170": {
+      "hazard_pct": 0.0413,
+      "tier": "T3",
+      "survival_1y": 95.9,
+      "survival_3y": 88.1,
+      "name": "002170"
+    },
+    "002200": {
+      "hazard_pct": 0.4615,
+      "tier": "T3",
+      "survival_1y": 53.8,
+      "survival_3y": 15.6,
+      "name": "002200"
+    },
+    "002220": {
+      "hazard_pct": 0.3895,
+      "tier": "T3",
+      "survival_1y": 61.1,
+      "survival_3y": 22.8,
+      "name": "002220"
+    },
+    "002230": {
+      "hazard_pct": 0.8688,
+      "tier": "T3",
+      "survival_1y": 13.1,
+      "survival_3y": 0.2,
+      "name": "002230"
+    },
+    "002290": {
+      "hazard_pct": 0.7968,
+      "tier": "T3",
+      "survival_1y": 20.3,
+      "survival_3y": 0.8,
+      "name": "002290"
+    },
+    "002310": {
+      "hazard_pct": 0.5587,
+      "tier": "T3",
+      "survival_1y": 44.1,
+      "survival_3y": 8.6,
+      "name": "002310"
+    },
+    "002320": {
+      "hazard_pct": 0.085,
+      "tier": "T3",
+      "survival_1y": 91.5,
+      "survival_3y": 76.6,
+      "name": "002320"
+    },
+    "002350": {
+      "hazard_pct": 0.2599,
+      "tier": "T3",
+      "survival_1y": 74.0,
+      "survival_3y": 40.5,
+      "name": "002350"
+    },
+    "002380": {
+      "hazard_pct": 0.2567,
+      "tier": "T3",
+      "survival_1y": 74.3,
+      "survival_3y": 41.1,
+      "name": "KCC"
+    },
+    "002390": {
+      "hazard_pct": 0.1903,
+      "tier": "T3",
+      "survival_1y": 81.0,
+      "survival_3y": 53.1,
+      "name": "002390"
+    },
+    "002460": {
+      "hazard_pct": 0.4105,
+      "tier": "T3",
+      "survival_1y": 58.9,
+      "survival_3y": 20.5,
+      "name": "002460"
+    },
+    "002620": {
+      "hazard_pct": 0.5441,
+      "tier": "T3",
+      "survival_1y": 45.6,
+      "survival_3y": 9.5,
+      "name": "002620"
+    },
+    "002700": {
+      "hazard_pct": 0.7636,
+      "tier": "T3",
+      "survival_1y": 23.6,
+      "survival_3y": 1.3,
+      "name": "002700"
+    },
+    "002710": {
+      "hazard_pct": 0.4186,
+      "tier": "T3",
+      "survival_1y": 58.1,
+      "survival_3y": 19.7,
+      "name": "002710"
+    },
+    "002790": {
+      "hazard_pct": 0.1061,
+      "tier": "T3",
+      "survival_1y": 89.4,
+      "survival_3y": 71.4,
+      "name": "002790"
+    },
+    "003090": {
+      "hazard_pct": 0.2704,
+      "tier": "T3",
+      "survival_1y": 73.0,
+      "survival_3y": 38.8,
+      "name": "003090"
+    },
+    "003300": {
+      "hazard_pct": 0.1036,
+      "tier": "T3",
+      "survival_1y": 89.6,
+      "survival_3y": 72.0,
+      "name": "003300"
+    },
+    "003410": {
+      "hazard_pct": 0.3028,
+      "tier": "T3",
+      "survival_1y": 69.7,
+      "survival_3y": 33.9,
+      "name": "003410"
+    },
+    "003490": {
+      "hazard_pct": 0.2194,
+      "tier": "T3",
+      "survival_1y": 78.1,
+      "survival_3y": 47.6,
+      "name": "003490"
+    },
+    "003540": {
+      "hazard_pct": 0.0551,
+      "tier": "T3",
+      "survival_1y": 94.5,
+      "survival_3y": 84.4,
+      "name": "003540"
+    },
+    "003550": {
+      "hazard_pct": 0.1628,
+      "tier": "T3",
+      "survival_1y": 83.7,
+      "survival_3y": 58.7,
+      "name": "LG"
+    },
+    "003690": {
+      "hazard_pct": 0.0081,
+      "tier": "T3",
+      "survival_1y": 99.2,
+      "survival_3y": 97.6,
+      "name": "코리안리"
+    },
+    "004000": {
+      "hazard_pct": 0.1846,
+      "tier": "T3",
+      "survival_1y": 81.5,
+      "survival_3y": 54.2,
+      "name": "004000"
+    },
+    "004020": {
+      "hazard_pct": 0.7733,
+      "tier": "T3",
+      "survival_1y": 22.7,
+      "survival_3y": 1.2,
+      "name": "현대제철"
+    },
+    "004170": {
+      "hazard_pct": 0.404,
+      "tier": "T3",
+      "survival_1y": 59.6,
+      "survival_3y": 21.2,
+      "name": "신세계"
+    },
+    "004370": {
+      "hazard_pct": 0.2381,
+      "tier": "T3",
+      "survival_1y": 76.2,
+      "survival_3y": 44.2,
+      "name": "004370"
+    },
+    "004800": {
+      "hazard_pct": 0.2146,
+      "tier": "T3",
+      "survival_1y": 78.5,
+      "survival_3y": 48.5,
+      "name": "효성"
+    },
+    "004990": {
+      "hazard_pct": 0.5457,
+      "tier": "T3",
+      "survival_1y": 45.4,
+      "survival_3y": 9.4,
+      "name": "004990"
+    },
+    "005380": {
+      "hazard_pct": 0.3757,
+      "tier": "T3",
+      "survival_1y": 62.4,
+      "survival_3y": 24.3,
+      "name": "현대차"
+    },
+    "005490": {
+      "hazard_pct": 0.7717,
+      "tier": "T3",
+      "survival_1y": 22.8,
+      "survival_3y": 1.2,
+      "name": "POSCO홀딩스"
+    },
+    "005830": {
+      "hazard_pct": 0.251,
+      "tier": "T3",
+      "survival_1y": 74.9,
+      "survival_3y": 42.0,
+      "name": "DB손해보험"
+    },
+    "005850": {
+      "hazard_pct": 0.8777,
+      "tier": "T3",
+      "survival_1y": 12.2,
+      "survival_3y": 0.2,
+      "name": "005850"
+    },
+    "005930": {
+      "hazard_pct": 0.5717,
+      "tier": "T3",
+      "survival_1y": 42.8,
+      "survival_3y": 7.9,
+      "name": "005930"
+    },
+    "005940": {
+      "hazard_pct": 0.0688,
+      "tier": "T3",
+      "survival_1y": 93.1,
+      "survival_3y": 80.7,
+      "name": "005940"
+    },
+    "006260": {
+      "hazard_pct": 0.1174,
+      "tier": "T3",
+      "survival_1y": 88.3,
+      "survival_3y": 68.8,
+      "name": "006260"
+    },
+    "006280": {
+      "hazard_pct": 0.5668,
+      "tier": "T3",
+      "survival_1y": 43.3,
+      "survival_3y": 8.1,
+      "name": "006280"
+    },
+    "006360": {
+      "hazard_pct": 0.2389,
+      "tier": "T3",
+      "survival_1y": 76.1,
+      "survival_3y": 44.1,
+      "name": "006360"
+    },
+    "006400": {
+      "hazard_pct": 0.5676,
+      "tier": "T3",
+      "survival_1y": 43.2,
+      "survival_3y": 8.1,
+      "name": "006400"
+    },
+    "006660": {
+      "hazard_pct": 0.0316,
+      "tier": "T3",
+      "survival_1y": 96.8,
+      "survival_3y": 90.8,
+      "name": "006660"
+    },
+    "006800": {
+      "hazard_pct": 0.0057,
+      "tier": "T3",
+      "survival_1y": 99.4,
+      "survival_3y": 98.3,
+      "name": "006800"
+    },
+    "007070": {
+      "hazard_pct": 0.4688,
+      "tier": "T3",
+      "survival_1y": 53.1,
+      "survival_3y": 15.0,
+      "name": "007070"
+    },
+    "007310": {
+      "hazard_pct": 0.549,
+      "tier": "T3",
+      "survival_1y": 45.1,
+      "survival_3y": 9.2,
+      "name": "007310"
+    },
+    "008060": {
+      "hazard_pct": 0.2696,
+      "tier": "T3",
+      "survival_1y": 73.0,
+      "survival_3y": 39.0,
+      "name": "008060"
+    },
+    "008770": {
+      "hazard_pct": 0.23,
+      "tier": "T3",
+      "survival_1y": 77.0,
+      "survival_3y": 45.7,
+      "name": "008770"
+    },
+    "009150": {
+      "hazard_pct": 0.0154,
+      "tier": "T3",
+      "survival_1y": 98.5,
+      "survival_3y": 95.5,
+      "name": "삼성전기"
+    },
+    "009240": {
+      "hazard_pct": 0.3296,
+      "tier": "T3",
+      "survival_1y": 67.0,
+      "survival_3y": 30.1,
+      "name": "009240"
+    },
+    "009540": {
+      "hazard_pct": 0.5433,
+      "tier": "T3",
+      "survival_1y": 45.7,
+      "survival_3y": 9.5,
+      "name": "009540"
+    },
+    "009830": {
+      "hazard_pct": 0.1093,
+      "tier": "T3",
+      "survival_1y": 89.1,
+      "survival_3y": 70.7,
+      "name": "009830"
+    },
+    "010060": {
+      "hazard_pct": 0.7749,
+      "tier": "T3",
+      "survival_1y": 22.5,
+      "survival_3y": 1.1,
+      "name": "010060"
+    },
+    "010120": {
+      "hazard_pct": 0.1976,
+      "tier": "T3",
+      "survival_1y": 80.2,
+      "survival_3y": 51.7,
+      "name": "010120"
+    },
+    "010140": {
+      "hazard_pct": 0.2073,
+      "tier": "T3",
+      "survival_1y": 79.3,
+      "survival_3y": 49.8,
+      "name": "010140"
+    },
+    "010950": {
+      "hazard_pct": 0.183,
+      "tier": "T3",
+      "survival_1y": 81.7,
+      "survival_3y": 54.5,
+      "name": "010950"
+    },
+    "011070": {
+      "hazard_pct": 0.3789,
+      "tier": "T3",
+      "survival_1y": 62.1,
+      "survival_3y": 24.0,
+      "name": "011070"
+    },
+    "011170": {
+      "hazard_pct": 0.7425,
+      "tier": "T3",
+      "survival_1y": 25.7,
+      "survival_3y": 1.7,
+      "name": "011170"
+    },
+    "011200": {
+      "hazard_pct": 0.8842,
+      "tier": "T3",
+      "survival_1y": 11.6,
+      "survival_3y": 0.2,
+      "name": "011200"
+    },
+    "011210": {
+      "hazard_pct": 0.1417,
+      "tier": "T3",
+      "survival_1y": 85.8,
+      "survival_3y": 63.2,
+      "name": "011210"
+    },
+    "011780": {
+      "hazard_pct": 0.2348,
+      "tier": "T3",
+      "survival_1y": 76.5,
+      "survival_3y": 44.8,
+      "name": "011780"
+    },
+    "012330": {
+      "hazard_pct": 0.0761,
+      "tier": "T3",
+      "survival_1y": 92.4,
+      "survival_3y": 78.9,
+      "name": "현대모비스"
+    },
+    "014680": {
+      "hazard_pct": 0.9652,
+      "tier": "T3",
+      "survival_1y": 3.5,
+      "survival_3y": 0.0,
+      "name": "014680"
+    },
+    "015760": {
+      "hazard_pct": 0.1077,
+      "tier": "T3",
+      "survival_1y": 89.2,
+      "survival_3y": 71.0,
+      "name": "한국전력"
+    },
+    "016360": {
+      "hazard_pct": 0.0008,
+      "tier": "T3",
+      "survival_1y": 99.9,
+      "survival_3y": 99.8,
+      "name": "삼성증권"
+    },
+    "016610": {
+      "hazard_pct": 0.0453,
+      "tier": "T3",
+      "survival_1y": 95.5,
+      "survival_3y": 87.0,
+      "name": "016610"
+    },
+    "017670": {
+      "hazard_pct": 0.4883,
+      "tier": "T3",
+      "survival_1y": 51.2,
+      "survival_3y": 13.4,
+      "name": "017670"
+    },
+    "018260": {
+      "hazard_pct": 0.9271,
+      "tier": "T3",
+      "survival_1y": 7.3,
+      "survival_3y": 0.0,
+      "name": "삼성에스디에스"
+    },
+    "020560": {
+      "hazard_pct": 0.1166,
+      "tier": "T3",
+      "survival_1y": 88.3,
+      "survival_3y": 68.9,
+      "name": "020560"
+    },
+    "021240": {
+      "hazard_pct": 0.3117,
+      "tier": "T3",
+      "survival_1y": 68.8,
+      "survival_3y": 32.6,
+      "name": "코웨이"
+    },
+    "022100": {
+      "hazard_pct": 0.7506,
+      "tier": "T3",
+      "survival_1y": 24.9,
+      "survival_3y": 1.6,
+      "name": "022100"
+    },
+    "023530": {
+      "hazard_pct": 0.2761,
+      "tier": "T3",
+      "survival_1y": 72.4,
+      "survival_3y": 37.9,
+      "name": "023530"
+    },
+    "024110": {
+      "hazard_pct": 0.0437,
+      "tier": "T3",
+      "survival_1y": 95.6,
+      "survival_3y": 87.4,
+      "name": "024110"
+    },
+    "024800": {
+      "hazard_pct": 0.0818,
+      "tier": "T3",
+      "survival_1y": 91.8,
+      "survival_3y": 77.4,
+      "name": "메리츠화재"
+    },
+    "026960": {
+      "hazard_pct": 0.1263,
+      "tier": "T3",
+      "survival_1y": 87.4,
+      "survival_3y": 66.7,
+      "name": "동서"
+    },
+    "027740": {
+      "hazard_pct": 0.1215,
+      "tier": "T3",
+      "survival_1y": 87.9,
+      "survival_3y": 67.8,
+      "name": "027740"
+    },
+    "028050": {
+      "hazard_pct": 0.4211,
+      "tier": "T3",
+      "survival_1y": 57.9,
+      "survival_3y": 19.4,
+      "name": "028050"
+    },
+    "028260": {
+      "hazard_pct": 0.9166,
+      "tier": "T3",
+      "survival_1y": 8.3,
+      "survival_3y": 0.1,
+      "name": "삼성물산"
+    },
+    "030000": {
+      "hazard_pct": 0.3668,
+      "tier": "T3",
+      "survival_1y": 63.3,
+      "survival_3y": 25.4,
+      "name": "030000"
+    },
+    "030200": {
+      "hazard_pct": 0.6907,
+      "tier": "T3",
+      "survival_1y": 30.9,
+      "survival_3y": 3.0,
+      "name": "KT"
+    },
+    "030610": {
+      "hazard_pct": 0.1919,
+      "tier": "T3",
+      "survival_1y": 80.8,
+      "survival_3y": 52.8,
+      "name": "030610"
+    },
+    "032350": {
+      "hazard_pct": 0.1652,
+      "tier": "T3",
+      "survival_1y": 83.5,
+      "survival_3y": 58.2,
+      "name": "032350"
+    },
+    "032640": {
+      "hazard_pct": 0.1466,
+      "tier": "T3",
+      "survival_1y": 85.3,
+      "survival_3y": 62.2,
+      "name": "LG유플러스"
+    },
+    "032830": {
+      "hazard_pct": 0.1255,
+      "tier": "T3",
+      "survival_1y": 87.4,
+      "survival_3y": 66.9,
+      "name": "032830"
+    },
+    "033780": {
+      "hazard_pct": 0.5352,
+      "tier": "T3",
+      "survival_1y": 46.5,
+      "survival_3y": 10.0,
+      "name": "033780"
+    },
+    "034020": {
+      "hazard_pct": 0.4275,
+      "tier": "T3",
+      "survival_1y": 57.2,
+      "survival_3y": 18.8,
+      "name": "034020"
+    },
+    "034120": {
+      "hazard_pct": 0.3717,
+      "tier": "T3",
+      "survival_1y": 62.8,
+      "survival_3y": 24.8,
+      "name": "034120"
+    },
+    "034220": {
+      "hazard_pct": 0.4146,
+      "tier": "T3",
+      "survival_1y": 58.5,
+      "survival_3y": 20.1,
+      "name": "034220"
+    },
+    "034730": {
+      "hazard_pct": 0.1709,
+      "tier": "T3",
+      "survival_1y": 82.9,
+      "survival_3y": 57.0,
+      "name": "034730"
+    },
+    "035250": {
+      "hazard_pct": 0.5879,
+      "tier": "T3",
+      "survival_1y": 41.2,
+      "survival_3y": 7.0,
+      "name": "035250"
+    },
+    "035420": {
+      "hazard_pct": 0.1781,
+      "tier": "T3",
+      "survival_1y": 82.2,
+      "survival_3y": 55.5,
+      "name": "035420"
+    },
+    "035720": {
+      "hazard_pct": 0.4939,
+      "tier": "T3",
+      "survival_1y": 50.6,
+      "survival_3y": 13.0,
+      "name": "035720"
+    },
+    "035900": {
+      "hazard_pct": 0.1279,
+      "tier": "T3",
+      "survival_1y": 87.2,
+      "survival_3y": 66.3,
+      "name": "035900"
+    },
+    "036460": {
+      "hazard_pct": 0.3061,
+      "tier": "T3",
+      "survival_1y": 69.4,
+      "survival_3y": 33.4,
+      "name": "036460"
+    },
+    "036570": {
+      "hazard_pct": 0.8761,
+      "tier": "T3",
+      "survival_1y": 12.4,
+      "survival_3y": 0.2,
+      "name": "036570"
+    },
+    "039130": {
+      "hazard_pct": 0.2397,
+      "tier": "T3",
+      "survival_1y": 76.0,
+      "survival_3y": 44.0,
+      "name": "039130"
+    },
+    "039490": {
+      "hazard_pct": 0.0478,
+      "tier": "T3",
+      "survival_1y": 95.2,
+      "survival_3y": 86.3,
+      "name": "039490"
+    },
+    "041510": {
+      "hazard_pct": 0.4818,
+      "tier": "T3",
+      "survival_1y": 51.8,
+      "survival_3y": 13.9,
+      "name": "041510"
+    },
+    "042660": {
+      "hazard_pct": 0.2219,
+      "tier": "T3",
+      "survival_1y": 77.8,
+      "survival_3y": 47.1,
+      "name": "042660"
+    },
+    "042670": {
+      "hazard_pct": 0.5628,
+      "tier": "T3",
+      "survival_1y": 43.7,
+      "survival_3y": 8.4,
+      "name": "042670"
+    },
+    "042700": {
+      "hazard_pct": 0.9223,
+      "tier": "T3",
+      "survival_1y": 7.8,
+      "survival_3y": 0.0,
+      "name": "042700"
+    },
+    "047040": {
+      "hazard_pct": 0.0243,
+      "tier": "T3",
+      "survival_1y": 97.6,
+      "survival_3y": 92.9,
+      "name": "047040"
+    },
+    "047050": {
+      "hazard_pct": 0.6267,
+      "tier": "T3",
+      "survival_1y": 37.3,
+      "survival_3y": 5.2,
+      "name": "포스코인터내셔널"
+    },
+    "047810": {
+      "hazard_pct": 0.0753,
+      "tier": "T3",
+      "survival_1y": 92.5,
+      "survival_3y": 79.1,
+      "name": "047810"
+    },
+    "051900": {
+      "hazard_pct": 0.3846,
+      "tier": "T3",
+      "survival_1y": 61.5,
+      "survival_3y": 23.3,
+      "name": "051900"
+    },
+    "051910": {
+      "hazard_pct": 0.3822,
+      "tier": "T3",
+      "survival_1y": 61.8,
+      "survival_3y": 23.6,
+      "name": "051910"
+    },
+    "055550": {
+      "hazard_pct": 0.2267,
+      "tier": "T3",
+      "survival_1y": 77.3,
+      "survival_3y": 46.2,
+      "name": "신한지주"
+    },
+    "064350": {
+      "hazard_pct": 0.1992,
+      "tier": "T3",
+      "survival_1y": 80.1,
+      "survival_3y": 51.4,
+      "name": "064350"
+    },
+    "064760": {
+      "hazard_pct": 0.0121,
+      "tier": "T3",
+      "survival_1y": 98.8,
+      "survival_3y": 96.4,
+      "name": "064760"
+    },
+    "066570": {
+      "hazard_pct": 0.5984,
+      "tier": "T3",
+      "survival_1y": 40.2,
+      "survival_3y": 6.5,
+      "name": "LG전자"
+    },
+    "066970": {
+      "hazard_pct": 0.3263,
+      "tier": "T3",
+      "survival_1y": 67.4,
+      "survival_3y": 30.6,
+      "name": "066970"
+    },
+    "068270": {
+      "hazard_pct": 0.2802,
+      "tier": "T3",
+      "survival_1y": 72.0,
+      "survival_3y": 37.3,
+      "name": "068270"
+    },
+    "069960": {
+      "hazard_pct": 0.5911,
+      "tier": "T3",
+      "survival_1y": 40.9,
+      "survival_3y": 6.8,
+      "name": "069960"
+    },
+    "071050": {
+      "hazard_pct": 0.047,
+      "tier": "T3",
+      "survival_1y": 95.3,
+      "survival_3y": 86.6,
+      "name": "한국금융지주"
+    },
+    "073240": {
+      "hazard_pct": 0.468,
+      "tier": "T3",
+      "survival_1y": 53.2,
+      "survival_3y": 15.1,
+      "name": "073240"
+    },
+    "078930": {
+      "hazard_pct": 0.6243,
+      "tier": "T3",
+      "survival_1y": 37.6,
+      "survival_3y": 5.3,
+      "name": "GS"
+    },
+    "079430": {
+      "hazard_pct": 0.6154,
+      "tier": "T3",
+      "survival_1y": 38.5,
+      "survival_3y": 5.7,
+      "name": "079430"
+    },
+    "082640": {
+      "hazard_pct": 0.4381,
+      "tier": "T3",
+      "survival_1y": 56.2,
+      "survival_3y": 17.7,
+      "name": "082640"
+    },
+    "082740": {
+      "hazard_pct": 0.1198,
+      "tier": "T3",
+      "survival_1y": 88.0,
+      "survival_3y": 68.2,
+      "name": "082740"
+    },
+    "086280": {
+      "hazard_pct": 0.268,
+      "tier": "T3",
+      "survival_1y": 73.2,
+      "survival_3y": 39.2,
+      "name": "086280"
+    },
+    "086520": {
+      "hazard_pct": 0.2437,
+      "tier": "T3",
+      "survival_1y": 75.6,
+      "survival_3y": 43.3,
+      "name": "086520"
+    },
+    "086790": {
+      "hazard_pct": 0.1506,
+      "tier": "T3",
+      "survival_1y": 84.9,
+      "survival_3y": 61.3,
+      "name": "하나금융지주"
+    },
+    "088350": {
+      "hazard_pct": 0.0494,
+      "tier": "T3",
+      "survival_1y": 95.1,
+      "survival_3y": 85.9,
+      "name": "088350"
+    },
+    "090430": {
+      "hazard_pct": 0.434,
+      "tier": "T3",
+      "survival_1y": 56.6,
+      "survival_3y": 18.1,
+      "name": "090430"
+    },
+    "092790": {
+      "hazard_pct": 0.5254,
+      "tier": "T1",
+      "survival_1y": 47.5,
+      "survival_3y": 10.7,
+      "name": "넥센타이어"
+    },
+    "093370": {
+      "hazard_pct": 0.6713,
+      "tier": "T3",
+      "survival_1y": 32.9,
+      "survival_3y": 3.6,
+      "name": "093370"
+    },
+    "096760": {
+      "hazard_pct": 0.8105,
+      "tier": "T3",
+      "survival_1y": 18.9,
+      "survival_3y": 0.7,
+      "name": "096760"
+    },
+    "096770": {
+      "hazard_pct": 0.2559,
+      "tier": "T3",
+      "survival_1y": 74.4,
+      "survival_3y": 41.2,
+      "name": "096770"
+    },
+    "097950": {
+      "hazard_pct": 0.1749,
+      "tier": "T3",
+      "survival_1y": 82.5,
+      "survival_3y": 56.2,
+      "name": "097950"
+    },
+    "103140": {
+      "hazard_pct": 0.1449,
+      "tier": "T3",
+      "survival_1y": 85.5,
+      "survival_3y": 62.5,
+      "name": "103140"
+    },
+    "105560": {
+      "hazard_pct": 0.0097,
+      "tier": "T3",
+      "survival_1y": 99.0,
+      "survival_3y": 97.1,
+      "name": "KB금융"
+    },
+    "112040": {
+      "hazard_pct": 0.4623,
+      "tier": "T3",
+      "survival_1y": 53.8,
+      "survival_3y": 15.5,
+      "name": "112040"
+    },
+    "114090": {
+      "hazard_pct": 0.9498,
+      "tier": "T3",
+      "survival_1y": 5.0,
+      "survival_3y": 0.0,
+      "name": "GKL"
+    },
+    "120110": {
+      "hazard_pct": 0.604,
+      "tier": "T3",
+      "survival_1y": 39.6,
+      "survival_3y": 6.2,
+      "name": "120110"
+    },
+    "122870": {
+      "hazard_pct": 0.5126,
+      "tier": "T3",
+      "survival_1y": 48.7,
+      "survival_3y": 11.6,
+      "name": "122870"
+    },
+    "138930": {
+      "hazard_pct": 0.0939,
+      "tier": "T3",
+      "survival_1y": 90.6,
+      "survival_3y": 74.4,
+      "name": "BNK금융지주"
+    },
+    "139130": {
+      "hazard_pct": 0.0785,
+      "tier": "T3",
+      "survival_1y": 92.1,
+      "survival_3y": 78.2,
+      "name": "DGB금융지주"
+    },
+    "139480": {
+      "hazard_pct": 0.2202,
+      "tier": "T3",
+      "survival_1y": 78.0,
+      "survival_3y": 47.4,
+      "name": "139480"
+    },
+    "145720": {
+      "hazard_pct": 0.0089,
+      "tier": "T3",
+      "survival_1y": 99.1,
+      "survival_3y": 97.4,
+      "name": "145720"
+    },
+    "161390": {
+      "hazard_pct": 0.6551,
+      "tier": "T3",
+      "survival_1y": 34.5,
+      "survival_3y": 4.1,
+      "name": "한국타이어앤테크"
+    },
+    "175330": {
+      "hazard_pct": 0.0737,
+      "tier": "T3",
+      "survival_1y": 92.6,
+      "survival_3y": 79.5,
+      "name": "JB금융지주"
+    },
+    "180640": {
+      "hazard_pct": 0.5312,
+      "tier": "T3",
+      "survival_1y": 46.9,
+      "survival_3y": 10.3,
+      "name": "한진칼"
+    },
+    "196170": {
+      "hazard_pct": 0.4316,
+      "tier": "T3",
+      "survival_1y": 56.8,
+      "survival_3y": 18.4,
+      "name": "196170"
+    },
+    "207940": {
+      "hazard_pct": 0.4551,
+      "tier": "T3",
+      "survival_1y": 54.5,
+      "survival_3y": 16.2,
+      "name": "207940"
+    },
+    "241560": {
+      "hazard_pct": 0.6721,
+      "tier": "T3",
+      "survival_1y": 32.8,
+      "survival_3y": 3.5,
+      "name": "241560"
+    },
+    "247540": {
+      "hazard_pct": 0.332,
+      "tier": "T3",
+      "survival_1y": 66.8,
+      "survival_3y": 29.8,
+      "name": "247540"
+    },
+    "251270": {
+      "hazard_pct": 0.9628,
+      "tier": "T3",
+      "survival_1y": 3.7,
+      "survival_3y": 0.0,
+      "name": "251270"
+    },
+    "259960": {
+      "hazard_pct": 0.9152,
+      "tier": "T2",
+      "survival_1y": 8.5,
+      "survival_3y": 0.1,
+      "name": "259960"
+    },
+    "267250": {
+      "hazard_pct": 0.396,
+      "tier": "T3",
+      "survival_1y": 60.4,
+      "survival_3y": 22.0,
+      "name": "267250"
+    },
+    "271560": {
+      "hazard_pct": 0.5085,
+      "tier": "T3",
+      "survival_1y": 49.1,
+      "survival_3y": 11.9,
+      "name": "오리온"
+    },
+    "280360": {
+      "hazard_pct": 0.3142,
+      "tier": "T3",
+      "survival_1y": 68.6,
+      "survival_3y": 32.3,
+      "name": "280360"
+    },
+    "282330": {
+      "hazard_pct": 0.6818,
+      "tier": "T3",
+      "survival_1y": 31.8,
+      "survival_3y": 3.2,
+      "name": "282330"
+    },
+    "293490": {
+      "hazard_pct": 0.4259,
+      "tier": "T3",
+      "survival_1y": 57.4,
+      "survival_3y": 18.9,
+      "name": "293490"
+    },
+    "294870": {
+      "hazard_pct": 0.4486,
+      "tier": "T3",
+      "survival_1y": 55.1,
+      "survival_3y": 16.8,
+      "name": "294870"
+    },
+    "298050": {
+      "hazard_pct": 0.3077,
+      "tier": "T3",
+      "survival_1y": 69.2,
+      "survival_3y": 33.2,
+      "name": "298050"
+    },
+    "316140": {
+      "hazard_pct": 0.1134,
+      "tier": "T3",
+      "survival_1y": 88.7,
+      "survival_3y": 69.7,
+      "name": "우리금융지주"
+    },
+    "323410": {
+      "hazard_pct": 0.3661,
+      "tier": "T2",
+      "survival_1y": 63.4,
+      "survival_3y": 25.5,
+      "name": "323410"
+    },
+    "328130": {
+      "hazard_pct": 0.8996,
+      "tier": "T2",
+      "survival_1y": 10.0,
+      "survival_3y": 0.1,
+      "name": "328130"
+    },
+    "352820": {
+      "hazard_pct": 0.847,
+      "tier": "T3",
+      "survival_1y": 15.3,
+      "survival_3y": 0.4,
+      "name": "352820"
+    },
+    "373220": {
+      "hazard_pct": 0.4583,
+      "tier": "T3",
+      "survival_1y": 54.2,
+      "survival_3y": 15.9,
+      "name": "373220"
+    },
+    "375500": {
+      "hazard_pct": 0.5446,
+      "tier": "T2",
+      "survival_1y": 45.5,
+      "survival_3y": 9.4,
+      "name": "375500"
+    },
+    "377300": {
+      "hazard_pct": 0.7344,
+      "tier": "T2",
+      "survival_1y": 26.6,
+      "survival_3y": 1.9,
+      "name": "377300"
+    },
+    "383220": {
+      "hazard_pct": 0.8638,
+      "tier": "T2",
+      "survival_1y": 13.6,
+      "survival_3y": 0.3,
+      "name": "383220"
+    }
+  },
+  "features": [
+    "dividend_coverage",
+    "payout_ratio",
+    "debt_ratio",
+    "interest_coverage",
+    "revenue_yoy_pct",
+    "ni_to_ta",
+    "ebit_to_ta",
+    "eq_to_tl",
+    "rev_to_ta",
+    "fcf_to_ta",
+    "ocf_to_ta",
+    "liab_to_ta",
+    "ocf_cov",
+    "fcf_cov",
+    "capex_ratio",
+    "fcf_negative",
+    "altman_z",
+    "dividend_coverage_chg",
+    "debt_ratio_chg",
+    "payout_ratio_chg",
+    "ocf_cov_chg",
+    "t_index",
+    "bok_rate",
+    "kospi_ret",
+    "rate_chg",
+    "debt_ratio_slope",
+    "dividend_coverage_slope",
+    "ocf_to_ta_slope",
+    "cox_score"
+  ],
+  "examples": [
+    {
+      "code": "016360",
+      "name": "삼성증권",
+      "tier": "T3",
+      "hazard": 0.0008,
+      "1y": 99.9,
+      "3y": 99.8,
+      "5y": 99.6
+    },
+    {
+      "code": "006800",
+      "name": "006800",
+      "tier": "T3",
+      "hazard": 0.0057,
+      "1y": 99.4,
+      "3y": 98.3,
+      "5y": 97.2
+    },
+    {
+      "code": "003690",
+      "name": "코리안리",
+      "tier": "T3",
+      "hazard": 0.0081,
+      "1y": 99.2,
+      "3y": 97.6,
+      "5y": 96.0
+    },
+    {
+      "code": "145720",
+      "name": "145720",
+      "tier": "T3",
+      "hazard": 0.0089,
+      "1y": 99.1,
+      "3y": 97.4,
+      "5y": 95.6
+    },
+    {
+      "code": "105560",
+      "name": "KB금융",
+      "tier": "T3",
+      "hazard": 0.0097,
+      "1y": 99.0,
+      "3y": 97.1,
+      "5y": 95.2
+    },
+    {
+      "code": "014680",
+      "name": "014680",
+      "tier": "T3",
+      "hazard": 0.9652,
+      "1y": 3.5,
+      "3y": 0.0,
+      "5y": 0.0
+    },
+    {
+      "code": "251270",
+      "name": "251270",
+      "tier": "T3",
+      "hazard": 0.9628,
+      "1y": 3.7,
+      "3y": 0.0,
+      "5y": 0.0
+    },
+    {
+      "code": "000020",
+      "name": "000020",
+      "tier": "T3",
+      "hazard": 0.9514,
+      "1y": 4.9,
+      "3y": 0.0,
+      "5y": 0.0
+    },
+    {
+      "code": "114090",
+      "name": "GKL",
+      "tier": "T3",
+      "hazard": 0.9498,
+      "1y": 5.0,
+      "3y": 0.0,
+      "5y": 0.0
+    },
+    {
+      "code": "018260",
+      "name": "삼성에스디에스",
+      "tier": "T3",
+      "hazard": 0.9271,
+      "1y": 7.3,
+      "3y": 0.0,
+      "5y": 0.0
+    }
+  ],
+  "threshold_analysis": [
+    {
+      "threshold": 0.3,
+      "n_removed": 120,
+      "precision": 0.4083,
+      "recall": 0.5568,
+      "f1": 0.4712,
+      "false_positive": 71,
+      "true_positive": 49
+    },
+    {
+      "threshold": 0.35,
+      "n_removed": 111,
+      "precision": 0.3964,
+      "recall": 0.5,
+      "f1": 0.4422,
+      "false_positive": 67,
+      "true_positive": 44
+    },
+    {
+      "threshold": 0.4,
+      "n_removed": 98,
+      "precision": 0.4082,
+      "recall": 0.4545,
+      "f1": 0.4301,
+      "false_positive": 58,
+      "true_positive": 40
+    },
+    {
+      "threshold": 0.45,
+      "n_removed": 86,
+      "precision": 0.4186,
+      "recall": 0.4091,
+      "f1": 0.4138,
+      "false_positive": 50,
+      "true_positive": 36
+    },
+    {
+      "threshold": 0.5,
+      "n_removed": 76,
+      "precision": 0.4079,
+      "recall": 0.3523,
+      "f1": 0.378,
+      "false_positive": 45,
+      "true_positive": 31
+    },
+    {
+      "threshold": 0.55,
+      "n_removed": 59,
+      "precision": 0.4237,
+      "recall": 0.2841,
+      "f1": 0.3401,
+      "false_positive": 34,
+      "true_positive": 25
+    },
+    {
+      "threshold": 0.6,
+      "n_removed": 49,
+      "precision": 0.4286,
+      "recall": 0.2386,
+      "f1": 0.3066,
+      "false_positive": 28,
+      "true_positive": 21
+    },
+    {
+      "threshold": 0.65,
+      "n_removed": 42,
+      "precision": 0.4762,
+      "recall": 0.2273,
+      "f1": 0.3077,
+      "false_positive": 22,
+      "true_positive": 20
+    },
+    {
+      "threshold": 0.7,
+      "n_removed": 35,
+      "precision": 0.5714,
+      "recall": 0.2273,
+      "f1": 0.3252,
+      "false_positive": 15,
+      "true_positive": 20
+    }
+  ]
+}

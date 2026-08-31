@@ -7,13 +7,14 @@ Ollama 로컬 LLM 클라이언트 유틸리티.
   Ollama: 완전 로컬, 무제한, API 키 불필요, M4 24GB에서 14B 모델 완벽 구동
 
 ■ 사용 모델
-  qwen2.5:14b  — 한국어 우수, 재무 분석 최적
-  (대안: llama3.1:8b — 더 빠르지만 한국어 약간 부족)
+  qwen3:14b  — function-calling 강화, 한국어 우수, GPT-4o급 agent 성능
+  (대안: qwen3:30b-a3b — MoE 16GB VRAM, 더 강력)
+  (구버전: qwen2.5:14b — legacy, 더 이상 기본값 아님)
 
 ■ 사전 준비
   1. brew install ollama
   2. ollama serve          (새 터미널 탭에서 계속 실행)
-  3. ollama pull qwen2.5:14b
+  3. ollama pull qwen3:14b
 """
 
 import requests
@@ -22,7 +23,7 @@ import time
 
 
 OLLAMA_URL   = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "qwen2.5:14b"
+OLLAMA_MODEL = "qwen3:14b"
 
 
 # ─────────────────────────────────────────────────────────────

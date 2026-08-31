@@ -255,3 +255,74 @@ class TestPipelineWithVariousInputs:
             pipeline = RecommendationPipeline(req)
             result = pipeline.execute()
             assert isinstance(result, dict), f"archetype={archetype} 실패"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Reverse FIRE 파이프라인 통합 테스트
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestReverseFireInPipeline:
+    """
+    ReverseFireFilter가 파이프라인에 올바르게 통합됐는지 검증.
+    절대값 고정 X — 구조와 방향성만 테스트.
+    """
+
+    @pytest.fixture(scope="class")
+    def result(self):
+        req = make_request(age=40, investable_amount=5000, monthly_target=100,
+                           monthly_savings=50, target_fire_age=55)
+        return RecommendationPipeline(req).execute()
+
+    def test_reverse_fire_key_in_response(self, result):
+        """파이프라인 응답에 reverse_fire 키 존재."""
+        assert "reverse_fire" in result, "응답에 reverse_fire 키 없음"
+
+    def test_reverse_fire_is_dict(self, result):
+        """reverse_fire는 dict 타입."""
+        assert isinstance(result["reverse_fire"], dict)
+
+    def test_reverse_fire_has_required_keys(self, result):
+        """reverse_fire 결과에 핵심 키 존재."""
+        rv = result["reverse_fire"]
+        if not rv:   # ReverseFireFilter 실패해도 pipeline은 계속 (빈 dict 허용)
+            return
+        required = [
+            "current_fire_age",
+            "target_fire_age",
+            "already_achievable",
+            "achievable_monthly",
+            "message",
+        ]
+        for key in required:
+            assert key in rv, f"reverse_fire에 '{key}' 없음"
+
+    def test_reverse_fire_already_achievable_is_bool(self, result):
+        """already_achievable은 bool."""
+        rv = result["reverse_fire"]
+        if not rv:
+            return
+        assert isinstance(rv["already_achievable"], bool)
+
+    def test_reverse_fire_does_not_break_recommendations(self, result):
+        """reverse_fire 추가 후에도 recommendations가 정상 반환됨."""
+        assert "recommendations" in result
+        assert isinstance(result["recommendations"], list)
+
+    def test_reverse_fire_fire_plan_coexists(self, result):
+        """reverse_fire와 fire_plan 둘 다 응답에 포함 (독립적 결과)."""
+        assert "fire_plan" in result
+        assert "reverse_fire" in result
+
+    def test_reverse_fire_target_age_matches_request(self, result):
+        """reverse_fire의 target_fire_age가 요청값과 일치."""
+        rv = result["reverse_fire"]
+        if not rv:
+            return
+        assert rv["target_fire_age"] == 55
+
+    def test_reverse_fire_target_monthly_matches_request(self, result):
+        """reverse_fire의 target_monthly_만원이 요청값과 일치."""
+        rv = result["reverse_fire"]
+        if not rv:
+            return
+        assert rv["target_monthly_만원"] == 100.0

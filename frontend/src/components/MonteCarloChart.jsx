@@ -26,14 +26,14 @@ const CustomTooltip = ({ active, payload, label }) => {
 
   return (
     <div style={{
-      background: '#1e293b', border: '1px solid #334155',
-      borderRadius: 10, padding: '10px 14px', fontSize: 12, color: '#e2e8f0',
+      background: '#dfe3ea', border: '1px solid #c8d0dc',
+      borderRadius: 10, padding: '10px 14px', fontSize: 12, color: '#283143',
     }}>
       <div style={{ fontWeight: 700, marginBottom: 6, color: '#94a3b8' }}>
         {label}년차
       </div>
-      <div style={{ color: '#34d399' }}>낙관(P90): {p90?.toFixed(1)}만원</div>
-      <div style={{ color: '#e2e8f0', fontWeight: 600 }}>기준(P50): {p50?.toFixed(1)}만원</div>
+      <div style={{ color: '#059669' }}>낙관(P90): {p90?.toFixed(1)}만원</div>
+      <div style={{ color: '#283143', fontWeight: 600 }}>기준(P50): {p50?.toFixed(1)}만원</div>
       <div style={{ color: '#ef4444' }}>비관(P10): {p10?.toFixed(1)}만원</div>
     </div>
   )
@@ -64,25 +64,25 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
 
   return (
     <div style={{
-      background: '#0f172a', borderRadius: 16, padding: '20px 24px',
-      border: '1px solid #1e293b',
+      background: '#ffffff', borderRadius: 16, padding: '20px 24px',
+      border: '1px solid #dfe3ea',
     }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0' }}>
-            Monte Carlo 시뮬레이션
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#283143' }}>
+            현재 자산 유지 시 미래 배당 <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>(추가 적립 제외)</span>
           </div>
           <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-            1,000회 시뮬레이션 · 20년 월 배당 신뢰구간
+            지금 보유분만으로 20년 — 위쪽 '목표 달성확률'(적립 포함)과 기준이 다름
             {regime && <span style={{ color: '#6366f1', marginLeft: 8 }}>({regime} 반영)</span>}
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 11, color: '#64748b' }}>목표달성 확률</div>
+          <div style={{ fontSize: 11, color: '#64748b' }}>추가 적립 없이 현재 자산만 유지 시<br/>목표 달성 확률 <span style={{ fontSize: 9, opacity: .7 }}>(적립 포함은 위쪽 헤드라인 참조)</span></div>
           <div style={{
             fontSize: 22, fontWeight: 800,
-            color: achievePct >= 70 ? '#34d399' : achievePct >= 50 ? '#fbbf24' : '#ef4444',
+            color: achievePct >= 70 ? '#059669' : achievePct >= 50 ? '#d97706' : '#ef4444',
           }}>
             {achievePct.toFixed(0)}%
           </div>
@@ -92,7 +92,7 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
       {/* 밴드 차트 */}
       <ResponsiveContainer width="100%" height={240}>
         <ComposedChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-          <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
+          <CartesianGrid stroke="#dfe3ea" strokeDasharray="3 3" />
           <XAxis
             dataKey="year"
             tick={{ fill: '#64748b', fontSize: 11 }}
@@ -116,7 +116,7 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
           <Area
             dataKey="p10"
             stroke="none"
-            fill="#0f172a"
+            fill="#ffffff"
             fillOpacity={1}
             legendType="none"
           />
@@ -124,7 +124,7 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
           {/* P90 상단선 */}
           <Line
             dataKey="p90"
-            stroke="#34d399"
+            stroke="#059669"
             strokeDasharray="4 3"
             strokeWidth={1.5}
             dot={false}
@@ -133,7 +133,7 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
           {/* P50 중앙선 */}
           <Line
             dataKey="p50"
-            stroke="#e2e8f0"
+            stroke="#283143"
             strokeWidth={2.5}
             dot={false}
             name="기준(P50)"
@@ -173,7 +173,7 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
           {
             label: '20년 후 기준(P50)',
             value: `${finalP50.toFixed(1)}만원/월`,
-            color: '#e2e8f0',
+            color: '#283143',
           },
           {
             label: '비관 시나리오(P10)',
@@ -182,14 +182,14 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
             sub: `P50 대비 -${((1 - finalP10 / Math.max(finalP50, 0.01)) * 100).toFixed(0)}%`,
           },
           {
-            label: '예상 배당컷 횟수',
-            value: `${cutEvents.toFixed(1)}회`,
-            color: cutEvents >= 3 ? '#ef4444' : cutEvents >= 1 ? '#fbbf24' : '#34d399',
-            sub: '20년간 평균',
+            label: '개별 종목 배당 변동 이벤트',
+            value: `${cutEvents.toFixed(1)}건`,
+            color: '#64748b',
+            sub: '20년간 23종목 합산 · 분산으로 전체 영향 제한적',
           },
         ].map(card => (
           <div key={card.label} style={{
-            background: '#1e293b', borderRadius: 8, padding: '10px 12px',
+            background: '#dfe3ea', borderRadius: 8, padding: '10px 12px',
           }}>
             <div style={{ fontSize: 10, color: '#64748b', marginBottom: 4 }}>{card.label}</div>
             <div style={{ fontSize: 14, fontWeight: 700, color: card.color }}>{card.value}</div>
@@ -202,7 +202,7 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
       {monteCarlo.summary_message && (
         <div style={{
           marginTop: 12, fontSize: 12, color: '#94a3b8',
-          padding: '8px 12px', background: '#1e293b', borderRadius: 8,
+          padding: '8px 12px', background: '#dfe3ea', borderRadius: 8,
           borderLeft: '3px solid #6366f1',
         }}>
           {monteCarlo.summary_message}

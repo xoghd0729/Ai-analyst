@@ -340,9 +340,23 @@ def start_scheduler():
         replace_existing=True,
     )
 
+    # DART 신규 공시 감지: 매일 오전 6시 (장 시작 전)
+    try:
+        from utils.dart_watcher import scheduled_dart_watch
+        scheduler.add_job(
+            scheduled_dart_watch,
+            CronTrigger(hour=6, minute=0),
+            id="dart_watch",
+            name="DART 신규 공시 감지",
+            replace_existing=True,
+        )
+        log.info("  DART watcher: 매일 06:00 (KST)")
+    except ImportError:
+        log.warning("dart_watcher 없음 → DART 실시간 감지 비활성")
+
     scheduler.start()
     log.info("데이터 파이프라인 스케줄러 시작 완료")
-    log.info("  ETF: 매일 17:00 / US: 토 00:00 / KR: 일 01:00 (KST)")
+    log.info("  ETF: 매일 17:00 / US: 토 00:00 / KR: 일 01:00 / DART: 매일 06:00 (KST)")
     return scheduler
 
 

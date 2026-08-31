@@ -139,7 +139,19 @@ def run_survival(
         })
 
     if not assets:
-        return {"survival_probability": 0.0, "error": "no_assets"}
+        return {
+            "survival_probability":       0.0,
+            "endpoint_probability":       0.0,
+            "income_sustainability_score": 0,
+            "health_score":               0,
+            "health_grade":               "N/A",
+            "concentration_hhi":          0.0,
+            "concentration_groups":       [],
+            "risk_contribution":          [],
+            "sub_metrics":                {},
+            "summary":                    "포트폴리오 데이터 없음",
+            "error":                      "no_assets",
+        }
 
     # 초기(연1) 실질 월배당 = 생존 기준선 산출용
     init_annual_net = sum(a["invest"] * a["dy"] / 100.0 * (1 - a["net_tax"]) for a in assets)
@@ -313,6 +325,15 @@ def survival_optimal_compare(
     """
     cur = run_survival(recommendations, monthly_target=monthly_target,
                        macro_regime=macro_regime, achievement_prob=achievement_prob)
+
+    # no_assets 또는 에러인 경우 early return
+    if cur.get("error") or not recommendations:
+        return {
+            "current":   {"survival": 0.0, "income_score": 0, "hhi": 0.0},
+            "optimized": {"survival": 0.0, "income_score": 0, "hhi": 0.0},
+            "delta_survival": 0.0, "actions": [], "action_summary": "포트폴리오 없음",
+            "note": "",
+        }
 
     KR_IND = {"kr_stock", "kr_financial", "kr_cyclical"}
     DIVERSE = ("div_etf", "bond", "us_stock", "reit")

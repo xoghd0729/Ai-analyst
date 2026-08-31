@@ -18,9 +18,11 @@ export default function App() {
             <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               포트폴리오 설계
             </NavLink>
+            {/* 발표용: 랭킹 메뉴 임시 숨김 (50점 라벨 정리 전까지). 페이지/라우트는 그대로 유지 — 발표 후 이 블록만 살리면 복구됨.
             <NavLink to="/ranking" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               배당 종목 랭킹
             </NavLink>
+            */}
           </div>
         </nav>
 

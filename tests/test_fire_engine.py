@@ -265,3 +265,88 @@ class TestFireTimeline:
             val_key = next((k for k in ["total_asset", "portfolio", "cumulative"] if k in first), None)
             if val_key:
                 assert last[val_key] >= first[val_key], "포트폴리오가 시간 역행"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FIRE 단조성 불변조건
+# 절대값 고정 X — 방향성만 검증 (시장 데이터 변동 허용)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestFireMonotonicityInvariants:
+    """입력이 유리해지면 FIRE age가 같거나 빨라져야 한다."""
+
+    # 공통 파라미터 기준
+    _BASE = dict(current_age=40, target_age=55, avg_net_yield=5.0,
+                 div_growth_rate=5.0, cpi_rate=2.5, custom_monthly_만원=100.0)
+
+    def _fire_age(self, result: dict) -> int:
+        """custom target의 projected_fire_age 추출 (없으면 99 반환)."""
+        custom = result.get("targets", {}).get("custom")
+        if not custom:
+            return 99
+        return int(custom.get("projected_fire_age") or 99)
+
+    def test_more_monthly_savings_earlier_fire(self):
+        """월 적립금 증가 → FIRE age 같거나 빨라짐."""
+        r_low  = calc_fire_engine(current_investable=5000, monthly_savings=30,  **self._BASE)
+        r_high = calc_fire_engine(current_investable=5000, monthly_savings=100, **self._BASE)
+        age_low  = self._fire_age(r_low)
+        age_high = self._fire_age(r_high)
+        assert age_high <= age_low, \
+            f"월적립 30→100만으로 증가했는데 FIRE가 늦어짐: {age_low}→{age_high}세"
+
+    def test_more_initial_capital_earlier_fire(self):
+        """초기 투자금 증가 → FIRE age 같거나 빨라짐."""
+        r_small = calc_fire_engine(current_investable=3000, monthly_savings=50, **self._BASE)
+        r_large = calc_fire_engine(current_investable=8000, monthly_savings=50, **self._BASE)
+        age_small = self._fire_age(r_small)
+        age_large = self._fire_age(r_large)
+        assert age_large <= age_small, \
+            f"초기자산 3000→8000만으로 증가했는데 FIRE가 늦어짐: {age_small}→{age_large}세"
+
+    def test_higher_yield_earlier_fire(self):
+        """수익률 증가 → FIRE age 같거나 빨라짐."""
+        r_low  = calc_fire_engine(current_investable=5000, monthly_savings=50,
+                                   current_age=40, target_age=55,
+                                   avg_net_yield=3.0, custom_monthly_만원=100.0)
+        r_high = calc_fire_engine(current_investable=5000, monthly_savings=50,
+                                   current_age=40, target_age=55,
+                                   avg_net_yield=6.0, custom_monthly_만원=100.0)
+        age_low  = self._fire_age(r_low)
+        age_high = self._fire_age(r_high)
+        assert age_high <= age_low, \
+            f"수익률 3%→6% 증가했는데 FIRE가 늦어짐: {age_low}→{age_high}세"
+
+    def test_lower_target_fires_earlier(self):
+        """낮은 목표 월배당 → 더 빨리 달성 (단조증가)."""
+        base = dict(current_investable=5000, monthly_savings=50,
+                    current_age=40, target_age=55, avg_net_yield=5.0)
+        r_small = calc_fire_engine(**base, custom_monthly_만원=50.0)
+        r_large = calc_fire_engine(**base, custom_monthly_만원=200.0)
+        age_small = self._fire_age(r_small)
+        age_large = self._fire_age(r_large)
+        assert age_small <= age_large, \
+            f"낮은 목표인데 FIRE가 더 늦음: 50만={age_small}세, 200만={age_large}세"
+
+    def test_current_dividend_positive_when_has_capital(self):
+        """초기 투자금 > 0이면 현재 월배당 > 0."""
+        r = calc_fire_engine(current_investable=5000, monthly_savings=0,
+                              current_age=40, avg_net_yield=5.0)
+        cur_div = r["current_state"]["current_monthly_div"]
+        assert cur_div > 0, f"투자금 5000만원인데 현재 월배당=0: {cur_div}"
+
+    def test_current_dividend_zero_when_no_capital(self):
+        """초기 투자금 = 0이면 현재 월배당 = 0."""
+        r = calc_fire_engine(current_investable=0, monthly_savings=50,
+                              current_age=25, avg_net_yield=5.0)
+        cur_div = r["current_state"]["current_monthly_div"]
+        assert cur_div == 0, f"투자금 0인데 현재 월배당 > 0: {cur_div}"
+
+    def test_combined_improvement_earlier_fire(self):
+        """투자금 + 적립금 동시 증가 → FIRE age 같거나 빨라짐 (합성 단조성)."""
+        r_base = calc_fire_engine(current_investable=3000, monthly_savings=30,  **self._BASE)
+        r_good = calc_fire_engine(current_investable=7000, monthly_savings=100, **self._BASE)
+        age_base = self._fire_age(r_base)
+        age_good = self._fire_age(r_good)
+        assert age_good <= age_base, \
+            f"투자금+적립금 모두 늘었는데 FIRE가 늦어짐: {age_base}→{age_good}세"

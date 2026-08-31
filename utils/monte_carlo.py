@@ -119,7 +119,8 @@ def run_monte_carlo(
     n_simulations:     int   = 1000,
     monthly_target:    float = 0.0,
     seed:              Optional[int] = 42,
-    macro_regime:      Optional[dict] = None,   # ← 거시 레짐 연동 (신규)
+    macro_regime:      Optional[dict] = None,   # ← 거시 레짐 연동
+    monthly_savings:   float = 0.0,             # ← 월 적립금 (만원) — FIRE 복리 반영
 ) -> dict:
     """
     포트폴리오 Monte Carlo 배당 시뮬레이션.
@@ -187,12 +188,18 @@ def run_monte_carlo(
     all_paths: list[list[float]] = []
     cut_counts: list[int] = []
 
+    # 월 적립금 → 자산별 비중대로 배분 (연간)
+    annual_savings = monthly_savings * 12.0
+    total_invest = sum(a["invest"] for a in assets) or 1.0
+    asset_weights = [a["invest"] / total_invest for a in assets]
+
     for _ in range(n_simulations):
         yearly_monthly_net = []
         sim_cuts = 0
 
         # 각 연도별 포트폴리오 배당 계산
-        current_yields = [a["dy"] for a in assets]   # 자산별 현재 yield
+        current_yields  = [a["dy"]     for a in assets]   # 자산별 현재 yield
+        current_invests = [a["invest"] for a in assets]   # 적립 누적 추적
 
         for t in range(1, years + 1):
             annual_net_total = 0.0
@@ -210,7 +217,10 @@ def run_monte_carlo(
                 else:
                     current_yields[i] = max(0.1, current_yields[i] * (1 + g))
 
-                annual_gross = asset["invest"] * current_yields[i] / 100.0
+                # 연말 적립금 추가 (비중 비례 배분)
+                current_invests[i] += annual_savings * asset_weights[i]
+
+                annual_gross = current_invests[i] * current_yields[i] / 100.0
                 annual_net   = annual_gross * (1 - asset["net_tax"])
                 annual_net_total += annual_net
 

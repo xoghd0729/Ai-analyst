@@ -1,0 +1,140 @@
+{
+  "version": "v3_multi_horizon_3tier",
+  "label": "meaningful_cut_30pct",
+  "n_stocks": 226,
+  "event_rate_1yr": 0.0586,
+  "event_rate_3yr": 0.1458,
+  "scores": {
+    "1yr_hazard": {
+      "roc": 0.542,
+      "pr_auc": 0.069,
+      "c_index": 0.482
+    },
+    "3yr_hazard": {
+      "roc": 0.552,
+      "pr_auc": 0.166
+    },
+    "ensemble": {
+      "roc": 0.524,
+      "c_index": 0.498
+    },
+    "3tier": {
+      "roc": 0.555,
+      "c_index": 0.5
+    },
+    "altman_bench": {
+      "roc": 0.58
+    }
+  },
+  "features": [
+    "dividend_coverage",
+    "payout_ratio",
+    "debt_ratio",
+    "interest_coverage",
+    "revenue_yoy_pct",
+    "ni_to_ta",
+    "ebit_to_ta",
+    "eq_to_tl",
+    "rev_to_ta",
+    "fcf_to_ta",
+    "ocf_to_ta",
+    "fcf_negative",
+    "altman_z",
+    "dividend_coverage_chg",
+    "debt_ratio_chg",
+    "payout_ratio_chg",
+    "t_index"
+  ],
+  "examples": [
+    {
+      "code": "006800",
+      "name": "006800",
+      "tier": "T3",
+      "hazard": 0.0003,
+      "1y": 100.0,
+      "3y": 99.9,
+      "5y": 99.9
+    },
+    {
+      "code": "047810",
+      "name": "047810",
+      "tier": "T3",
+      "hazard": 0.0003,
+      "1y": 100.0,
+      "3y": 99.9,
+      "5y": 99.9
+    },
+    {
+      "code": "000270",
+      "name": "기아",
+      "tier": "T3",
+      "hazard": 0.0005,
+      "1y": 99.9,
+      "3y": 99.8,
+      "5y": 99.7
+    },
+    {
+      "code": "006360",
+      "name": "006360",
+      "tier": "T3",
+      "hazard": 0.0006,
+      "1y": 99.9,
+      "3y": 99.8,
+      "5y": 99.7
+    },
+    {
+      "code": "042660",
+      "name": "042660",
+      "tier": "T3",
+      "hazard": 0.0007,
+      "1y": 99.9,
+      "3y": 99.8,
+      "5y": 99.7
+    },
+    {
+      "code": "001530",
+      "name": "001530",
+      "tier": "T3",
+      "hazard": 0.899,
+      "1y": 10.1,
+      "3y": 0.1,
+      "5y": 0.0
+    },
+    {
+      "code": "175330",
+      "name": "JB금융지주",
+      "tier": "T3",
+      "hazard": 0.8864,
+      "1y": 11.4,
+      "3y": 0.1,
+      "5y": 0.0
+    },
+    {
+      "code": "010060",
+      "name": "010060",
+      "tier": "T3",
+      "hazard": 0.8772,
+      "1y": 12.3,
+      "3y": 0.2,
+      "5y": 0.0
+    },
+    {
+      "code": "092790",
+      "name": "넥센타이어",
+      "tier": "T1",
+      "hazard": 0.8753,
+      "1y": 12.5,
+      "3y": 0.2,
+      "5y": 0.0
+    },
+    {
+      "code": "001820",
+      "name": "001820",
+      "tier": "T3",
+      "hazard": 0.8698,
+      "1y": 13.0,
+      "3y": 0.2,
+      "5y": 0.0
+    }
+  ]
+}

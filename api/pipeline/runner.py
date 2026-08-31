@@ -92,8 +92,11 @@ class RecommendationPipeline:
             },
 
             # ── 추천 자산 목록 ──────────────────────────────────
-            "recommendations":  ctx.recommendations,
-            "axis_summary":     self._axis_summary(),
+            "recommendations":    ctx.recommendations,
+            "axis_summary":       self._axis_summary(),
+            "target_yield":       ctx.target_yield,      # 엔진 사용값 (1~20% 클램프)
+            "raw_target_yield":   getattr(ctx, "raw_target_yield", None),  # 순수 역산값
+            "yield_capped":       getattr(ctx, "yield_capped", False),     # True → 20% 상한 적용
 
             # ── 데이터 신선도 ────────────────────────────────────
             "data_freshness":   self._data_freshness(),
@@ -141,6 +144,7 @@ class RecommendationPipeline:
             "sector_exposure":   ctx.sector_exposure,
             "dividend_calendar": ctx.dividend_calendar,
             "fire_plan":         ctx.fire_plan,
+            "reverse_fire":      ctx.reverse_fire,   # Reverse FIRE 역산 결과 (optional)
             "monte_carlo":       ctx.monte_carlo,
             "survival":          ctx.survival,
             "tax_optimizer":     ctx.tax_optimizer_result,

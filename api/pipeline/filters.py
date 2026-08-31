@@ -88,12 +88,85 @@ class AssetPickerFilter(BaseFilter):
     def process(self, ctx: PipelineContext) -> None:
         try:
             from api.routers.portfolio import pick_kr_stocks, pick_us_stocks, pick_etfs
+            from utils.us_dividend_data import pick_us_stocks_v2
             req = ctx.request
-            kr_count      = 7 if req.risk_tolerance == "conservative" else 5
-            ctx.kr_stocks = pick_kr_stocks(req.risk_tolerance, kr_count)
-            ctx.us_stocks = pick_us_stocks(req.risk_tolerance, ctx.etf_yields, n=4)
-            ctx.etfs      = pick_etfs(req.risk_tolerance, ctx.etf_yields,
-                                      archetype=req.archetype, macro_regime=ctx.macro)
+            age = int(getattr(req, "age", 35) or 35)
+            # 후보풀 크기: PersonalizedRankingFilter가 최종 선택 → 여기서는 넉넉히
+            # KR: 최종 2~3개 × 3 = 6~9개 후보, US: 10개 후보 (85개 유니버스에서)
+            if req.risk_tolerance == "conservative":
+                kr_count, us_cand = 9, 10
+            elif req.risk_tolerance == "aggressive":
+                kr_count, us_cand = 6, 10
+            else:
+                kr_count, us_cand = 9, 10
+            ctx.kr_stocks = pick_kr_stocks(req.risk_tolerance, kr_count, age=age)
+            # Cold Start 플래그 부착: 데이터 3년 미만 → ml_status="NO_DATA", sector_score 대체
+            try:
+                from utils.cold_start import apply_cold_start_flags
+                ctx.kr_stocks = apply_cold_start_flags(ctx.kr_stocks)
+            except Exception:
+                pass
+            # yfinance 기반 US 배당주 (7일 캐시, 85개 유니버스) — 실패 시 CSV 방식 폴백
+            try:
+                ctx.us_stocks = pick_us_stocks_v2(req.risk_tolerance, n=us_cand, age=age)
+            except Exception:
+                ctx.us_stocks = pick_us_stocks(req.risk_tolerance, ctx.etf_yields, n=3)
+            # ETF: 후보 전체 전달 → PersonalizedRankingFilter가 n_etfs=2 선택
+            # pick_etfs는 모든 ETF 후보 반환 (상위 8개), 우선순위 정렬만 여기서
+            all_etfs = pick_etfs(req.risk_tolerance, ctx.etf_yields,
+                                 archetype=req.archetype, macro_regime=ctx.macro)
+            _priority = lambda e: (
+                0 if e.get("asset_class") == "us_div_etf" else
+                1 if e.get("asset_class") in ("us_reit", "kr_reit") else
+                2 if e.get("asset_class") == "defensive" else 3
+            )
+            # 전체 후보 유지 (최대 8개) — 최종 2개는 PersonalizedRankingFilter에서 선택
+            ctx.etfs = sorted(all_etfs, key=_priority)[:8]
+        except Exception as e:
+            ctx.add_error(self.name, str(e))
+
+
+# ═══════════════════════════════════════════════════════════════
+# Filter 3-b — 개인화 랭킹 (Risk Engine + 목표수익률 역산)
+# ═══════════════════════════════════════════════════════════════
+class PersonalizedRankingFilter(BaseFilter):
+    """
+    AssetPickerFilter가 구성한 KR/US/ETF 후보군을 개인화 점수로 재정렬 (E_v2).
+      - risk_engine  : composite_risk_score 계산 후 BLOCK 제거
+      - ranker v2    : abs_yield_fit_v2 + risk + growth + age (horizon 기반 동적 가중치)
+      - sector 2층   : 동일 세분화 섹터 max 1개 + 동일 상위 그룹 max 2개
+    WeightAllocatorFilter 이전에 실행되어 ctx.kr_stocks / ctx.us_stocks 순서를 확정.
+    """
+    name = "PersonalizedRanking"
+
+    def process(self, ctx: PipelineContext) -> None:
+        try:
+            from utils.personalized_ranker import pick_personalized_portfolio
+            req = ctx.request
+            n_stocks = 4 if req.risk_tolerance == "moderate" else 3
+            result = pick_personalized_portfolio(
+                kr_candidates    = list(ctx.kr_stocks or []),
+                us_candidates    = list(ctx.us_stocks or []),
+                etf_candidates   = list(ctx.etfs or []),
+                age              = int(getattr(req, "age", 40) or 40),
+                investable_amount= float(req.investable_amount or 0),
+                monthly_target   = float(req.monthly_target or 0),
+                risk_tolerance   = req.risk_tolerance,
+                macro            = ctx.macro,
+                n_stocks         = n_stocks,
+                n_etfs           = 2,
+                target_fire_age  = int(getattr(req, "target_fire_age", 65) or 65),
+            )
+            # 재정렬 결과 반영 (ETF는 별도 슬롯 유지)
+            # 중요: ranker가 선택한 결과로 교체 (빈 경우 명시적으로 빈 리스트)
+            # fallback "or ctx.xxx" 금지 — 안 쓰면 원래 후보 전체가 넘어가는 버그
+            all_stocks       = result["stocks"]
+            ctx.kr_stocks        = [s for s in all_stocks if s.get("asset_class") == "kr_stock"]
+            ctx.us_stocks        = [s for s in all_stocks if s.get("asset_class") not in ("kr_stock",)]
+            ctx.etfs             = result["etfs"] if result["etfs"] else ctx.etfs[:2]
+            ctx.target_yield     = result.get("target_yield", 0)
+            ctx.raw_target_yield = result.get("raw_target_yield")   # 클램프 이전 순수 역산값
+            ctx.yield_capped     = result.get("yield_capped", False) # 20% 상한 적용 여부
         except Exception as e:
             ctx.add_error(self.name, str(e))
 
@@ -119,6 +192,127 @@ class WeightAllocatorFilter(BaseFilter):
                 archetype=req.archetype,
                 req_age=req.age,
                 req_risk=req.risk_tolerance,
+            )
+
+            # ── fit_score 기반 비중 차별화 ─────────────────────────
+            # PersonalizedRankingFilter가 부여한 fit_score(0-100)를 비중에 반영.
+            # 같은 자산군 내에서 fit 높은 종목에 더 큰 비중, 낮은 종목에 작은 비중.
+            # fit=0 → 0.70x, fit=50 → 1.00x, fit=100 → 1.30x (±30% 범위)
+            recs = ctx.recommendations
+            has_fit = recs and any(r.get("fit_score") is not None for r in recs)
+            if has_fit and len(recs) > 1:
+                # 자산군(KR/US/ETF)별로 그룹화해 그룹 총비중은 보존
+                from collections import defaultdict
+                groups = defaultdict(list)
+                for r in recs:
+                    ac = r.get("asset_class", "")
+                    g = "kr" if ac == "kr_stock" else ("us" if "us" in ac else "etf")
+                    groups[g].append(r)
+
+                for grp in groups.values():
+                    if len(grp) <= 1:
+                        continue
+                    total_before = sum(r["weight_pct"] for r in grp) or 1.0
+                    for r in grp:
+                        fs = float(r.get("fit_score") or 50)
+                        r["weight_pct"] *= (0.70 + fs * 0.006)  # 0.70~1.30x
+                    total_after = sum(r["weight_pct"] for r in grp) or 1.0
+                    scale = total_before / total_after
+                    for r in grp:
+                        r["weight_pct"] = round(r["weight_pct"] * scale, 2)
+
+                # 전체 재정규화 (소수점 오차 보정)
+                total = sum(r["weight_pct"] for r in recs) or 100.0
+                for r in recs:
+                    r["weight_pct"] = round(r["weight_pct"] / total * 100, 2)
+                ctx.recommendations = recs
+
+        except Exception as e:
+            ctx.add_error(self.name, str(e))
+
+
+# ═══════════════════════════════════════════════════════════════
+# Filter 4-b — Survival Score → 가중치 보정
+# ═══════════════════════════════════════════════════════════════
+class SurvivalWeightFilter(BaseFilter):
+    """
+    TabPFN 생존 스코어를 포트폴리오 비중에 직접 반영.
+
+    로직:
+      multiplier = 1.0 - 0.4 * hazard_pct
+        → hazard=0.0 : multiplier=1.00 (변화 없음)
+        → hazard=0.5 : multiplier=0.80 (20% 감소)
+        → hazard=0.65: multiplier=0.74 (gate 직전 최대 26% 감소)
+
+    KR 주식만 보정 (US/ETF는 survival 모델 미적용).
+    보정 후 전체 합계가 100%가 되도록 재정규화.
+    보정값은 recommendation에 'survival_weight_adj' 필드로 기록.
+    """
+    name = "SurvivalWeight"
+
+    def process(self, ctx: PipelineContext) -> None:
+        try:
+            import os, json
+            BASE = os.path.dirname(os.path.dirname(os.path.dirname(
+                os.path.abspath(__file__))))
+            sv_path = os.path.join(BASE, "results", "survival_pd_v4.json")
+            if not os.path.exists(sv_path):
+                return
+            with open(sv_path) as f:
+                sv = json.load(f)
+            stock_risk = sv.get("stock_risk", {})
+            if not stock_risk or not ctx.recommendations:
+                return
+
+            recs = ctx.recommendations
+            for r in recs:
+                ticker = str(r.get("ticker", "") or r.get("stock_code", ""))
+                if r.get("asset_class") == "kr_stock" and ticker in stock_risk:
+                    hz = float(stock_risk[ticker].get("hazard_pct", 0.3))
+                    multiplier = round(1.0 - 0.4 * hz, 4)
+                    r["weight_pct"] = round(r.get("weight_pct", 0) * multiplier, 2)
+                    r["survival_risk_score"] = round(hz, 4)   # uncalibrated score (≠ 확률)
+                    r["survival_weight_adj"] = round(multiplier, 4)
+                    r["survival_1y"] = stock_risk[ticker].get("survival_1y", None)
+                else:
+                    r["survival_hazard"] = None
+                    r["survival_weight_adj"] = 1.0
+
+            # 재정규화 → 합계 100%
+            total = sum(r.get("weight_pct", 0) for r in recs) or 100.0
+            for r in recs:
+                r["weight_pct"] = round(r.get("weight_pct", 0) / total * 100, 2)
+
+            # invest_amount_만원 재계산
+            investable = ctx.request.investable_amount
+            for r in recs:
+                r["invest_amount_만원"] = round(investable * r["weight_pct"] / 100)
+
+        except Exception as e:
+            ctx.add_error(self.name, str(e))
+
+
+# ═══════════════════════════════════════════════════════════════
+# Filter 4-c — Risk Engine: composite_risk_score 부착
+# ═══════════════════════════════════════════════════════════════
+class RiskEngineFilter(BaseFilter):
+    """
+    SurvivalWeightFilter 이후 recommendations 전체에
+    composite_risk_score / risk_gate / layer1_xgb / layer2_survival 부착.
+
+    근거: walk-forward 앙상블 실험 (risk_ensemble_comparison.py)
+      XGB 70% + Survival 30% = ROC 0.7824, P@20 0.9509 (최적)
+      Macro composite 제외 (성능 저하 확인, ROC 0.7727)
+    """
+    name = "RiskEngine"
+
+    def process(self, ctx: PipelineContext) -> None:
+        try:
+            from utils.risk_engine import score_portfolio
+            ctx.recommendations = score_portfolio(
+                ctx.recommendations,
+                macro=ctx.macro,
+                risk_tolerance=ctx.request.risk_tolerance,
             )
         except Exception as e:
             ctx.add_error(self.name, str(e))
@@ -310,6 +504,7 @@ class FireEngineFilter(BaseFilter):
                 div_growth_rate     = ctx.projection.get("portfolio_div_cagr", 4.0),
                 cpi_rate            = 2.5,
                 custom_monthly_만원 = float(req.monthly_target),
+                annual_savings_growth = req.savings_growth,   # 적립 증액 반영 (프론트와 통일)
             )
         except Exception as e:
             ctx.add_error(self.name, str(e))
@@ -339,7 +534,8 @@ class MonteCarloFilter(BaseFilter):
                 years             = 20,
                 n_simulations     = 1000,
                 monthly_target    = float(ctx.request.monthly_target),
-                macro_regime      = ctx.macro,          # ← 거시 레짐 연동 (신규)
+                macro_regime      = ctx.macro,
+                monthly_savings   = float(ctx.request.monthly_savings),  # ← 적립 복리 반영
             )
         except Exception as e:
             ctx.add_error(self.name, str(e))
@@ -484,6 +680,41 @@ class PortfolioHealthFilter(BaseFilter):
 # ═══════════════════════════════════════════════════════════════
 # Filter 18 — 서술형 스토리텔링
 # ═══════════════════════════════════════════════════════════════
+class ReverseFireFilter(BaseFilter):
+    """
+    FIRE 역산 (Reverse): 현재 조건 → 목표 달성을 위해 무엇을 바꿔야 하는가.
+
+    FireEngineFilter 이후 실행 — fire_plan의 avg_yield_net 재활용.
+    실패해도 pipeline 전체에 영향 없음 (ctx.reverse_fire = {} 유지).
+
+    E_v2 계약:
+      - target_yield 는 Ranker 점수에 미사용
+      - monthly_target / target_fire_age 는 FIRE/Reverse FIRE 쪽으로만 전달
+    """
+    name = "ReverseFire"
+
+    def process(self, ctx: PipelineContext) -> None:
+        try:
+            from utils.fire_engine import calc_fire_reverse
+            req = ctx.request
+            # avg_yield_net: SummarizeFilter 결과 재사용 (포트폴리오 세후 수익률)
+            avg_yield_net = ctx.avg_yield_net or 3.5
+
+            ctx.reverse_fire = calc_fire_reverse(
+                current_investable  = float(req.investable_amount),
+                monthly_savings     = float(req.monthly_savings),
+                current_age         = int(req.age),
+                target_fire_age     = int(req.target_fire_age),
+                target_monthly_만원 = float(req.monthly_target),
+                avg_net_yield       = avg_yield_net,
+                div_growth_rate     = float(ctx.projection.get("portfolio_div_cagr", 4.0)),
+                cpi_rate            = 2.5,
+            )
+        except Exception as e:
+            ctx.add_error(self.name, str(e))
+            # reverse_fire는 optional — 실패해도 빈 dict 유지, pipeline 계속
+
+
 class StorytellingFilter(BaseFilter):
     """
     분석 결과 전체를 한국어 서술형 리포트로 변환.
@@ -532,26 +763,59 @@ class StorytellingFilter(BaseFilter):
 
 
 # ═══════════════════════════════════════════════════════════════
-# Filter 18 — SHAP 설명 가능성
+# Filter 18 — 위험 요인 분석 (Risk Factor Attribution)
 # ═══════════════════════════════════════════════════════════════
 class SHAPExplainerFilter(BaseFilter):
     """
-    ML 위험 종목(WEAKENING/BROKEN)에 대해 SHAP 기반 판단 근거 생성.
-    "배당성향 92%가 위험도를 +0.34 올렸다" 형태로 블랙박스 해제.
-    context.recommendations 의 각 종목에 shap_explanation 키 추가.
+    WEAKENING/BROKEN 종목에 대해 위험 요인 attribution 생성.
+
+    [v2 변경사항]
+    기존: XGBoost TreeExplainer 기반 SHAP (kr_3class_model.pkl)
+    현재: TabPFN Survival hazard score 기반 rule-based feature attribution.
+          재무지표가 위험 기준 임계값을 얼마나 벗어나는지를 점수화.
+          실제 SHAP(Shapley value)가 아님 — 도메인 지식 기반 attribution.
+          XGBoost SHAP은 _explain_xgb_benchmark() 로 benchmark 전용 보존.
+
+    출력 키: rec["risk_attribution"] (WEAKENING/BROKEN만), rec["ml_status"]
     """
-    name = "SHAPExplainer"
+    name = "RiskAttribution"
 
     def process(self, ctx: PipelineContext) -> None:
         try:
             from utils.shap_explainer import explain_portfolio_risks
             shap_results = explain_portfolio_risks(ctx.recommendations)
-            shap_map = {r["ticker"]: r.get("explanation") for r in shap_results}
-            # recommendations 에 explanation 첨부
+            result_map = {r["ticker"]: r for r in shap_results}
             for rec in ctx.recommendations:
                 ticker = rec.get("ticker", "")
-                if ticker in shap_map and shap_map[ticker]:
-                    rec["shap_explanation"] = shap_map[ticker]
+                res = result_map.get(ticker)
+                if res is None:
+                    continue
+                # ml_status: survival hazard 기반 분류로 업데이트
+                rec["ml_status"] = res.get("prediction", "INTACT")
+                if res.get("hazard") is not None:
+                    rec.setdefault("survival_risk_score", res["hazard"])
+                if res.get("survival_1y") is not None:
+                    rec.setdefault("survival_1y", res["survival_1y"])
+                # attribution 첨부 (WEAKENING/BROKEN만)
+                if res.get("explanation"):
+                    explanation = res["explanation"]
+                    rec["risk_attribution"] = explanation
+                    # recommendation_reason에 위험 요인 문장 후위 첨부
+                    prediction = res.get("prediction", "INTACT")
+                    if prediction in ("WEAKENING", "BROKEN"):
+                        top_factors = explanation.get("top_factors", [])
+                        if top_factors:
+                            factor_labels = [f["label_ko"] for f in top_factors[:3]]
+                            risk_sentence = (
+                                f"⚠️ AI 위험 신호 — {', '.join(factor_labels)} 지표 이상 감지"
+                                if prediction == "WEAKENING" else
+                                f"🚨 고위험 — {', '.join(factor_labels)} 악화, 비중 최소화"
+                            )
+                            existing_reason = rec.get("recommendation_reason", "")
+                            if existing_reason:
+                                rec["recommendation_reason"] = existing_reason + ". " + risk_sentence
+                            else:
+                                rec["recommendation_reason"] = risk_sentence
         except Exception as e:
             ctx.add_error(self.name, str(e))
 
@@ -559,8 +823,11 @@ class SHAPExplainerFilter(BaseFilter):
 PIPELINE_FILTERS: list[type[BaseFilter]] = [
     MacroRegimeFilter,       # 2. 거시 레짐 (AxisWeight 보다 먼저 — axis_w 에 반영)
     AxisWeightFilter,        # 1. 5축 비중
-    AssetPickerFilter,       # 3. 자산 선별
-    WeightAllocatorFilter,   # 4. 비중 배분
+    AssetPickerFilter,          # 3. 자산 선별
+    PersonalizedRankingFilter,  # 3-b. 개인화 랭킹 (Risk Engine + 목표수익률)
+    WeightAllocatorFilter,      # 4. 비중 배분
+    SurvivalWeightFilter,    # 4-b. Survival Score → 가중치 보정
+    RiskEngineFilter,        # 4-c. composite_risk_score 부착 (XGB 70%+Survival 30%)
     SummarizeFilter,         # 5. 수치 요약
     ProjectionFilter,        # 6. 성장 시뮬레이션
     RebalancingFilter,       # 7. 리밸런싱
@@ -569,12 +836,13 @@ PIPELINE_FILTERS: list[type[BaseFilter]] = [
     CalendarFilter,          # 10. 배당 캘린더
     RiskAlertFilter,         # 11. ISA + 리스크 경보
     FireEngineFilter,        # 12. FIRE 역산
+    ReverseFireFilter,       # 12-b. FIRE 역산 (Reverse) — optional, 실패해도 pipeline 계속
     MonteCarloFilter,        # 13. Monte Carlo (Macro 연동)
     SurvivalFilter,          # 13-b. 생존확률 (ML+상관충격 통합)
     TaxOptimizerFilter,      # 14. 세금 최적화 (2026)
     BehavioralFinanceFilter, # 15. 행동편향
     YieldTrapFilter,         # 16. Yield Trap 감지
     PortfolioHealthFilter,   # 17. Health Score
-    SHAPExplainerFilter,     # 18. SHAP 설명 (ML 위험 종목)
+    SHAPExplainerFilter,     # 18. Risk Attribution (Survival hazard 기반, SHAP 아님)
     StorytellingFilter,      # 19. 스토리텔링
 ]

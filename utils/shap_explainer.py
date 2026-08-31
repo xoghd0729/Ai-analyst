@@ -1,36 +1,25 @@
 """
-utils/shap_explainer.py — ML 판단 근거 설명 엔진 (SHAP)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+utils/shap_explainer.py  v2 - TabPFN Survival hazard score
+===========================================================
 
-왜 SHAP인가?
-  XGBoost가 "WEAKENING"을 판단했을 때 "왜?"를 설명할 수 없으면
-  AI 블랙박스라는 비판을 피할 수 없다.
+v1 (XGBoost 3-class TreeExplainer) -> v2 (Survival hazard + rule-based attribution)
 
-  SHAP(SHapley Additive exPlanations):
-    각 피처가 최종 예측에 얼마나 기여했는지 수치로 계산.
-    "payout_ratio 92%가 위험도를 +0.34 올렸다"
-    이 한 줄이 ML 신뢰도를 완전히 바꾼다.
+[분류 체계 - 종목 상태]
+  hazard_pct < 0.35        -> INTACT    (안정)
+  0.35 <= hazard_pct < 0.65 -> WEAKENING (주의)
+  hazard_pct >= 0.65        -> BROKEN    (고위험)
 
-■ 동작 방식
-  1. 저장된 XGBoost 모델(pkl)을 SHAP TreeExplainer에 연결
-  2. 종목 데이터 한 행 → SHAP values 계산
-  3. 상위 기여 피처 3개를 한국어로 번역해 반환
-  4. 판단에 대한 신뢰도(confidence) 도 함께 반환
+[투자성향 gate - 별도 적용, 이 파일과 분리]
+  conservative: gate=0.35 / moderate: gate=0.50 / aggressive: gate=0.65
 
-■ 반환 구조
-  {
-    "prediction":   "WEAKENING",
-    "confidence":   0.74,
-    "top_factors": [
-      {"feature": "payout_ratio",   "label_ko": "배당성향",    "shap_value": +0.34, "direction": "위험"},
-      {"feature": "fcf_negative",   "label_ko": "FCF 적자",    "shap_value": +0.21, "direction": "위험"},
-      {"feature": "div_to_ocf",     "label_ko": "배당/영업CF", "shap_value": +0.15, "direction": "위험"},
-    ],
-    "summary": "배당성향 과도·잉여현금흐름 적자로 배당 약화 위험 감지",
-  }
+[설명 방법]
+  TabPFN은 TreeExplainer 불가 -> 재무지표 rule-based attribution.
+  각 지표가 '위험 기준'을 얼마나 벗어나는지로 기여도 산출.
+  kr_3class_model.pkl 기반 XGBoost 설명은 _explain_xgb_benchmark()로 보존.
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import pickle
@@ -40,58 +29,21 @@ import numpy as np
 
 log = logging.getLogger(__name__)
 
-BASE_DIR   = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, "models", "kr_3class_model.pkl")
-DATASET_PATH = os.path.join(BASE_DIR, "data", "dividend_dataset.csv")
+BASE_DIR      = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SURVIVAL_PATH = os.path.join(BASE_DIR, "results", "survival_pd_v4.json")
+DATASET_PATH  = os.path.join(BASE_DIR, "data", "dividend_dataset.csv")
+MODEL_PATH    = os.path.join(BASE_DIR, "models", "kr_3class_model.pkl")   # benchmark only
 
-# 종목별 최신 연도 피처 캐시 (SHAP 입력용 — 실제 재무값 공급)
+CLASS_NAMES = ["INTACT", "WEAKENING", "BROKEN"]
+
+# 종목별 최신 재무 피처 캐시 (attribution 입력용)
 _FEATURE_CACHE: dict | None = None
+# 생존분석 결과 캐시
+_SURVIVAL_CACHE: dict | None = None
 
-
-def _load_latest_features() -> dict:
-    """dividend_dataset.csv에서 종목별 '최신 연도' 13개 피처를 로드.
-
-    SHAP 설명은 실제 재무값이 있어야 의미가 있다. 추천 데이터(ranking 기반)에는
-    원시 재무값이 없으므로, 학습 데이터셋에서 종목별 최신 행을 끌어와 공급한다.
-    파생 피처(div_to_ocf, fcf_negative, ocf_to_capex)도 여기서 계산한다.
-    """
-    global _FEATURE_CACHE
-    if _FEATURE_CACHE is not None:
-        return _FEATURE_CACHE
-    out: dict = {}
-    try:
-        import pandas as pd
-        df = pd.read_csv(DATASET_PATH, dtype={"stock_code": str})
-        df = df.sort_values(["stock_code", "year"])
-        latest = df.groupby("stock_code").tail(1)
-        for _, r in latest.iterrows():
-            code = str(r["stock_code"]).zfill(6)
-            ocf = float(r.get("operating_cf") or 0)
-            capex = float(r.get("capex") or 0)
-            fcf = r.get("fcf")
-            divp = float(r.get("dividends_paid") or 0)
-            feat = {
-                "fcf":               float(fcf) if pd.notna(fcf) else 0.0,
-                "dividends_paid":    divp,
-                "dividend_coverage": float(r.get("dividend_coverage") or 0),
-                "operating_cf":      ocf,
-                "capex":             capex,
-                "payout_ratio":      float(r.get("payout_ratio") or 0),
-                "dps_yoy_pct":       float(r.get("dps_yoy_pct") or 0),
-                "debt_ratio":        float(r.get("debt_ratio") or 0),
-                "interest_coverage": float(r.get("interest_coverage") or 0),
-                "revenue_yoy_pct":   float(r.get("revenue_yoy_pct") or 0),
-                # 파생 피처 (학습 시 build_features와 동일 정의)
-                "div_to_ocf":        divp / (abs(ocf) + 1),
-                "fcf_negative":      1 if (pd.notna(fcf) and float(fcf) < 0) else 0,
-                "ocf_to_capex":      ocf / (abs(capex) + 1),
-            }
-            out[code] = feat
-    except Exception as e:
-        log.warning("최신 피처 로드 실패: %s", e)
-    _FEATURE_CACHE = out
-    return out
-
+# ─────────────────────────────────────────────────
+# 피처 한국어 레이블
+# ─────────────────────────────────────────────────
 FEATURE_LABEL_KO = {
     "fcf":               "잉여현금흐름(FCF)",
     "dividends_paid":    "배당금 지급액",
@@ -108,189 +60,265 @@ FEATURE_LABEL_KO = {
     "revenue_yoy_pct":   "매출 성장률(%)",
 }
 
-CLASS_NAMES = ["INTACT", "WEAKENING", "BROKEN"]
+# ─────────────────────────────────────────────────
+# Rule-based attribution 기준
+# (feature, direction, warn_threshold, danger_threshold, weight)
+# direction: "high" = 높을수록 위험 / "low" = 낮을수록 위험
+# ─────────────────────────────────────────────────
+_ATTRIBUTION_RULES: list[tuple] = [
+    ("payout_ratio",      "high", 70.0,  90.0,  1.2),
+    ("fcf_negative",      "high",  0.5,   1.0,  1.0),
+    ("div_to_ocf",        "high",  0.7,   1.0,  1.1),
+    ("dps_yoy_pct",       "low",  -5.0, -20.0,  1.0),
+    ("interest_coverage", "low",   3.0,   1.5,  0.9),
+    ("debt_ratio",        "high", 200.0, 350.0,  0.8),
+    ("dividend_coverage", "low",   1.5,   1.0,  1.0),
+    ("ocf_to_capex",      "low",   1.2,   0.8,  0.8),
+    ("revenue_yoy_pct",   "low",  -3.0, -10.0,  0.7),
+    ("operating_cf",      "low",   0.0,  -1e9,  0.7),
+]
 
-_model_cache: Optional[dict] = None
 
+# ─────────────────────────────────────────────────
+# 데이터 로더
+# ─────────────────────────────────────────────────
 
-def _load_model() -> Optional[dict]:
-    global _model_cache
-    if _model_cache is not None:
-        return _model_cache
-    if not os.path.exists(MODEL_PATH):
-        log.warning("모델 파일 없음: %s", MODEL_PATH)
-        return None
-    # 모델은 train_kr_3class.py 에서 joblib.dump 로 저장됨 → joblib.load 우선.
-    # (일반 pickle.load 로 읽으면 'No module named Pipeline' 등 클래스 해석 실패)
+def _load_survival_scores() -> dict:
+    global _SURVIVAL_CACHE
+    if _SURVIVAL_CACHE is not None:
+        return _SURVIVAL_CACHE
     try:
-        import joblib
-        bundle = joblib.load(MODEL_PATH)
-        _model_cache = bundle
-        return bundle
-    except Exception as e_joblib:
-        try:
-            with open(MODEL_PATH, "rb") as f:
-                bundle = pickle.load(f)
-            _model_cache = bundle
-            return bundle
-        except Exception as e:
-            log.error("모델 로드 실패: joblib(%s) / pickle(%s)", e_joblib, e)
-            return None
+        with open(SURVIVAL_PATH, encoding="utf-8") as f:
+            d = json.load(f)
+        _SURVIVAL_CACHE = d.get("stock_risk", {})
+    except Exception as e:
+        log.warning("survival_pd_v4.json 로드 실패: %s", e)
+        _SURVIVAL_CACHE = {}
+    return _SURVIVAL_CACHE
 
+
+def _load_latest_features() -> dict:
+    global _FEATURE_CACHE
+    if _FEATURE_CACHE is not None:
+        return _FEATURE_CACHE
+    out: dict = {}
+    try:
+        import pandas as pd
+        df = pd.read_csv(DATASET_PATH, dtype={"stock_code": str})
+        df = df.sort_values(["stock_code", "year"])
+        latest = df.groupby("stock_code").tail(1)
+        for _, r in latest.iterrows():
+            code = str(r["stock_code"]).zfill(6)
+            ocf  = float(r.get("operating_cf") or 0)
+            capex = float(r.get("capex") or 0)
+            fcf   = r.get("fcf")
+            divp  = float(r.get("dividends_paid") or 0)
+            feat = {
+                "fcf":               float(fcf) if hasattr(fcf, '__float__') and fcf == fcf else 0.0,
+                "dividends_paid":    divp,
+                "dividend_coverage": float(r.get("dividend_coverage") or 0),
+                "operating_cf":      ocf,
+                "capex":             capex,
+                "payout_ratio":      float(r.get("payout_ratio") or 0),
+                "dps_yoy_pct":       float(r.get("dps_yoy_pct") or 0),
+                "debt_ratio":        float(r.get("debt_ratio") or 0),
+                "interest_coverage": float(r.get("interest_coverage") or 0),
+                "revenue_yoy_pct":   float(r.get("revenue_yoy_pct") or 0),
+                "div_to_ocf":        divp / (abs(ocf) + 1),
+                "fcf_negative":      1 if (fcf is not None and fcf == fcf and float(fcf) < 0) else 0,
+                "ocf_to_capex":      ocf / (abs(capex) + 1),
+            }
+            out[code] = feat
+    except Exception as e:
+        log.warning("최신 피처 로드 실패: %s", e)
+    _FEATURE_CACHE = out
+    return out
+
+
+# ─────────────────────────────────────────────────
+# 핵심 분류 함수
+# ─────────────────────────────────────────────────
+
+def classify_by_hazard(hazard: float) -> str:
+    """
+    TabPFN Survival hazard score -> INTACT / WEAKENING / BROKEN.
+    hazard 는 uncalibrated risk score (배당삭감 확률이 아님).
+    """
+    if hazard < 0.35:
+        return "INTACT"
+    if hazard < 0.65:
+        return "WEAKENING"
+    return "BROKEN"
+
+
+# ─────────────────────────────────────────────────
+# Rule-based Feature Attribution
+# ─────────────────────────────────────────────────
+
+def _compute_attribution(stock_data: dict, n_top: int = 3) -> list[dict]:
+    """
+    재무지표 기반 위험 기여도 계산.
+    TabPFN 모델의 실제 gradient/SHAP이 아닌 도메인 지식 기반 attribution.
+    각 지표가 위험 기준(warn/danger threshold)을 얼마나 벗어나는지 점수화.
+    """
+    scores: dict[str, float] = {}
+
+    for fname, direction, warn, danger, weight in _ATTRIBUTION_RULES:
+        val = stock_data.get(fname)
+        if val is None:
+            continue
+        val = float(val)
+
+        if direction == "high":
+            if val >= danger:
+                score = 1.0 * weight
+            elif val >= warn:
+                score = ((val - warn) / (abs(danger - warn) + 1e-9)) * weight * 0.6
+            else:
+                score = 0.0
+        else:  # "low"
+            if val <= danger:
+                score = 1.0 * weight
+            elif val <= warn:
+                score = ((warn - val) / (abs(warn - danger) + 1e-9)) * weight * 0.6
+            else:
+                score = 0.0
+
+        if score > 0:
+            scores[fname] = score
+
+    # 절댓값 기준 정렬
+    ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:n_top]
+
+    factors = []
+    for fname, score in ranked:
+        raw = stock_data.get(fname, 0) or 0
+        factors.append({
+            "feature":   fname,
+            "label_ko":  FEATURE_LABEL_KO.get(fname, fname),
+            "score":     round(score, 4),
+            "direction": "위험",
+            "raw_value": round(float(raw), 2),
+        })
+    return factors
+
+
+def _build_summary_v2(prediction: str, top_factors: list, hazard: float,
+                      survival_1y: float | None) -> str:
+    risk_labels = [f["label_ko"] for f in top_factors]
+    surv_str = f", 1년 생존률 {survival_1y:.1f}%" if survival_1y is not None else ""
+
+    if prediction == "INTACT":
+        return f"배당 유지 안정 판정 (위험도 {hazard:.2f}{surv_str}). 주요 재무 지표 정상 범위."
+
+    label = "배당 약화" if prediction == "WEAKENING" else "배당 삭감 고위험"
+    parts = [f"{label} 감지 (위험도 {hazard:.2f}{surv_str})."]
+    if risk_labels:
+        parts.append(f"주요 위험 요인: {', '.join(risk_labels)}.")
+    return " ".join(parts)
+
+
+# ─────────────────────────────────────────────────
+# 공개 API
+# ─────────────────────────────────────────────────
 
 def explain_prediction(
     stock_data: dict,
-    n_top:      int = 3,
+    hazard: float | None = None,
+    survival_1y: float | None = None,
+    n_top: int = 3,
 ) -> dict:
     """
-    단일 종목에 대한 SHAP 기반 ML 판단 근거 반환.
+    단일 종목 위험 설명 반환 (v2: Survival hazard 기반).
 
     Args:
-        stock_data: 종목 피처 딕셔너리
-                    {fcf, dividends_paid, dividend_coverage, operating_cf,
-                     capex, payout_ratio, dps_yoy_pct, ...}
-        n_top:      상위 기여 피처 개수 (기본 3개)
+        stock_data:   재무 피처 딕셔너리
+        hazard:       TabPFN Survival hazard score (None이면 재무지표로만 판단)
+        survival_1y:  1년 생존률 (%, None 허용)
+        n_top:        상위 기여 피처 개수
 
     Returns:
-        prediction, confidence, top_factors, summary
+        prediction, hazard, top_factors, summary, method
     """
-    bundle = _load_model()
-    if bundle is None:
-        return _fallback_explanation(stock_data)
+    # hazard 없으면 재무지표로 간이 판단
+    if hazard is None:
+        payout = float(stock_data.get("payout_ratio", 50) or 50)
+        fcf_neg = float(stock_data.get("fcf_negative", 0) or 0)
+        hazard_est = min(0.9, payout / 200 + fcf_neg * 0.3)
+        prediction = classify_by_hazard(hazard_est)
+        hazard = hazard_est
+        method = "rule-based (no survival score)"
+    else:
+        prediction = classify_by_hazard(hazard)
+        method = "TabPFN Survival hazard"
 
-    try:
-        import shap
-    except ImportError:
-        log.warning("shap 미설치. pip install shap --break-system-packages")
-        return _fallback_explanation(stock_data)
+    top_factors = _compute_attribution(stock_data, n_top=n_top)
+    summary = _build_summary_v2(prediction, top_factors, hazard, survival_1y)
 
-    try:
-        pipeline       = bundle.get("pipeline") or bundle.get("model")
-        feature_names  = bundle.get("feature_names") or bundle.get("features", [])
-
-        if pipeline is None or not feature_names:
-            return _fallback_explanation(stock_data)
-
-        # 피처 벡터 구성 (누락 피처는 0으로 채움)
-        X_row = np.array([[float(stock_data.get(f, 0) or 0) for f in feature_names]])
-
-        # 파이프라인에서 XGBoost 추출 (SimpleImputer → XGBoost 구조)
-        if hasattr(pipeline, "steps"):
-            xgb_model = pipeline.steps[-1][1]
-            X_transformed = pipeline[:-1].transform(X_row)
-        else:
-            xgb_model    = pipeline
-            X_transformed = X_row
-
-        # 예측 확률
-        proba = pipeline.predict_proba(X_row)[0]
-        pred_idx     = int(np.argmax(proba))
-        prediction   = CLASS_NAMES[pred_idx]
-        confidence   = float(proba[pred_idx])
-
-        # SHAP TreeExplainer
-        explainer   = shap.TreeExplainer(xgb_model)
-        shap_values = explainer.shap_values(X_transformed)
-
-        # 다중 클래스 SHAP 출력은 shap 버전마다 형태가 다름:
-        #   구버전: list[n_classes] of (n_samples, n_features)
-        #   신버전: ndarray (n_samples, n_features, n_classes)
-        # 예측 클래스의 기여도를 버전 무관하게 추출.
-        n_classes = len(CLASS_NAMES)
-        if isinstance(shap_values, list):
-            sv = np.asarray(shap_values[pred_idx])[0]
-        else:
-            arr = np.asarray(shap_values)
-            if arr.ndim == 3:
-                if arr.shape[-1] == n_classes:        # (samples, features, classes)
-                    sv = arr[0, :, pred_idx]
-                else:                                  # (classes, samples, features)
-                    sv = arr[pred_idx, 0, :]
-            else:                                       # 이진/단일: (samples, features)
-                sv = arr[0]
-        sv = np.asarray(sv).ravel()
-
-        # 상위 기여 피처 (절댓값 기준 정렬)
-        feat_contributions = sorted(
-            zip(feature_names, sv),
-            key=lambda x: abs(x[1]),
-            reverse=True,
-        )[:n_top]
-
-        top_factors = []
-        for fname, shap_val in feat_contributions:
-            direction = "위험" if shap_val > 0 else "안전"
-            top_factors.append({
-                "feature":    fname,
-                "label_ko":   FEATURE_LABEL_KO.get(fname, fname),
-                "shap_value": round(float(shap_val), 4),
-                "direction":  direction,
-                "raw_value":  round(float(stock_data.get(fname, 0) or 0), 2),
-            })
-
-        summary = _build_summary(prediction, top_factors, confidence)
-
-        return {
-            "prediction":   prediction,
-            "confidence":   round(confidence, 3),
-            "probabilities": {
-                CLASS_NAMES[i]: round(float(p), 3)
-                for i, p in enumerate(proba)
-            },
-            "top_factors":  top_factors,
-            "summary":      summary,
-            "method":       "SHAP TreeExplainer",
-        }
-
-    except Exception as e:
-        log.error("SHAP 계산 실패: %s", e, exc_info=True)
-        return _fallback_explanation(stock_data)
+    return {
+        "prediction":   prediction,
+        "hazard":       round(hazard, 4),
+        "survival_1y":  survival_1y,
+        "top_factors":  top_factors,
+        "summary":      summary,
+        "method":       method,
+    }
 
 
 def explain_portfolio_risks(recommendations: list[dict]) -> list[dict]:
     """
-    포트폴리오 전 종목에 대해 SHAP 설명 일괄 생성.
-    ML 위험 종목(WEAKENING/BROKEN)만 설명 생성.
+    포트폴리오 전 종목 설명 일괄 생성.
+    SurvivalWeightFilter가 이미 survival_risk_score를 채워놓음.
+    WEAKENING / BROKEN 종목만 attribution 생성.
     """
+    survival_scores = _load_survival_scores()
+    features = _load_latest_features()
     results = []
+
     for rec in recommendations:
-        ml_status = rec.get("ml_status", "INTACT")
-        if ml_status == "INTACT":
+        ticker = rec.get("ticker", "")
+        code   = str(rec.get("stock_code", "")).zfill(6)
+
+        # hazard: SurvivalWeightFilter 결과 우선, 없으면 survival_pd_v4.json 직접
+        hazard = rec.get("survival_risk_score")
+        survival_1y = rec.get("survival_1y")
+        if hazard is None:
+            sr = survival_scores.get(ticker) or survival_scores.get(code) or {}
+            hazard = sr.get("hazard_pct")
+            survival_1y = sr.get("survival_1y")
+
+        prediction = classify_by_hazard(float(hazard)) if hazard is not None else "INTACT"
+
+        if prediction == "INTACT":
             results.append({
-                "ticker":    rec.get("ticker", ""),
-                "name":      rec.get("name", ""),
-                "ml_status": ml_status,
+                "ticker":      ticker,
+                "name":        rec.get("name", ""),
+                "prediction":  "INTACT",
+                "hazard":      round(float(hazard), 4) if hazard is not None else None,
+                "survival_1y": survival_1y,
                 "explanation": None,
             })
             continue
 
-        # 종목 피처: 학습 데이터셋의 최신 연도 실제 재무값 우선 (13개 전부 공급)
-        code = str(rec.get("stock_code", "")).zfill(6)
-        feats = _load_latest_features().get(code, {})
-        if feats:
-            stock_data = dict(feats)
-        else:
-            # 폴백: 추천 데이터에 있는 값만 (없으면 explain_prediction이 0 처리)
-            stock_data = {
-                "fcf":               rec.get("fcf", 0),
-                "dividends_paid":    rec.get("dividends_paid", 0),
-                "dividend_coverage": rec.get("dividend_coverage", 1.0),
-                "operating_cf":      rec.get("operating_cf", 0),
-                "capex":             rec.get("capex", 0),
-                "payout_ratio":      rec.get("payout_ratio", 50),
-                "dps_yoy_pct":       rec.get("dps_yoy_pct") or rec.get("latest_yoy_pct", 0),
-            }
-        # 추천 데이터에 더 최신 값이 있으면 덮어쓰기 (실시간 우선)
-        for k in ("dps_yoy_pct", "payout_ratio"):
+        # 재무 피처: CSV 최신 연도 우선
+        stock_data = dict(features.get(code, {}))
+        # 추천 데이터에서 최신값 덮어쓰기
+        for k in ("payout_ratio", "dps_yoy_pct", "dividend_coverage"):
             v = rec.get(k)
             if v is not None:
                 stock_data[k] = v
 
-        explanation = explain_prediction(stock_data)
+        explanation = explain_prediction(
+            stock_data,
+            hazard=float(hazard) if hazard is not None else None,
+            survival_1y=survival_1y,
+        )
         results.append({
-            "ticker":      rec.get("ticker", ""),
+            "ticker":      ticker,
             "name":        rec.get("name", ""),
-            "ml_status":   ml_status,
+            "prediction":  prediction,
+            "hazard":      explanation["hazard"],
+            "survival_1y": survival_1y,
             "weight_pct":  rec.get("weight_pct", 0),
             "explanation": explanation,
         })
@@ -298,46 +326,88 @@ def explain_portfolio_risks(recommendations: list[dict]) -> list[dict]:
     return results
 
 
-def _build_summary(prediction: str, top_factors: list, confidence: float) -> str:
-    """상위 요인 기반 한국어 요약 문장 생성."""
-    if prediction == "INTACT":
-        return f"배당 유지 안정 판정 (신뢰도 {confidence*100:.0f}%). 주요 재무 지표 정상 범위."
+# ─────────────────────────────────────────────────
+# Benchmark: 기존 XGBoost 3-class (보존용)
+# ─────────────────────────────────────────────────
 
-    risk_factors = [f["label_ko"] for f in top_factors if f["shap_value"] > 0]
-    safe_factors = [f["label_ko"] for f in top_factors if f["shap_value"] < 0]
-
-    label = "배당 약화" if prediction == "WEAKENING" else "배당 삭감"
-    parts = [f"{label} 위험 감지 (신뢰도 {confidence*100:.0f}%)."]
-
-    if risk_factors:
-        parts.append(f"주요 위험 요인: {', '.join(risk_factors)}.")
-    if safe_factors:
-        parts.append(f"방어 요인: {', '.join(safe_factors)}.")
-
-    return " ".join(parts)
+_xgb_model_cache: Optional[dict] = None
 
 
-def _fallback_explanation(stock_data: dict) -> dict:
-    """SHAP/모델 없을 때 feature importance 기반 fallback."""
-    payout = float(stock_data.get("payout_ratio", 50) or 50)
-    dps_yoy = float(stock_data.get("dps_yoy_pct", 0) or 0)
-    fcf = float(stock_data.get("fcf", 1) or 1)
+def _explain_xgb_benchmark(stock_data: dict, n_top: int = 3) -> dict:
+    """
+    kr_3class_model.pkl (XGBoost) 기반 설명. benchmark / 비교용.
+    프로덕션 경로에서는 호출하지 않음.
+    """
+    global _xgb_model_cache
+    if _xgb_model_cache is None:
+        if not os.path.exists(MODEL_PATH):
+            return {"error": "kr_3class_model.pkl not found"}
+        try:
+            try:
+                import joblib
+                _xgb_model_cache = joblib.load(MODEL_PATH)
+            except ImportError:
+                with open(MODEL_PATH, "rb") as f:
+                    _xgb_model_cache = pickle.load(f)
+        except Exception as e:
+            return {"error": str(e)}
 
-    factors = []
-    if payout > 80:
-        factors.append({"feature": "payout_ratio", "label_ko": "배당성향(%)",
-                        "shap_value": (payout - 50) / 100, "direction": "위험", "raw_value": payout})
-    if dps_yoy < -10:
-        factors.append({"feature": "dps_yoy_pct", "label_ko": "배당금 전년비 증감률",
-                        "shap_value": abs(dps_yoy) / 100, "direction": "위험", "raw_value": dps_yoy})
-    if fcf < 0:
-        factors.append({"feature": "fcf", "label_ko": "잉여현금흐름(FCF)",
-                        "shap_value": 0.2, "direction": "위험", "raw_value": fcf})
+    bundle = _xgb_model_cache
+    try:
+        import shap
 
-    return {
-        "prediction":  "UNKNOWN",
-        "confidence":  0.0,
-        "top_factors": factors[:3],
-        "summary":    "SHAP 미지원 — 재무 지표 기반 간이 설명",
-        "method":     "rule-based fallback",
-    }
+        pipeline      = bundle.get("pipeline") or bundle.get("model")
+        feature_names = bundle.get("feature_names") or bundle.get("features", [])
+        if pipeline is None or not feature_names:
+            return {"error": "bundle structure unknown"}
+
+        X_row = np.array([[float(stock_data.get(f, 0) or 0) for f in feature_names]])
+
+        if hasattr(pipeline, "steps"):
+            xgb_model     = pipeline.steps[-1][1]
+            X_transformed = pipeline[:-1].transform(X_row)
+        else:
+            xgb_model     = pipeline
+            X_transformed = X_row
+
+        proba      = pipeline.predict_proba(X_row)[0]
+        pred_idx   = int(np.argmax(proba))
+        prediction = CLASS_NAMES[pred_idx]
+        confidence = float(proba[pred_idx])
+
+        explainer   = shap.TreeExplainer(xgb_model)
+        shap_values = explainer.shap_values(X_transformed)
+
+        n_classes = len(CLASS_NAMES)
+        if isinstance(shap_values, list):
+            sv = np.asarray(shap_values[pred_idx])[0]
+        else:
+            arr = np.asarray(shap_values)
+            if arr.ndim == 3:
+                sv = arr[0, :, pred_idx] if arr.shape[-1] == n_classes else arr[pred_idx, 0, :]
+            else:
+                sv = arr[0]
+        sv = np.asarray(sv).ravel()
+
+        ranked = sorted(zip(feature_names, sv), key=lambda x: abs(x[1]), reverse=True)[:n_top]
+        top_factors = [
+            {
+                "feature":   fn,
+                "label_ko":  FEATURE_LABEL_KO.get(fn, fn),
+                "shap_value": round(float(sv_), 4),
+                "direction": "위험" if sv_ > 0 else "안전",
+                "raw_value": round(float(stock_data.get(fn, 0) or 0), 2),
+            }
+            for fn, sv_ in ranked
+        ]
+
+        return {
+            "prediction":    prediction,
+            "confidence":    round(confidence, 3),
+            "probabilities": {CLASS_NAMES[i]: round(float(p), 3) for i, p in enumerate(proba)},
+            "top_factors":   top_factors,
+            "method":        "SHAP TreeExplainer (XGBoost benchmark)",
+        }
+    except Exception as e:
+        log.error("XGBoost benchmark SHAP 실패: %s", e, exc_info=True)
+        return {"error": str(e)}

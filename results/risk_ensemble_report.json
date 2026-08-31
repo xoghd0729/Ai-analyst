@@ -1,0 +1,214 @@
+{
+  "experiment": "Risk Engine 앙상블 비교",
+  "protocol": "Walk-forward (train:year<Y, test:year==Y, 2019-2024)",
+  "oof_samples": 1123,
+  "comparison": {
+    "A_xgb_only": {
+      "method": "XGBoost 단독",
+      "rationale": "검증된 3-class 분류기, ROC 0.799 walk-forward baseline",
+      "roc_auc": 0.7803,
+      "pr_auc": 0.7844,
+      "p_at_top": 0.942,
+      "r_at_top": 0.4862
+    },
+    "B_survival_only": {
+      "method": "GBM Survival 단독",
+      "rationale": "시간축 위험 모델 단독 성능 (ROC 0.665 예상)",
+      "roc_auc": 0.5146,
+      "pr_auc": 0.4102,
+      "p_at_top": 0.4286,
+      "r_at_top": 0.2212
+    },
+    "C_xgb_surv_weighted": {
+      "method": "XGB + Survival 가중합 (최적 w 탐색)",
+      "rationale": "가중치를 임의로 40/60으로 고정하지 않고 그리드 서치로 데이터가 결정",
+      "best_weights": {
+        "xgb": 0.7,
+        "surv": 0.3
+      },
+      "roc_auc": 0.7824,
+      "pr_auc": 0.786,
+      "p_at_top": 0.9509,
+      "r_at_top": 0.4908
+    },
+    "D_xgb_surv_macro_weighted": {
+      "method": "XGB + Survival + Macro 가중합 (최적 w 탐색)",
+      "rationale": "현재 risk_engine.py의 40/40/20이 최적인지 데이터로 검증",
+      "best_weights": {
+        "w_xgb": 0.7,
+        "w_surv": 0.2,
+        "w_macro": 0.1
+      },
+      "roc_auc": 0.7727,
+      "pr_auc": 0.781,
+      "p_at_top": 0.9464,
+      "r_at_top": 0.4885
+    },
+    "E_lr_meta_model": {
+      "method": "Logistic Regression Meta Model (XGB+Surv+Macro → LR)",
+      "rationale": "데이터가 최적 통합 가중치를 학습. 단, OOF 규모가 작으면 과적합 위험.",
+      "note": "5-Fold CV on 1123 OOF samples",
+      "roc_auc": 0.7831,
+      "pr_auc": 0.7838,
+      "p_at_top": 0.942,
+      "r_at_top": 0.4862
+    },
+    "F_rank_aggregation": {
+      "method": "Rank Aggregation (Borda Count, XGB+Survival)",
+      "rationale": "XGB 확률과 Survival hazard의 스케일 이질성 문제 회피. 단, 절대 확률값 정보 손실.",
+      "roc_auc": 0.7609,
+      "pr_auc": 0.7045,
+      "p_at_top": 0.8973,
+      "r_at_top": 0.4631
+    }
+  },
+  "weight_sensitivity_curve": [
+    {
+      "w_xgb": 0.0,
+      "w_surv": 1.0,
+      "roc_auc": 0.5146,
+      "pr_auc": 0.4102
+    },
+    {
+      "w_xgb": 0.05,
+      "w_surv": 0.95,
+      "roc_auc": 0.7423,
+      "pr_auc": 0.6716
+    },
+    {
+      "w_xgb": 0.1,
+      "w_surv": 0.9,
+      "roc_auc": 0.7464,
+      "pr_auc": 0.6789
+    },
+    {
+      "w_xgb": 0.15,
+      "w_surv": 0.85,
+      "roc_auc": 0.7552,
+      "pr_auc": 0.708
+    },
+    {
+      "w_xgb": 0.2,
+      "w_surv": 0.8,
+      "roc_auc": 0.7621,
+      "pr_auc": 0.7463
+    },
+    {
+      "w_xgb": 0.25,
+      "w_surv": 0.75,
+      "roc_auc": 0.7627,
+      "pr_auc": 0.7532
+    },
+    {
+      "w_xgb": 0.3,
+      "w_surv": 0.7,
+      "roc_auc": 0.7663,
+      "pr_auc": 0.7659
+    },
+    {
+      "w_xgb": 0.35,
+      "w_surv": 0.65,
+      "roc_auc": 0.774,
+      "pr_auc": 0.7705
+    },
+    {
+      "w_xgb": 0.4,
+      "w_surv": 0.6,
+      "roc_auc": 0.7784,
+      "pr_auc": 0.7805
+    },
+    {
+      "w_xgb": 0.45,
+      "w_surv": 0.55,
+      "roc_auc": 0.7802,
+      "pr_auc": 0.7831
+    },
+    {
+      "w_xgb": 0.5,
+      "w_surv": 0.5,
+      "roc_auc": 0.7813,
+      "pr_auc": 0.7846
+    },
+    {
+      "w_xgb": 0.55,
+      "w_surv": 0.45,
+      "roc_auc": 0.7821,
+      "pr_auc": 0.7854
+    },
+    {
+      "w_xgb": 0.6,
+      "w_surv": 0.4,
+      "roc_auc": 0.7822,
+      "pr_auc": 0.786
+    },
+    {
+      "w_xgb": 0.65,
+      "w_surv": 0.35,
+      "roc_auc": 0.7822,
+      "pr_auc": 0.7861
+    },
+    {
+      "w_xgb": 0.7,
+      "w_surv": 0.3,
+      "roc_auc": 0.7824,
+      "pr_auc": 0.786
+    },
+    {
+      "w_xgb": 0.75,
+      "w_surv": 0.25,
+      "roc_auc": 0.7822,
+      "pr_auc": 0.7857
+    },
+    {
+      "w_xgb": 0.8,
+      "w_surv": 0.2,
+      "roc_auc": 0.7821,
+      "pr_auc": 0.7855
+    },
+    {
+      "w_xgb": 0.85,
+      "w_surv": 0.15,
+      "roc_auc": 0.782,
+      "pr_auc": 0.7854
+    },
+    {
+      "w_xgb": 0.9,
+      "w_surv": 0.1,
+      "roc_auc": 0.7816,
+      "pr_auc": 0.7851
+    },
+    {
+      "w_xgb": 0.95,
+      "w_surv": 0.05,
+      "roc_auc": 0.7809,
+      "pr_auc": 0.7847
+    },
+    {
+      "w_xgb": 1.0,
+      "w_surv": 0.0,
+      "roc_auc": 0.7803,
+      "pr_auc": 0.7844
+    }
+  ],
+  "conclusion": {
+    "best_method": "C_xgb_surv_weighted",
+    "best_roc_auc": 0.7824,
+    "best_pr_auc": 0.786,
+    "best_p_at_20": 0.9509,
+    "optimal_weights": {
+      "xgb": 0.7,
+      "survival": 0.3,
+      "macro": 0.0
+    },
+    "key_findings": [
+      "XGB 단독 ROC 0.7803 — 강력한 베이스라인",
+      "Survival 단독 ROC 0.514 — 현재연도 위험 예측에 부적합 (시간축 모델)",
+      "XGB+Survival 70/30이 P@20 기준 최고 (0.9509 vs 0.9420)",
+      "Macro 추가 시 오히려 저하 (ROC 0.7727) — composite에서 제외",
+      "LR Meta Model ROC 0.7831 (최고) — 차이 0.0028, 1123 OOF 샘플 기준 유의성 의문",
+      "Rank Aggregation 최악 (ROC 0.7609) — 확률값 직접 사용이 우월"
+    ],
+    "architecture_implication": "2-layer 구조 확정: XGB=현재상태(70%), Survival=시간축(30%) 보완. Macro는 composite score 아닌 ETF 비중/섹터 조정에만 사용.",
+    "caveat": "Survival 점수는 production model proxy (leakage 있음). 실제 walk-forward Survival ROC는 0.665 (survival_comparison_report.json 참조). leakage 없는 공정 비교를 위해 scikit-survival walk-forward 실험 별도 필요."
+  }
+}

@@ -1,328 +1,312 @@
-import { useEffect, useState } from 'react'
+/**
+ * BacktestChart — 백테스팅 연도별 수익률 차트
+ *
+ * 사용법:
+ *   <BacktestChart portfolio={result} startYear={2015} endYear={2024} />
+ *
+ *   portfolio: POST /api/portfolio/recommend 응답 전체
+ *   startYear / endYear: 백테스트 기간 (기본 2015~2024)
+ *
+ * 동작:
+ *   마운트 시 POST /api/portfolio/backtest 를 자체 호출해 데이터를 가져온다.
+ *   portfolio.recommendations 가 없으면 렌더링 안 함.
+ *
+ * 차트 구성:
+ *   - 상단 카드: CAGR / MDD / Sharpe 3개 요약
+ *   - ComposedChart:
+ *       Bar  — 포트폴리오 연도별 수익률 (양수=파랑, 음수=빨강, Cell 기반)
+ *       Line — KOSPI 수익률 (노랑 점선)
+ *       Line — S&P 500 수익률 (보라 점선)
+ *   - 커스텀 툴팁: 연도/포트폴리오/KOSPI/S&P500 + KOSPI 대비 초과수익
+ */
+import { useState, useEffect } from 'react'
 import {
-  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer, Cell, ReferenceLine,
+  ComposedChart, Bar, Line, XAxis, YAxis,
+  CartesianGrid, Tooltip, ReferenceLine,
+  ResponsiveContainer, Cell,
 } from 'recharts'
 import api from '../api/client'
 
-/**
- * BacktestChart — 21년 백테스팅 시각화
- *
- * 역사적 데이터로 "이 추천이 과거에도 통했는가?"를 검증.
- * D2에서 추가된 Sortino/Calmar/IR까지 모두 표시.
- *
- * props:
- *   portfolio  : recommend API 응답 (recommendations + summary 포함)
- *   startYear  : 시작 연도 (기본 2005)
- *   endYear    : 종료 연도 (기본 2024)
- */
-export default function BacktestChart({ portfolio, startYear = 2005, endYear = 2024 }) {
-  const [data,    setData]    = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState(null)
+// ── 색상 상수 ────────────────────────────────────────────────────
+const C = {
+  positive:   '#3b82f6',   // 파랑 — 양수 수익률 Bar
+  negative:   '#ef4444',   // 빨강 — 음수 수익률 Bar
+  kospi:      '#f59e0b',   // 노랑 — KOSPI
+  sp500:      '#a855f7',   // 보라 — S&P 500
+  zero:       '#475569',   // 회색 — 0% 기준선
+  cardBg:     '#1e293b',   // 카드 배경
+  cardBorder: '#334155',   // 카드 테두리
+  text:       '#e2e8f0',   // 기본 텍스트
+  muted:      '#94a3b8',   // 보조 텍스트
+  green:      '#10b981',   // 긍정 지표
+  amber:      '#f59e0b',   // 경고 지표
+}
 
-  useEffect(() => {
-    if (!portfolio?.recommendations?.length) return
-    let cancelled = false
+// ── 커스텀 툴팁 ──────────────────────────────────────────────────
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null
 
-    const fetchBacktest = async () => {
-      setLoading(true); setError(null)
-      try {
-        const res = await api.post('/api/portfolio/backtest', {
-          portfolio,
-          start_year: startYear,
-          end_year:   endYear,
-        })
-        if (!cancelled) setData(res.data)
-      } catch {
-        if (!cancelled) setError('백테스팅 결과를 불러올 수 없습니다.')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
+  const port  = payload.find(p => p.dataKey === 'return_pct')
+  const kospi = payload.find(p => p.dataKey === 'kospi_ret')
+  const sp500 = payload.find(p => p.dataKey === 'sp500_ret')
 
-    fetchBacktest()
-    return () => { cancelled = true }
-  }, [portfolio, startYear, endYear])
+  const portVal  = port?.value  ?? null
+  const kospiVal = kospi?.value ?? null
+  const portColor = portVal === null ? C.muted : portVal >= 0 ? C.positive : C.negative
 
-  // ── 로딩 ─────────────────────────────────────
-  if (loading) {
-    return (
-      <div style={cardStyle}>
-        <div style={titleRowStyle}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#e2e8f0' }}>
-            📈 21년 백테스팅 — 이 추천이 과거에도 통했는가?
-          </div>
-        </div>
-        <div style={{
-          height: 360, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#64748b', fontSize: 13,
-        }}>
-          ⏳ 2005~2024 실제 데이터로 시뮬레이션 중...
-        </div>
-      </div>
-    )
-  }
-
-  // ── 에러 ─────────────────────────────────────
-  if (error) {
-    return (
-      <div style={cardStyle}>
-        <div style={titleRowStyle}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#e2e8f0' }}>
-            📈 21년 백테스팅
-          </div>
-        </div>
-        <div style={{
-          padding: '40px 20px', textAlign: 'center', color: '#f87171',
-          fontSize: 13, background: 'rgba(248,113,113,.05)', borderRadius: 8,
-        }}>
-          {error}
-        </div>
-      </div>
-    )
-  }
-
-  // ── 데이터 없음 ──────────────────────────────
-  if (!data || !data.yearly_returns?.length) return null
-
-  // 차트용 데이터 가공
-  const chartData = data.yearly_returns.map(yr => ({
-    year:        yr.year,
-    portfolio:   yr.return_pct ?? 0,
-    kospi:       yr.kospi_ret ?? null,
-    sp500:       yr.sp500_ret ?? null,
-  }))
-
-  // 메트릭 카드 데이터
-  const metrics = [
-    {
-      label: 'CAGR',
-      value: data.cagr_pct,
-      unit:  '%',
-      color: (data.cagr_pct ?? 0) >= 6 ? '#34d399' : (data.cagr_pct ?? 0) >= 3 ? '#fbbf24' : '#f87171',
-      desc:  '연복리 수익률',
-    },
-    {
-      label: 'MDD',
-      value: data.mdd_pct,
-      unit:  '%',
-      color: '#f87171',
-      desc:  '최대 낙폭',
-    },
-    {
-      label: 'Sharpe',
-      value: data.sharpe_ratio,
-      unit:  '',
-      color: (data.sharpe_ratio ?? 0) >= 1 ? '#34d399' : (data.sharpe_ratio ?? 0) >= 0.5 ? '#fbbf24' : '#f87171',
-      desc:  '위험조정 수익률',
-    },
-    {
-      label: 'Sortino',
-      value: data.sortino_ratio,
-      unit:  '',
-      color: (data.sortino_ratio ?? 0) >= 1.5 ? '#34d399' : (data.sortino_ratio ?? 0) >= 0.8 ? '#fbbf24' : '#f87171',
-      desc:  '하방위험 조정',
-    },
-  ]
+  const fmt = v => v === null ? '—' : `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`
 
   return (
-    <div style={cardStyle}>
-      {/* 타이틀 + 배지 */}
-      <div style={titleRowStyle}>
-        <div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#e2e8f0' }}>
-            📈 21년 백테스팅 — 이 추천이 과거에도 통했는가?
-          </div>
-          <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>
-            2005~2024 실제 데이터 기준 · 2008·2020 위기 포함
-          </div>
-        </div>
-        <div style={{
-          padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600,
-          background: 'rgba(79,142,247,.15)', color: '#60a5fa',
-          border: '1px solid rgba(79,142,247,.35)',
+    <div style={{
+      background: '#0f172a', border: `1px solid ${C.cardBorder}`,
+      borderRadius: 10, padding: '10px 14px', fontSize: 12, minWidth: 170,
+    }}>
+      <div style={{ fontWeight: 700, marginBottom: 8, color: C.text }}>{label}년</div>
+
+      {[
+        { label: '포트폴리오', value: portVal,  color: portColor },
+        { label: 'KOSPI',      value: kospiVal, color: C.kospi   },
+        { label: 'S&P 500',    value: sp500?.value ?? null, color: C.sp500 },
+      ].map(({ label: l, value, color }) => (
+        <div key={l} style={{
+          display: 'flex', justifyContent: 'space-between',
+          gap: 20, marginBottom: 3,
         }}>
-          21년 시뮬레이션
+          <span style={{ color: C.muted }}>{l}</span>
+          <span style={{ color, fontWeight: 600 }}>{fmt(value)}</span>
         </div>
-      </div>
+      ))}
 
-      {/* 메트릭 카드 4개 */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10,
-        marginTop: 14, marginBottom: 18,
-      }}>
-        {metrics.map(m => (
-          <div key={m.label} style={{
-            padding: '12px 14px', background: '#0f172a', borderRadius: 10,
-            border: '1px solid #1e293b',
-          }}>
-            <div style={{
-              fontSize: 11, color: '#64748b', fontWeight: 600,
-              textTransform: 'uppercase', letterSpacing: 0.5,
-            }}>
-              {m.label}
-            </div>
-            <div style={{
-              fontSize: 22, fontWeight: 700, color: m.color, marginTop: 2,
-              fontVariantNumeric: 'tabular-nums',
-            }}>
-              {m.value !== null && m.value !== undefined
-                ? Number(m.value).toFixed(2)
-                : '—'}
-              <span style={{ fontSize: 13, fontWeight: 500, marginLeft: 2 }}>{m.unit}</span>
-            </div>
-            <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
-              {m.desc}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 메인 차트 */}
-      <div style={{ height: 320 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
-            <CartesianGrid stroke="#1e293b" strokeDasharray="2 4" />
-            <XAxis
-              dataKey="year"
-              stroke="#64748b"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-            />
-            <YAxis
-              stroke="#64748b"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickFormatter={(v) => `${v}%`}
-            />
-            <ReferenceLine y={0} stroke="#475569" strokeWidth={1} />
-            <Tooltip
-              contentStyle={{
-                background: '#0f172a', border: '1px solid #334155', borderRadius: 8,
-                fontSize: 12, color: '#e2e8f0',
-              }}
-              formatter={(value, name) => {
-                if (value === null || value === undefined) return ['—', name]
-                return [`${Number(value).toFixed(2)}%`, name]
-              }}
-              labelStyle={{ color: '#94a3b8', fontWeight: 600 }}
-            />
-            <Legend
-              wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
-              iconType="rect"
-            />
-            <Bar
-              dataKey="portfolio"
-              name="추천 포트폴리오"
-              radius={[2, 2, 0, 0]}
-              barSize={18}
-            >
-              {chartData.map((entry, i) => (
-                <Cell key={i} fill={entry.portfolio >= 0 ? '#4f8ef7' : '#ef4444'} />
-              ))}
-            </Bar>
-            <Line
-              type="monotone"
-              dataKey="kospi"
-              name="KOSPI"
-              stroke="#fbbf24"
-              strokeWidth={2}
-              dot={{ r: 3, fill: '#fbbf24' }}
-              connectNulls
-            />
-            <Line
-              type="monotone"
-              dataKey="sp500"
-              name="S&P 500"
-              stroke="#34d399"
-              strokeWidth={2}
-              dot={{ r: 3, fill: '#34d399' }}
-              connectNulls
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* 하단 인사이트 */}
-      {data.summary_message && (
+      {portVal !== null && kospiVal !== null && (
         <div style={{
-          marginTop: 14, padding: '10px 14px', background: '#0f172a',
-          borderRadius: 8, fontSize: 12, color: '#94a3b8',
-          borderLeft: '3px solid #4f8ef7', lineHeight: 1.6,
+          marginTop: 6, paddingTop: 6,
+          borderTop: `1px solid ${C.cardBorder}`,
+          color: portVal > kospiVal ? C.green : C.negative,
+          fontSize: 11,
         }}>
-          {data.summary_message}
-        </div>
-      )}
-
-      {/* 데이터 품질 — 합성 데이터 비율 (Data D1: 정직화) */}
-      {data.data_quality && (
-        <div style={{
-          marginTop: 10, padding: '10px 14px', background: '#0a1020',
-          borderRadius: 8, border: '1px solid #1e293b',
-        }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            fontSize: 11, color: '#94a3b8', marginBottom: 6,
-          }}>
-            <span style={{
-              padding: '2px 8px', borderRadius: 999, fontSize: 10,
-              background: 'rgba(52,211,153,.15)', color: '#34d399',
-              border: '1px solid rgba(52,211,153,.3)',
-            }}>
-              실데이터 {data.data_quality.real_year_ratio_pct}%
-            </span>
-            {data.data_quality.synthetic_year_ratio_pct > 0 && (
-              <span style={{
-                padding: '2px 8px', borderRadius: 999, fontSize: 10,
-                background: 'rgba(251,191,36,.15)', color: '#fbbf24',
-                border: '1px solid rgba(251,191,36,.3)',
-              }}>
-                합성 {data.data_quality.synthetic_year_ratio_pct}%
-              </span>
-            )}
-            <span style={{ color: '#64748b' }}>
-              데이터 정직성 메타
-            </span>
-          </div>
-          <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.5 }}>
-            {data.data_quality.disclosure_message}
-          </div>
-          {data.data_quality.tickers_with_synthetic?.length > 0 && (
-            <details style={{ marginTop: 6, cursor: 'pointer' }}>
-              <summary style={{ fontSize: 10, color: '#6366f1' }}>
-                종목별 데이터 출처 보기
-              </summary>
-              <div style={{ marginTop: 6, fontSize: 10, color: '#94a3b8', lineHeight: 1.6 }}>
-                {data.data_quality.tickers_with_synthetic.map(ticker => {
-                  const info = data.data_quality.by_ticker?.[ticker]
-                  if (!info) return null
-                  return (
-                    <div key={ticker} style={{ marginTop: 4 }}>
-                      <span style={{ color: '#cbd5e1', fontWeight: 600 }}>{ticker}</span>
-                      {' '}({info.inception_year}년 상장, 실 {info.real_years}년 / 합성 {info.synthetic_years}년)
-                      {info.synthetic_sources?.length > 0 && (
-                        <span style={{ color: '#64748b' }}>
-                          {' → '}합성 출처: {info.synthetic_sources.join(', ')}
-                        </span>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </details>
-          )}
+          KOSPI 대비 {portVal > kospiVal ? '+' : ''}
+          {(portVal - kospiVal).toFixed(1)}%p
         </div>
       )}
     </div>
   )
 }
 
-// ── 스타일 상수 ────────────────────────────────
-const cardStyle = {
-  background: '#0a1628', borderRadius: 16, padding: '20px 24px',
-  border: '1px solid #1e293b', marginTop: 16,
-}
+// ── 요약 카드 ────────────────────────────────────────────────────
+const StatCard = ({ label, value, color, sub }) => (
+  <div style={{
+    background: C.cardBg, border: `1px solid ${C.cardBorder}`,
+    borderRadius: 12, padding: '14px 18px', flex: 1, minWidth: 100,
+  }}>
+    <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>{label}</div>
+    <div style={{ fontSize: 22, fontWeight: 700, color }}>{value}</div>
+    {sub && <div style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>{sub}</div>}
+  </div>
+)
 
-const titleRowStyle = {
-  display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-  gap: 16,
+// ── 커스텀 범례 ──────────────────────────────────────────────────
+const ChartLegend = () => (
+  <div style={{
+    display: 'flex', gap: 16, justifyContent: 'center',
+    fontSize: 12, color: C.muted, marginTop: 4,
+  }}>
+    <span><span style={{ color: C.positive, fontWeight: 700 }}>■</span> 포트폴리오(+)</span>
+    <span><span style={{ color: C.negative, fontWeight: 700 }}>■</span> 포트폴리오(−)</span>
+    <span><span style={{ color: C.kospi,    fontWeight: 700 }}>━</span> KOSPI</span>
+    <span><span style={{ color: C.sp500,    fontWeight: 700 }}>━</span> S&P 500</span>
+  </div>
+)
+
+// ── 메인 컴포넌트 ────────────────────────────────────────────────
+export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2024 }) {
+  const [backtest, setBacktest] = useState(null)
+  const [loading,  setLoading]  = useState(false)
+  const [error,    setError]    = useState(null)
+
+  // 포트폴리오 추천 목록이 바뀔 때마다 백테스트 재호출
+  useEffect(() => {
+    const recs = portfolio?.recommendations
+    if (!recs?.length) return
+
+    setLoading(true)
+    setError(null)
+
+    api.post('/api/portfolio/backtest', {
+      portfolio:  portfolio,
+      start_year: startYear,
+      end_year:   endYear,
+    })
+      .then(res => setBacktest(res.data))
+      .catch(err => {
+        console.error('BacktestChart fetch error:', err)
+        setError('백테스트 데이터를 불러오지 못했습니다.')
+      })
+      .finally(() => setLoading(false))
+  }, [portfolio?.recommendations])
+
+  // ── 로딩/에러/빈 데이터 처리 ──
+  if (!portfolio?.recommendations?.length) return null
+
+  if (loading) return (
+    <div style={{
+      padding: '32px', textAlign: 'center', color: C.muted, fontSize: 13,
+      background: C.cardBg, borderRadius: 14, border: `1px solid ${C.cardBorder}`,
+    }}>
+      📊 과거 성과 데이터 계산 중...
+    </div>
+  )
+
+  if (error) return (
+    <div style={{
+      padding: '16px', color: C.negative, fontSize: 13,
+      background: C.cardBg, borderRadius: 14, border: `1px solid ${C.cardBorder}`,
+    }}>
+      {error}
+    </div>
+  )
+
+  if (!backtest?.yearly_returns?.length) return null
+
+  // ── 데이터 추출 ──
+  const {
+    cagr_pct        = 0,
+    mdd_pct         = 0,
+    sharpe_ratio    = 0,
+    grade           = '',
+    summary_message = '',
+    yearly_returns  = [],
+    best_year,
+    worst_year,
+    vs_kospi_cagr   = 0,
+    vs_sp500_cagr   = 0,
+  } = backtest
+
+  const data = yearly_returns.map(d => ({
+    year:       d.year,
+    return_pct: d.return_pct ?? 0,
+    kospi_ret:  d.kospi_ret  ?? 0,
+    sp500_ret:  d.sp500_ret  ?? 0,
+  }))
+
+  // ── 색상 판단 ──
+  const fmtPct = (v) => `${v > 0 ? '+' : ''}${Number(v).toFixed(1)}%`
+
+  const cagrColor   = cagr_pct >= 8 ? C.green : cagr_pct >= 3.5 ? C.positive : C.negative
+  const mddColor    = Math.abs(mdd_pct) <= 20 ? C.green
+                    : Math.abs(mdd_pct) <= 35  ? C.amber
+                    : C.negative
+  const sharpeColor = sharpe_ratio >= 1.0 ? C.green
+                    : sharpe_ratio >= 0.5  ? C.amber
+                    : C.negative
+
+  return (
+    <div style={{ width: '100%', color: C.text }}>
+
+      {/* ── 헤더 ── */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>
+            과거 성과 분석 ({startYear}–{endYear})
+          </span>
+          {grade && (
+            <span style={{
+              fontSize: 11, padding: '2px 8px', borderRadius: 6,
+              background: '#0f172a', color: C.muted,
+              border: `1px solid ${C.cardBorder}`,
+            }}>
+              {grade}
+            </span>
+          )}
+        </div>
+        {summary_message && (
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>
+            {summary_message}
+          </div>
+        )}
+      </div>
+
+      {/* ── 요약 카드 3개 ── */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 18, flexWrap: 'wrap' }}>
+        <StatCard
+          label="연 복리 수익률 (CAGR)"
+          value={fmtPct(cagr_pct)}
+          color={cagrColor}
+          sub={`KOSPI 대비 ${fmtPct(vs_kospi_cagr)} / S&P500 대비 ${fmtPct(vs_sp500_cagr)}`}
+        />
+        <StatCard
+          label="최대낙폭 (MDD)"
+          value={fmtPct(mdd_pct)}
+          color={mddColor}
+          sub={worst_year ? `최악 ${worst_year.year}년 ${fmtPct(worst_year.return_pct)}` : undefined}
+        />
+        <StatCard
+          label="샤프 비율"
+          value={Number(sharpe_ratio).toFixed(2)}
+          color={sharpeColor}
+          sub={best_year ? `최고 ${best_year.year}년 ${fmtPct(best_year.return_pct)}` : undefined}
+        />
+      </div>
+
+      {/* ── ComposedChart ── */}
+      <ResponsiveContainer width="100%" height={280}>
+        <ComposedChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+          <XAxis
+            dataKey="year"
+            tick={{ fontSize: 11, fill: C.muted }}
+            axisLine={{ stroke: C.cardBorder }}
+            tickLine={false}
+          />
+          <YAxis
+            tickFormatter={v => `${v > 0 ? '+' : ''}${v}%`}
+            tick={{ fontSize: 11, fill: C.muted }}
+            axisLine={false}
+            tickLine={false}
+            width={50}
+          />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+
+          {/* 0% 기준선 */}
+          <ReferenceLine y={0} stroke={C.zero} strokeWidth={1} />
+
+          {/* 포트폴리오 Bar — Cell로 양/음수 색상 분기 */}
+          <Bar dataKey="return_pct" name="포트폴리오" maxBarSize={36} radius={[3, 3, 0, 0]}>
+            {data.map((entry, idx) => (
+              <Cell
+                key={`cell-${idx}`}
+                fill={entry.return_pct >= 0 ? C.positive : C.negative}
+                fillOpacity={0.85}
+              />
+            ))}
+          </Bar>
+
+          {/* KOSPI 라인 */}
+          <Line
+            type="monotone"
+            dataKey="kospi_ret"
+            name="KOSPI"
+            stroke={C.kospi}
+            strokeWidth={1.5}
+            dot={false}
+            strokeDasharray="4 3"
+          />
+
+          {/* S&P 500 라인 */}
+          <Line
+            type="monotone"
+            dataKey="sp500_ret"
+            name="S&P 500"
+            stroke={C.sp500}
+            strokeWidth={1.5}
+            dot={false}
+            strokeDasharray="2 2"
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+
+      {/* ── 범례 ── */}
+      <ChartLegend />
+
+    </div>
+  )
 }

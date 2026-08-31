@@ -34,3 +34,6 @@ data/dividend_dataset_partial.csv
 reports/.Rhistory
 *.bak
 dividend_dataset.xlsx
+data/users.json
+data/auth_tokens.json
+data/saved_portfolios.json

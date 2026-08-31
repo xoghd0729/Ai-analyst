@@ -370,3 +370,289 @@ def _make_fire_recommendation(
         lines.append("현재 적립 속도와 수익률로 목표를 향해 순조롭게 진행 중입니다.")
 
     return " ".join(lines)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# FIRE 역산 엔진 (Reverse Engine)
+# "55세 달성 불가"가 아니라 "무엇을 얼마나 바꿔야 하는가"를 계산
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _binary_search_min(
+    lo: float, hi: float, tol: float,
+    fn,
+    max_iter: int = 60,
+) -> Optional[float]:
+    """[lo, hi]에서 fn(x)==True인 최솟값 반환. 없으면 None."""
+    if fn(lo):
+        return lo
+    if not fn(hi):
+        return None   # 범위 내 해 없음
+    for _ in range(max_iter):
+        mid = (lo + hi) / 2
+        if fn(mid):
+            hi = mid
+        else:
+            lo = mid
+        if hi - lo < tol:
+            break
+    return round(hi, 1)
+
+
+def _binary_search_max(
+    lo: float, hi: float, tol: float,
+    fn,
+    max_iter: int = 60,
+) -> Optional[float]:
+    """[lo, hi]에서 fn(x)==True인 최댓값 반환. lo에서도 False면 None."""
+    if not fn(lo):
+        return None
+    if fn(hi):
+        return hi
+    for _ in range(max_iter):
+        mid = (lo + hi) / 2
+        if fn(mid):
+            lo = mid
+        else:
+            hi = mid
+        if hi - lo < tol:
+            break
+    return round(lo, 1)
+
+
+def calc_fire_reverse(
+    current_investable:  float,   # 현재 투자금 (만원)
+    monthly_savings:     float,   # 현재 월 적립금 (만원)
+    current_age:         int,
+    target_fire_age:     int,     # 달성하고 싶은 나이
+    target_monthly_만원: float,   # 달성하고 싶은 월배당 목표 (만원)
+    avg_net_yield:       float = 5.0,
+    div_growth_rate:     float = 5.0,
+    cpi_rate:            float = 2.5,
+) -> dict:
+    """
+    현재 조건 기준으로 목표(target_fire_age / target_monthly_만원) 달성을 위해
+    무엇을 얼마나 바꿔야 하는지 역산한다.
+
+    3가지 역산 경로:
+      방법 1 (savings): 월 적립금을 X만원으로 늘리면 달성
+      방법 2 (capital): 초기 투자금을 Y만원으로 늘리면 달성
+      방법 3 (target ): 현재 조건 유지 시 target_fire_age에 달성 가능한 최대 월배당
+
+    반환:
+    {
+        "current_fire_age":          int | None,
+        "gap_years":                 int | None,   # 양수=늦음, 음수=빠름
+        "target_fire_age":           int,
+        "target_monthly_만원":       float,
+        "already_achievable":        bool,
+        "required_monthly_savings":  float | None, # 방법1 결과
+        "savings_increase":          float | None, # 방법1: 증가분
+        "required_initial_capital":  float | None, # 방법2 결과
+        "capital_increase":          float | None, # 방법2: 증가분
+        "achievable_monthly":        float | None, # 방법3: 현재 조건 최대 목표
+        "message":                   str,
+    }
+    """
+    # ── 공통 파라미터 묶음 ──────────────────────────────────────────────
+    _common = dict(
+        current_age     = current_age,
+        target_age      = target_fire_age,
+        avg_net_yield   = avg_net_yield,
+        div_growth_rate = div_growth_rate,
+        cpi_rate        = cpi_rate,
+        custom_monthly_만원 = target_monthly_만원,
+    )
+
+    def _proj_age(investable: float, savings: float) -> int:
+        """주어진 조건에서 custom 목표의 예상 달성 나이."""
+        if target_monthly_만원 <= 0:
+            return current_age
+        r = calc_fire_engine(
+            current_investable = investable,
+            monthly_savings    = savings,
+            **_common,
+        )
+        custom = r["targets"].get("custom")
+        if not custom:
+            return 999
+        return int(custom.get("projected_fire_age") or 999)
+
+    # ── 1. 현재 조건 기준 예상 달성 나이 ──────────────────────────────
+    current_fire_age = _proj_age(current_investable, monthly_savings)
+    if current_fire_age == 999:
+        current_fire_age = None
+
+    already_achievable = (
+        current_fire_age is not None and current_fire_age <= target_fire_age
+    )
+    gap_years = (
+        (current_fire_age - target_fire_age) if current_fire_age else None
+    )
+
+    # ── 2. 방법 1: 필요 월 적립금 역산 ───────────────────────────────
+    # fn(s): monthly_savings=s 일 때 target_fire_age 내 달성
+    fn_savings = lambda s: _proj_age(current_investable, s) <= target_fire_age
+
+    required_monthly_savings = None
+    savings_increase         = None
+
+    if not already_achievable:
+        # 상한: 목표 원금을 남은 기간 동안 직선 적립하는 최악 케이스
+        years_left   = max(target_fire_age - current_age, 1)
+        r_temp       = calc_fire_engine(
+            current_investable=current_investable,
+            monthly_savings=monthly_savings,
+            **_common,
+        )
+        required_prin = (
+            r_temp["targets"]["custom"]["required_principal"]
+            if r_temp["targets"].get("custom") else current_investable * 10
+        )
+        savings_hi = max(required_prin / (years_left * 12), monthly_savings * 20, 500.0)
+
+        req_s = _binary_search_min(
+            lo=monthly_savings, hi=savings_hi, tol=0.5,
+            fn=fn_savings,
+        )
+        if req_s is not None:
+            required_monthly_savings = req_s
+            savings_increase         = round(req_s - monthly_savings, 1)
+
+    # ── 3. 방법 2: 필요 초기 투자금 역산 ─────────────────────────────
+    fn_capital = lambda c: _proj_age(c, monthly_savings) <= target_fire_age
+
+    required_initial_capital = None
+    capital_increase         = None
+
+    if not already_achievable:
+        r_temp2      = calc_fire_engine(
+            current_investable=current_investable,
+            monthly_savings=monthly_savings,
+            **_common,
+        )
+        required_prin2 = (
+            r_temp2["targets"]["custom"]["required_principal"]
+            if r_temp2["targets"].get("custom") else current_investable * 10
+        )
+        capital_hi = max(required_prin2 * 1.5, current_investable * 5, 10_000.0)
+
+        req_c = _binary_search_min(
+            lo=current_investable, hi=capital_hi, tol=100.0,
+            fn=fn_capital,
+        )
+        if req_c is not None:
+            required_initial_capital = req_c
+            capital_increase         = round(req_c - current_investable, 0)
+
+    # ── 4. 방법 3: 현재 조건으로 달성 가능한 최대 월배당 ──────────────
+    # fn(m): monthly_target=m 일 때 target_fire_age 내 달성
+    def fn_achievable(m: float) -> bool:
+        if m <= 0:
+            return True
+        r = calc_fire_engine(
+            current_investable  = current_investable,
+            monthly_savings     = monthly_savings,
+            current_age         = current_age,
+            target_age          = target_fire_age,
+            avg_net_yield       = avg_net_yield,
+            div_growth_rate     = div_growth_rate,
+            cpi_rate            = cpi_rate,
+            custom_monthly_만원 = m,
+        )
+        custom = r["targets"].get("custom")
+        if not custom:
+            return False
+        age = custom.get("projected_fire_age")
+        return age is not None and int(age) <= target_fire_age
+
+    achievable_monthly = _binary_search_max(
+        lo=1.0, hi=max(target_monthly_만원 * 3, 1000.0), tol=0.5,
+        fn=fn_achievable,
+    )
+
+    # ── 5. 메시지 생성 ─────────────────────────────────────────────
+    message = _make_reverse_message(
+        current_age          = current_age,
+        target_fire_age      = target_fire_age,
+        target_monthly       = target_monthly_만원,
+        current_fire_age     = current_fire_age,
+        gap_years            = gap_years,
+        already_achievable   = already_achievable,
+        req_savings          = required_monthly_savings,
+        savings_inc          = savings_increase,
+        req_capital          = required_initial_capital,
+        capital_inc          = capital_increase,
+        achievable_monthly   = achievable_monthly,
+        current_savings      = monthly_savings,
+        current_capital      = current_investable,
+    )
+
+    return {
+        "current_fire_age":         current_fire_age,
+        "gap_years":                gap_years,
+        "target_fire_age":          target_fire_age,
+        "target_monthly_만원":      target_monthly_만원,
+        "already_achievable":       already_achievable,
+        "required_monthly_savings": required_monthly_savings,
+        "savings_increase":         savings_increase,
+        "required_initial_capital": required_initial_capital,
+        "capital_increase":         capital_increase,
+        "achievable_monthly":       achievable_monthly,
+        "message":                  message,
+    }
+
+
+def _make_reverse_message(
+    current_age:        int,
+    target_fire_age:    int,
+    target_monthly:     float,
+    current_fire_age:   Optional[int],
+    gap_years:          Optional[int],
+    already_achievable: bool,
+    req_savings:        Optional[float],
+    savings_inc:        Optional[float],
+    req_capital:        Optional[float],
+    capital_inc:        Optional[float],
+    achievable_monthly: Optional[float],
+    current_savings:    float,
+    current_capital:    float,
+) -> str:
+    lines = []
+
+    if already_achievable:
+        lines.append(
+            f"현재 조건으로 {current_fire_age}세에 "
+            f"월 {target_monthly:,.0f}만원 달성 가능합니다 "
+            f"(목표 {target_fire_age}세보다 {target_fire_age - current_fire_age}년 빠름)."
+        )
+        return " ".join(lines)
+
+    fire_str = f"{current_fire_age}세" if current_fire_age else "40년 내 미달성"
+    lines.append(
+        f"현재 조건 예상: {fire_str} | "
+        f"목표: {target_fire_age}세 / 월 {target_monthly:,.0f}만원"
+    )
+
+    if req_savings is not None and savings_inc is not None:
+        lines.append(
+            f"\n방법 1 (월 적립 증액): {current_savings:,.0f}만원 → "
+            f"{req_savings:,.1f}만원 (+{savings_inc:,.1f}만원)"
+        )
+    elif req_savings is None:
+        lines.append("\n방법 1 (월 적립 증액): 현실적 범위 내 단독 달성 어려움")
+
+    if req_capital is not None and capital_inc is not None:
+        lines.append(
+            f"\n방법 2 (초기 투자금 증액): {current_capital:,.0f}만원 → "
+            f"{req_capital:,.0f}만원 (+{capital_inc:,.0f}만원)"
+        )
+    elif req_capital is None:
+        lines.append("\n방법 2 (초기 투자금 증액): 현실적 범위 내 단독 달성 어려움")
+
+    if achievable_monthly is not None:
+        lines.append(
+            f"\n방법 3 (목표 조정): 현재 조건으로 {target_fire_age}세까지 "
+            f"달성 가능한 최대 월배당 → {achievable_monthly:,.1f}만원"
+        )
+
+    return "".join(lines)

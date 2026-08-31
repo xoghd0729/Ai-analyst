@@ -33,17 +33,17 @@ function getProjectionAge(fire_plan, label) {
   return null
 }
 
-export default function CashflowMilestone({ summary, fire_plan }) {
+export default function CashflowMilestone({ summary, fire_plan, fireEarliest = null }) {
   const currentMonthly = summary?.est_monthly_div_after_tax_만원 || 0
   const projection20   = summary?.projection_20y_monthly || 0
 
   return (
     <div style={{
-      background: '#0f172a', borderRadius: 16, padding: '20px 24px',
-      border: '1px solid #1e293b',
+      background: '#ffffff', borderRadius: 16, padding: '20px 24px',
+      border: '1px solid #dfe3ea',
     }}>
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0' }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: '#283143' }}>
           현금흐름 마일스톤
         </div>
         <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
@@ -54,10 +54,10 @@ export default function CashflowMilestone({ summary, fire_plan }) {
       {/* 현재 월 배당 큰 숫자 */}
       <div style={{
         textAlign: 'center', padding: '16px 0', marginBottom: 16,
-        borderBottom: '1px solid #1e293b',
+        borderBottom: '1px solid #dfe3ea',
       }}>
         <div style={{ fontSize: 12, color: '#64748b' }}>현재 월 배당 (세후)</div>
-        <div style={{ fontSize: 40, fontWeight: 900, color: '#34d399', lineHeight: 1.1 }}>
+        <div style={{ fontSize: 40, fontWeight: 900, color: '#059669', lineHeight: 1.1 }}>
           {currentMonthly.toFixed(1)}
           <span style={{ fontSize: 16, fontWeight: 400, color: '#64748b' }}>만원</span>
         </div>
@@ -75,10 +75,10 @@ export default function CashflowMilestone({ summary, fire_plan }) {
 
           return (
             <div key={ms.amount} style={{
-              background: achieved ? '#0f2a1f' : '#111827',
+              background: achieved ? '#0f2a1f' : '#ffffff',
               borderRadius: 12,
               padding: '12px 14px',
-              border: `1px solid ${achieved ? '#065f46' : inRange ? '#1e3a5f' : '#1e293b'}`,
+              border: `1px solid ${achieved ? '#065f46' : inRange ? '#1e3a5f' : '#dfe3ea'}`,
               position: 'relative', overflow: 'hidden',
             }}>
               {/* 진행바 배경 */}
@@ -106,7 +106,7 @@ export default function CashflowMilestone({ summary, fire_plan }) {
                 <div style={{ flex: 1 }}>
                   <div style={{
                     fontSize: 13, fontWeight: 700,
-                    color: achieved ? '#34d399' : '#e2e8f0',
+                    color: achieved ? '#059669' : '#283143',
                   }}>
                     {ms.label}
                   </div>
@@ -119,13 +119,13 @@ export default function CashflowMilestone({ summary, fire_plan }) {
                 <div style={{ textAlign: 'right' }}>
                   <div style={{
                     fontSize: 14, fontWeight: 700,
-                    color: achieved ? '#34d399' : '#475569',
+                    color: achieved ? '#059669' : '#475569',
                   }}>
                     {ms.amount}만원
                   </div>
                   <div style={{ fontSize: 10, marginTop: 2 }}>
                     {achieved
-                      ? <span style={{ color: '#34d399' }}>달성 ✓</span>
+                      ? <span style={{ color: '#059669' }}>달성 ✓</span>
                       : <span style={{ color: '#64748b' }}>
                           {(ms.amount - currentMonthly).toFixed(1)}만원 부족
                         </span>
@@ -136,7 +136,7 @@ export default function CashflowMilestone({ summary, fire_plan }) {
 
               {/* 진행률 바 */}
               {!achieved && (
-                <div style={{ marginTop: 8, height: 3, background: '#1e293b', borderRadius: 2 }}>
+                <div style={{ marginTop: 8, height: 3, background: '#dfe3ea', borderRadius: 2 }}>
                   <div style={{
                     height: '100%', borderRadius: 2,
                     width: `${pct}%`,
@@ -150,17 +150,19 @@ export default function CashflowMilestone({ summary, fire_plan }) {
         })}
       </div>
 
-      {/* FIRE 달성 예상 */}
-      {fire_plan?.earliest_fire_age && (
+      {/* FIRE 달성 예상 — 화면 전체와 동일 엔진(fireEarliest, calcCompoundGrowth) 사용해 숫자 통일 */}
+      {(fireEarliest?.age || fire_plan?.earliest_fire_age) && (
         <div style={{
           marginTop: 14, padding: '10px 14px',
-          background: '#1e293b', borderRadius: 10,
+          background: '#dfe3ea', borderRadius: 10,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
           <div>
-            <div style={{ fontSize: 11, color: '#64748b' }}>FIRE 최조 달성 예상</div>
-            <div style={{ fontSize: 13, color: '#fbbf24', fontWeight: 700, marginTop: 2 }}>
-              {fire_plan.earliest_fire_type} — 만 {fire_plan.earliest_fire_age}세
+            <div style={{ fontSize: 11, color: '#64748b' }}>FIRE 최초 달성 예상</div>
+            <div style={{ fontSize: 13, color: '#d97706', fontWeight: 700, marginTop: 2 }}>
+              {fireEarliest?.age
+                ? `${fireEarliest.name} — 만 ${fireEarliest.age}세`
+                : `${fire_plan.earliest_fire_type} — 만 ${fire_plan.earliest_fire_age}세`}
             </div>
           </div>
           <div style={{ fontSize: 24 }}>🏝️</div>

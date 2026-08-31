@@ -1,18 +1,18 @@
-ticker,name,overall_score,grade,trap_level,asset_type,consecutive_years,yield_pct,yield_score,stability_score,financial_score,growth_score,dividend_cut,dps_yoy_pct,payout_ratio,div_coverage,exclude_reason,capital_gain_rate,risk_profile,account,description,div_growth_rate_pct,sector
-XOM,ExxonMobil,95.0,🟢 우량,SAFE,DIVIDEND_ARISTOCRAT,41,3.4,35.0,35.0,20.0,5.0,0,4.2,33.2,1.37,,5.5,moderate,일반/연금,에너지 섹터 배당귀족. 40년+ 배당 증가 — 배당 3.4% + 주가 5.5% = 총 8.9%,3.5,에너지
-IBM,IBM,95.0,🟢 우량,SAFE,HIGH_YIELD,7,3.5,35.0,35.0,20.0,5.0,0,0.6,47.4,1.83,,5.0,moderate,일반/연금,IT전환 진행 중. AI·클라우드 전환으로 주가 회복세 — 배당 3.5% + 주가 5% = 총 8.5%,1.0,IT
-JNJ,Johnson & Johnson,88.0,🟢 우량,SAFE,DIVIDEND_KING,62,3.2,35.0,35.0,13.0,5.0,0,4.7,50.5,1.56,,5.0,stable,일반/연금,61년 연속 배당 증가. 헬스케어 글로벌 1위 — 배당 3.2% + 주가 5% = 총 8.2%,5.5,헬스케어
-CVX,Chevron,87.0,🟢 우량,SAFE,DIVIDEND_ARISTOCRAT,36,4.1,30.0,32.0,20.0,5.0,0,4.9,37.6,1.3,,4.5,moderate,일반/연금,36년 연속 배당 증가. 에너지 고배당 — 배당 4.1% + 주가 4.5% = 총 8.6%,4.0,에너지
-ABBV,AbbVie,84.0,🟢 우량,SAFE,DIVIDEND_CHALLENGER,14,3.8,35.0,28.0,13.0,8.0,0,5.8,61.3,1.53,,6.0,moderate,일반/연금,바이오파마 배당귀족. 휴미라 후속 파이프라인 강력 — 배당 3.8% + 주가 6% = 총 9.8%,7.0,헬스케어
-PG,Procter & Gamble,83.0,🟢 우량,SAFE,DIVIDEND_KING,67,2.5,27.0,35.0,13.0,8.0,0,5.5,55.4,1.42,,6.0,stable,일반/연금,67년 연속 배당 증가 배당왕. 생활필수재 독점 — 배당 2.5% + 주가 6% = 총 8.5%,5.0,소비재(필수)
-MCD,McDonald's,83.0,🟢 우량,SAFE,DIVIDEND_ARISTOCRAT,48,2.4,20.0,35.0,20.0,8.0,0,5.8,48.5,1.41,,7.0,stable,일반/연금,48년 연속 배당 증가. 프랜차이즈 모델 고성장 — 배당 2.4% + 주가 7% = 총 9.4%,8.0,소비재(경기)
-KO,Coca-Cola,78.0,🟡 보통,SAFE,DIVIDEND_KING,62,3.1,35.0,35.0,0.0,8.0,0,5.2,118.5,0.6,,4.0,stable,일반/연금,62년 연속 배당 증가 배당왕. 음료 독점력 — 배당 3.1% + 주가 4% = 총 7.1%,4.5,소비재(필수)
-T,AT&T,77.0,🟡 보통,WATCH,HIGH_YIELD,0,6.5,20.0,32.0,20.0,5.0,0,0.0,20.3,2.38,,1.5,moderate,일반/연금,통신 고배당주. 부채 감축 진행 중 — 배당 6.5% + 주가 1.5% = 총 8.0%,0.0,통신
-VZ,Verizon,77.0,🟡 보통,WATCH,DIVIDEND_CHALLENGER,19,6.8,20.0,32.0,20.0,5.0,0,1.9,30.9,1.71,,1.5,moderate,일반/연금,20년 연속 배당 증가. 5G 인프라 고배당 — 배당 6.8% + 주가 1.5% = 총 8.3%,1.5,통신
-PFE,Pfizer,62.0,🟠 주의,WATCH,DIVIDEND_CHALLENGER,14,6.5,20.0,35.0,2.0,5.0,0,2.4,83.5,0.93,,3.0,moderate,일반/연금,"코로나 이후 주가 조정, 배당수익률 급상승. 파이프라인 회복 기대 — 배당 6.5%",2.5,헬스케어
-MO,MO (알트리아),55.0,🟠 주의,WATCH,HIGH_YIELD,4,8.5,0.0,0.0,0.0,0.0,0,0.0,,,,1.0,aggressive,일반/연금,담배 고배당 대장주. 규제 리스크 있으나 현금흐름 극강 — 배당 8.5%,3.0,소비재(필수)
-EQR,Equity Residential,78.0,🟢 우량,SAFE,US_REIT,12,4.0,30.0,30.0,13.0,5.0,0,3.5,65.0,1.35,,4.0,moderate,일반/연금,미국 최대 아파트 리츠. 주요 대도시 중심. 임대 수익 안정적.,3.5,리츠(주거)
-FRT,Federal Realty Investment Trust,80.0,🟢 우량,SAFE,DIVIDEND_KING,56,4.2,32.0,33.0,10.0,5.0,0,2.5,70.0,1.28,,4.5,moderate,일반/연금,리츠 중 유일한 배당킹 56년 연속. 프리미엄 복합상업시설 중심.,2.5,리츠(소매)
-SPG,Simon Property Group,82.0,🟢 우량,SAFE,US_REIT,10,5.1,33.0,32.0,12.0,5.0,1,4.0,60.0,1.45,,5.0,moderate,일반/연금,미국 최대 프리미엄 아울렛·쇼핑몰 리츠. 코로나 후 배당 회복 완료.,4.0,리츠(소매)
-PSA,Public Storage,79.0,🟢 우량,SAFE,US_REIT,13,4.3,30.0,32.0,12.0,5.0,0,3.0,55.0,1.60,,4.5,moderate,일반/연금,미국 최대 셀프스토리지 리츠. 불경기 내성 강함. 낮은 자본지출.,3.0,리츠(창고)
-AMT,American Tower,81.0,🟢 우량,SAFE,DIVIDEND_ARISTOCRAT,13,3.2,28.0,32.0,16.0,5.0,0,3.5,58.0,1.50,,5.5,moderate,일반/연금,글로벌 통신타워 리츠. 5G 인프라 확장 수혜. 장기 임대 계약 기반 안정적 수익.,3.5,리츠(인프라)
+ticker,name,overall_score,grade,trap_level,asset_type,consecutive_years,yield_pct,yield_score,stability_score,financial_score,growth_score,dividend_cut,dps_yoy_pct,payout_ratio,div_coverage,exclude_reason,capital_gain_rate,risk_profile,account,description,div_growth_rate_pct,sector,sector_group
+XOM,ExxonMobil,95.0,🟢 우량,SAFE,DIVIDEND_ARISTOCRAT,41,3.4,35.0,35.0,20.0,5.0,0,4.2,33.2,1.37,,5.5,moderate,일반/연금,에너지 섹터 배당귀족. 40년+ 배당 증가 — 배당 3.4% + 주가 5.5% = 총 8.9%,3.5,에너지,에너지
+IBM,IBM,95.0,🟢 우량,SAFE,HIGH_YIELD,7,3.5,35.0,35.0,20.0,5.0,0,0.6,47.4,1.83,,5.0,moderate,일반/연금,IT전환 진행 중. AI·클라우드 전환으로 주가 회복세 — 배당 3.5% + 주가 5% = 총 8.5%,1.0,IT,IT
+JNJ,Johnson & Johnson,88.0,🟢 우량,SAFE,DIVIDEND_KING,62,3.2,35.0,35.0,13.0,5.0,0,4.7,50.5,1.56,,5.0,stable,일반/연금,61년 연속 배당 증가. 헬스케어 글로벌 1위 — 배당 3.2% + 주가 5% = 총 8.2%,5.5,헬스케어,헬스케어
+CVX,Chevron,87.0,🟢 우량,SAFE,DIVIDEND_ARISTOCRAT,36,4.1,30.0,32.0,20.0,5.0,0,4.9,37.6,1.3,,4.5,moderate,일반/연금,36년 연속 배당 증가. 에너지 고배당 — 배당 4.1% + 주가 4.5% = 총 8.6%,4.0,에너지,에너지
+ABBV,AbbVie,84.0,🟢 우량,SAFE,DIVIDEND_CHALLENGER,14,3.8,35.0,28.0,13.0,8.0,0,5.8,61.3,1.53,,6.0,moderate,일반/연금,바이오파마 배당귀족. 휴미라 후속 파이프라인 강력 — 배당 3.8% + 주가 6% = 총 9.8%,7.0,헬스케어,헬스케어
+PG,Procter & Gamble,83.0,🟢 우량,SAFE,DIVIDEND_KING,67,2.5,27.0,35.0,13.0,8.0,0,5.5,55.4,1.42,,6.0,stable,일반/연금,67년 연속 배당 증가 배당왕. 생활필수재 독점 — 배당 2.5% + 주가 6% = 총 8.5%,5.0,소비재(필수),소비재
+MCD,McDonald's,83.0,🟢 우량,SAFE,DIVIDEND_ARISTOCRAT,48,2.4,20.0,35.0,20.0,8.0,0,5.8,48.5,1.41,,7.0,stable,일반/연금,48년 연속 배당 증가. 프랜차이즈 모델 고성장 — 배당 2.4% + 주가 7% = 총 9.4%,8.0,소비재(경기),소비재
+KO,Coca-Cola,78.0,🟡 보통,SAFE,DIVIDEND_KING,62,3.1,35.0,35.0,0.0,8.0,0,5.2,118.5,0.6,,4.0,stable,일반/연금,62년 연속 배당 증가 배당왕. 음료 독점력 — 배당 3.1% + 주가 4% = 총 7.1%,4.5,소비재(필수),소비재
+T,AT&T,77.0,🟡 보통,WATCH,HIGH_YIELD,0,6.5,20.0,32.0,20.0,5.0,0,0.0,20.3,2.38,,1.5,moderate,일반/연금,통신 고배당주. 부채 감축 진행 중 — 배당 6.5% + 주가 1.5% = 총 8.0%,0.0,통신,통신
+VZ,Verizon,77.0,🟡 보통,WATCH,DIVIDEND_CHALLENGER,19,6.8,20.0,32.0,20.0,5.0,0,1.9,30.9,1.71,,1.5,moderate,일반/연금,20년 연속 배당 증가. 5G 인프라 고배당 — 배당 6.8% + 주가 1.5% = 총 8.3%,1.5,통신,통신
+PFE,Pfizer,62.0,🟠 주의,WATCH,DIVIDEND_CHALLENGER,14,6.5,20.0,35.0,2.0,5.0,0,2.4,83.5,0.93,,3.0,moderate,일반/연금,"코로나 이후 주가 조정, 배당수익률 급상승. 파이프라인 회복 기대 — 배당 6.5%",2.5,헬스케어,헬스케어
+MO,MO (알트리아),55.0,🟠 주의,WATCH,HIGH_YIELD,4,8.5,0.0,0.0,0.0,0.0,0,0.0,,,,1.0,aggressive,일반/연금,담배 고배당 대장주. 규제 리스크 있으나 현금흐름 극강 — 배당 8.5%,3.0,소비재(필수),소비재
+EQR,Equity Residential,78.0,🟢 우량,SAFE,US_REIT,12,4.0,30.0,30.0,13.0,5.0,0,3.5,65.0,1.35,,4.0,moderate,일반/연금,미국 최대 아파트 리츠. 주요 대도시 중심. 임대 수익 안정적.,3.5,리츠(주거),리츠
+FRT,Federal Realty Investment Trust,80.0,🟢 우량,SAFE,DIVIDEND_KING,56,4.2,32.0,33.0,10.0,5.0,0,2.5,70.0,1.28,,4.5,moderate,일반/연금,리츠 중 유일한 배당킹 56년 연속. 프리미엄 복합상업시설 중심.,2.5,리츠(소매),리츠
+SPG,Simon Property Group,82.0,🟢 우량,SAFE,US_REIT,10,5.1,33.0,32.0,12.0,5.0,1,4.0,60.0,1.45,,5.0,moderate,일반/연금,미국 최대 프리미엄 아울렛·쇼핑몰 리츠. 코로나 후 배당 회복 완료.,4.0,리츠(소매),리츠
+PSA,Public Storage,79.0,🟢 우량,SAFE,US_REIT,13,4.3,30.0,32.0,12.0,5.0,0,3.0,55.0,1.60,,4.5,moderate,일반/연금,미국 최대 셀프스토리지 리츠. 불경기 내성 강함. 낮은 자본지출.,3.0,리츠(창고),리츠
+AMT,American Tower,81.0,🟢 우량,SAFE,DIVIDEND_ARISTOCRAT,13,3.2,28.0,32.0,16.0,5.0,0,3.5,58.0,1.50,,5.5,moderate,일반/연금,글로벌 통신타워 리츠. 5G 인프라 확장 수혜. 장기 임대 계약 기반 안정적 수익.,3.5,리츠(인프라),리츠

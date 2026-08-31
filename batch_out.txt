@@ -1,0 +1,19 @@
+[init] dps_yoy 히스토리: 207종목 로드 완료
+[init] CSV 피처 fallback: 226종목 로드 완료
+
+=================================================================
+  Thesis 배치 분석 — 43개 종목
+  모드: DB 저장
+=================================================================
+
+[ 1/43] 메리츠화재 (024800) 분석 중...  [thesis_agent] Ollama 실패, fallback: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/chat (Caused by NewConnectionError("HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [Errno 111] Connection refused"))
+[thesis_agent] DB 저장 실패 (계속 진행): (psycopg2.OperationalError) connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+🟢 INTACT    | risk=0.00 (ML=0.00) | dps_yoy=N/A(?) payout=N/A
+[ 2/43] 포스코인터내셔널 (047050) 분석 중...  [thesis_agent] Ollama 실패, fallback: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/chat (Caused by NewConnectionError("HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [Errno 111] Connection refused"))
+[thesis_agent] DB 저장 실패 (계속 진행): (psycopg2.OperationalError) connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+(Background on this error at: https://sqlalche.me/e/20/e3q8)

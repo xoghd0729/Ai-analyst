@@ -31,8 +31,8 @@ const AXIS_LABELS = {
 
 const GRADE_COLOR = {
   'S': '#10b981',  // 에메랄드
-  'A': '#34d399',
-  'B': '#fbbf24',
+  'A': '#059669',
+  'B': '#d97706',
   'C': '#f97316',
   'D': '#ef4444',
 }
@@ -46,15 +46,15 @@ const CustomTooltip = ({ active, payload }) => {
   const d = payload[0]?.payload
   return (
     <div style={{
-      background: '#1e293b', border: '1px solid #334155',
-      borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#e2e8f0',
+      background: '#dfe3ea', border: '1px solid #c8d0dc',
+      borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#283143',
     }}>
       <div style={{ fontWeight: 700, marginBottom: 4 }}>{d?.fullLabel}</div>
       <div style={{ color: '#94a3b8' }}>
         {d?.score} / {d?.max}점 ({d?.pct}%)
       </div>
       {d?.action && (
-        <div style={{ marginTop: 6, color: '#fbbf24', fontSize: 12 }}>
+        <div style={{ marginTop: 6, color: '#d97706', fontSize: 12 }}>
           💡 {d.action}
         </div>
       )}
@@ -83,13 +83,13 @@ export default function HealthRadarChart({ health }) {
 
   return (
     <div style={{
-      background: '#0f172a', borderRadius: 16, padding: '20px 24px',
-      border: '1px solid #1e293b',
+      background: '#ffffff', borderRadius: 16, padding: '20px 24px',
+      border: '1px solid #dfe3ea',
     }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0' }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: '#283143' }}>
             Portfolio Health OS
           </div>
           <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
@@ -112,7 +112,7 @@ export default function HealthRadarChart({ health }) {
       {/* 레이더 차트 */}
       <ResponsiveContainer width="100%" height={280}>
         <RadarChart data={data} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
-          <PolarGrid stroke="#1e293b" />
+          <PolarGrid stroke="#dfe3ea" />
           <PolarAngleAxis
             dataKey="subject"
             tick={{ fill: '#94a3b8', fontSize: 12 }}
@@ -140,15 +140,15 @@ export default function HealthRadarChart({ health }) {
           <div key={d.subject}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 3 }}>
               <span style={{ color: '#94a3b8' }}>{d.subject}</span>
-              <span style={{ color: d.pct >= 70 ? '#34d399' : d.pct >= 40 ? '#fbbf24' : '#ef4444', fontWeight: 600 }}>
+              <span style={{ color: d.pct >= 70 ? '#059669' : d.pct >= 40 ? '#d97706' : '#ef4444', fontWeight: 600 }}>
                 {d.score}/{d.max}
               </span>
             </div>
-            <div style={{ height: 4, background: '#1e293b', borderRadius: 2 }}>
+            <div style={{ height: 4, background: '#dfe3ea', borderRadius: 2 }}>
               <div style={{
                 height: '100%', borderRadius: 2,
                 width: `${d.pct}%`,
-                background: d.pct >= 70 ? '#34d399' : d.pct >= 40 ? '#fbbf24' : '#ef4444',
+                background: d.pct >= 70 ? '#059669' : d.pct >= 40 ? '#d97706' : '#ef4444',
                 transition: 'width 0.6s ease',
               }} />
             </div>
@@ -158,9 +158,9 @@ export default function HealthRadarChart({ health }) {
 
       {/* 팁 */}
       {health.tips?.length > 0 && (
-        <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid #1e293b' }}>
+        <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid #dfe3ea' }}>
           {health.tips.slice(0, 2).map((tip, i) => (
-            <div key={i} style={{ fontSize: 12, color: '#fbbf24', marginTop: i > 0 ? 6 : 0 }}>
+            <div key={i} style={{ fontSize: 12, color: '#d97706', marginTop: i > 0 ? 6 : 0 }}>
               💡 {tip}
             </div>
           ))}

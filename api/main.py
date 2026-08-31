@@ -15,7 +15,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import ranking, stock, portfolio
+from api.routers import ranking, stock, portfolio, auth
 
 log = logging.getLogger(__name__)
 
@@ -63,6 +63,7 @@ app.add_middleware(
 app.include_router(ranking.router,   prefix="/api/ranking",   tags=["랭킹"])
 app.include_router(stock.router,     prefix="/api/stock",     tags=["종목"])
 app.include_router(portfolio.router, prefix="/api/portfolio", tags=["포트폴리오"])
+app.include_router(auth.router,      prefix="/api/auth",      tags=["사용자"])
 
 
 @app.get("/")
@@ -106,10 +107,12 @@ def health_check():
         if not os.path.exists(full):
             overall = "degraded"
 
-    # 2. ML 모델 로드 가능 여부
-    model_path = os.path.join(BASE, "models", "kr_3class_model.pkl")
-    checks["ml_model"] = "ok" if os.path.exists(model_path) else "missing"
-    if not os.path.exists(model_path):
+    # 2. Survival explainer import 가능 여부 (XGBoost 의존성 제거됨)
+    try:
+        from utils.shap_explainer import explain_prediction  # noqa: F401
+        checks["ml_model"] = "ok"
+    except Exception:
+        checks["ml_model"] = "missing"
         overall = "degraded"
 
     # 3. 파이프라인 import 가능 여부 (구조 검증)

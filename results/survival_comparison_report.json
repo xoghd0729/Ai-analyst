@@ -1,0 +1,156 @@
+{
+  "top_frac": 0.2,
+  "start_year": 2019,
+  "models": {
+    "XGBoost": {
+      "years": [
+        {
+          "year": 2019,
+          "pr_auc": 0.7898,
+          "roc_auc": 0.7643,
+          "top_precision": 0.9459,
+          "top_recall": 0.4268
+        },
+        {
+          "year": 2020,
+          "pr_auc": 0.8557,
+          "roc_auc": 0.8554,
+          "top_precision": 1.0,
+          "top_recall": 0.5143
+        },
+        {
+          "year": 2021,
+          "pr_auc": 0.7634,
+          "roc_auc": 0.7755,
+          "top_precision": 0.8889,
+          "top_recall": 0.4444
+        },
+        {
+          "year": 2022,
+          "pr_auc": 0.8458,
+          "roc_auc": 0.8223,
+          "top_precision": 1.0,
+          "top_recall": 0.4744
+        },
+        {
+          "year": 2023,
+          "pr_auc": 0.814,
+          "roc_auc": 0.804,
+          "top_precision": 1.0,
+          "top_recall": 0.5286
+        },
+        {
+          "year": 2024,
+          "pr_auc": 0.8351,
+          "roc_auc": 0.8627,
+          "top_precision": 0.9474,
+          "top_recall": 0.5806
+        }
+      ],
+      "pooled_pr_auc": 0.8026,
+      "pooled_roc_auc": 0.7993,
+      "mean_top_precision": 0.9637,
+      "mean_top_recall": 0.4948
+    },
+    "Cox PH": {
+      "years": [
+        {
+          "year": 2019,
+          "pr_auc": 0.4446,
+          "roc_auc": 0.4528,
+          "top_precision": 0.5135,
+          "top_recall": 0.2317
+        },
+        {
+          "year": 2020,
+          "pr_auc": 0.4326,
+          "roc_auc": 0.507,
+          "top_precision": 0.4167,
+          "top_recall": 0.2143
+        },
+        {
+          "year": 2021,
+          "pr_auc": 0.4575,
+          "roc_auc": 0.5094,
+          "top_precision": 0.4167,
+          "top_recall": 0.2083
+        },
+        {
+          "year": 2022,
+          "pr_auc": 0.3788,
+          "roc_auc": 0.3901,
+          "top_precision": 0.3514,
+          "top_recall": 0.1667
+        },
+        {
+          "year": 2023,
+          "pr_auc": 0.3607,
+          "roc_auc": 0.4758,
+          "top_precision": 0.2703,
+          "top_recall": 0.1429
+        },
+        {
+          "year": 2024,
+          "pr_auc": 0.3782,
+          "roc_auc": 0.5547,
+          "top_precision": 0.4211,
+          "top_recall": 0.2581
+        }
+      ],
+      "pooled_pr_auc": 0.3999,
+      "pooled_roc_auc": 0.4821,
+      "mean_top_precision": 0.3983,
+      "mean_top_recall": 0.2037
+    },
+    "GBM Survival": {
+      "years": [
+        {
+          "year": 2019,
+          "pr_auc": 0.6756,
+          "roc_auc": 0.6794,
+          "top_precision": 0.7297,
+          "top_recall": 0.3293
+        },
+        {
+          "year": 2020,
+          "pr_auc": 0.6637,
+          "roc_auc": 0.7189,
+          "top_precision": 0.6944,
+          "top_recall": 0.3571
+        },
+        {
+          "year": 2021,
+          "pr_auc": 0.5342,
+          "roc_auc": 0.5706,
+          "top_precision": 0.5833,
+          "top_recall": 0.2917
+        },
+        {
+          "year": 2022,
+          "pr_auc": 0.7274,
+          "roc_auc": 0.6948,
+          "top_precision": 0.8649,
+          "top_recall": 0.4103
+        },
+        {
+          "year": 2023,
+          "pr_auc": 0.5641,
+          "roc_auc": 0.6381,
+          "top_precision": 0.6486,
+          "top_recall": 0.3429
+        },
+        {
+          "year": 2024,
+          "pr_auc": 0.5676,
+          "roc_auc": 0.6808,
+          "top_precision": 0.5526,
+          "top_recall": 0.3387
+        }
+      ],
+      "pooled_pr_auc": 0.6294,
+      "pooled_roc_auc": 0.6653,
+      "mean_top_precision": 0.6789,
+      "mean_top_recall": 0.345
+    }
+  }
+}
