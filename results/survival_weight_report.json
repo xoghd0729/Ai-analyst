@@ -1,0 +1,186 @@
+{
+  "experiment": "Survival 단일소스 가중치 재검증  v2",
+  "version": 2,
+  "label": "label_cut_1y",
+  "label_meaning": "2024년 피처 → 2025년 배당 삭감 예측",
+  "eval_year": 2024,
+  "n_samples": 199,
+  "n_events": 33,
+  "event_rate": 0.1658,
+  "hazard_match_rate": 1.0,
+  "ml_status_match_rate": 0.1457,
+  "known_limitations": [
+    "단면 평가 (cross-sectional) — walk-forward 아님",
+    "survival_pd_v4.json은 전체 기간 데이터 기반 → 누수 가능성",
+    "v1(n=62)보다 n=199로 안정적이나 여전히 단면",
+    "최적 가중치는 동일 데이터에서 선택 → 과적합 가능성",
+    "hazard_match_rate < 1.0인 경우 미매칭 종목은 ml_status 기반 대리값 사용"
+  ],
+  "comparison": {
+    "A_hazard_only": {
+      "roc_auc": 0.5283,
+      "pr_auc": 0.203,
+      "p_at_20": 0.2308,
+      "f1_at_50": 0.2136
+    },
+    "B_status_only": {
+      "roc_auc": 0.954,
+      "pr_auc": 0.7068,
+      "p_at_20": 0.3333,
+      "f1_at_50": 0.2128
+    },
+    "C_70_30": {
+      "roc_auc": 0.5944,
+      "pr_auc": 0.3292,
+      "p_at_20": 0.3077,
+      "f1_at_50": 0.2381
+    },
+    "D_50_50": {
+      "roc_auc": 0.5969,
+      "pr_auc": 0.2846,
+      "p_at_20": 0.359,
+      "f1_at_50": 0.25
+    },
+    "E_optimal": {
+      "optimal_w_status": 1.0,
+      "optimal_w_hazard": 0.0,
+      "roc_auc": 0.954,
+      "pr_auc": 0.7068,
+      "p_at_20": 0.3333,
+      "f1_at_50": 0.2128
+    }
+  },
+  "weight_sensitivity_curve": [
+    {
+      "w_status": 0.0,
+      "w_hazard": 1.0,
+      "roc_auc": 0.5283,
+      "pr_auc": 0.203
+    },
+    {
+      "w_status": 0.05,
+      "w_hazard": 0.95,
+      "roc_auc": 0.5356,
+      "pr_auc": 0.2049
+    },
+    {
+      "w_status": 0.1,
+      "w_hazard": 0.9,
+      "roc_auc": 0.5433,
+      "pr_auc": 0.2067
+    },
+    {
+      "w_status": 0.15,
+      "w_hazard": 0.85,
+      "roc_auc": 0.5509,
+      "pr_auc": 0.2076
+    },
+    {
+      "w_status": 0.2,
+      "w_hazard": 0.8,
+      "roc_auc": 0.5584,
+      "pr_auc": 0.2111
+    },
+    {
+      "w_status": 0.25,
+      "w_hazard": 0.75,
+      "roc_auc": 0.567,
+      "pr_auc": 0.2157
+    },
+    {
+      "w_status": 0.3,
+      "w_hazard": 0.7,
+      "roc_auc": 0.5706,
+      "pr_auc": 0.2194
+    },
+    {
+      "w_status": 0.35,
+      "w_hazard": 0.65,
+      "roc_auc": 0.5781,
+      "pr_auc": 0.2282
+    },
+    {
+      "w_status": 0.4,
+      "w_hazard": 0.6,
+      "roc_auc": 0.5893,
+      "pr_auc": 0.2549
+    },
+    {
+      "w_status": 0.45,
+      "w_hazard": 0.55,
+      "roc_auc": 0.5929,
+      "pr_auc": 0.2687
+    },
+    {
+      "w_status": 0.5,
+      "w_hazard": 0.5,
+      "roc_auc": 0.5969,
+      "pr_auc": 0.2846
+    },
+    {
+      "w_status": 0.55,
+      "w_hazard": 0.45,
+      "roc_auc": 0.6013,
+      "pr_auc": 0.3172
+    },
+    {
+      "w_status": 0.6,
+      "w_hazard": 0.4,
+      "roc_auc": 0.5997,
+      "pr_auc": 0.3291
+    },
+    {
+      "w_status": 0.65,
+      "w_hazard": 0.35,
+      "roc_auc": 0.5962,
+      "pr_auc": 0.3346
+    },
+    {
+      "w_status": 0.7,
+      "w_hazard": 0.3,
+      "roc_auc": 0.5944,
+      "pr_auc": 0.3292
+    },
+    {
+      "w_status": 0.75,
+      "w_hazard": 0.25,
+      "roc_auc": 0.5947,
+      "pr_auc": 0.3368
+    },
+    {
+      "w_status": 0.8,
+      "w_hazard": 0.2,
+      "roc_auc": 0.5947,
+      "pr_auc": 0.3368
+    },
+    {
+      "w_status": 0.85,
+      "w_hazard": 0.15,
+      "roc_auc": 0.5947,
+      "pr_auc": 0.3368
+    },
+    {
+      "w_status": 0.9,
+      "w_hazard": 0.1,
+      "roc_auc": 0.5947,
+      "pr_auc": 0.3368
+    },
+    {
+      "w_status": 0.95,
+      "w_hazard": 0.05,
+      "roc_auc": 0.5947,
+      "pr_auc": 0.3368
+    },
+    {
+      "w_status": 1.0,
+      "w_hazard": 0.0,
+      "roc_auc": 0.954,
+      "pr_auc": 0.7068
+    }
+  ],
+  "conclusion": {
+    "best_in_experiment": "E_optimal",
+    "roc_70_30_vs_hazard_only": 0.0661,
+    "interpretation": "양수: 70:30이 hazard 단독보다 높음. 음수: ml_status 70% 가중이 성능 저하. walk-forward 재검증 전까지 가중치 변경 보류."
+  }
+}
