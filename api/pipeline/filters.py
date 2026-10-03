@@ -298,10 +298,11 @@ class SurvivalWeightFilter(BaseFilter):
 class RiskEngineFilter(BaseFilter):
     """
     SurvivalWeightFilter 이후 recommendations 전체에
-    composite_risk_score / risk_gate / layer1_xgb / layer2_survival 부착.
+    composite_risk_score / risk_gate / status_score / layer2_survival 부착.
 
     근거: walk-forward 앙상블 실험 (risk_ensemble_comparison.py)
-      XGB 70% + Survival 30% = ROC 0.7824, P@20 0.9509 (최적)
+      Survival-derived ml_status 70% + Survival hazard 30% (내부 설계값, 재검증 예정)
+      과거 XGB+Survival 실험: ROC 0.7824, P@20 0.9509 (당시 최적, 현재 구조와 다름)
       Macro composite 제외 (성능 저하 확인, ROC 0.7727)
     """
     name = "RiskEngine"
@@ -467,7 +468,7 @@ class CalendarFilter(BaseFilter):
 # ═══════════════════════════════════════════════════════════════
 class RiskAlertFilter(BaseFilter):
     """
-    XGBoost 배당 삭감 예측 모델 기반 리스크 경보 생성.
+    Survival 위험 점수 기반 리스크 경보 생성.
     ISA 절세 전략 산출.
     """
     name = "RiskAlert"
@@ -493,19 +494,37 @@ class FireEngineFilter(BaseFilter):
 
     def process(self, ctx: PipelineContext) -> None:
         try:
-            from utils.fire_engine import calc_fire_engine
             req = ctx.request
-            ctx.fire_plan = calc_fire_engine(
-                current_investable  = req.investable_amount,
-                monthly_savings     = req.monthly_savings,
-                current_age         = req.age,
-                target_age          = req.target_fire_age,
-                avg_net_yield       = ctx.avg_yield_net,
-                div_growth_rate     = ctx.projection.get("portfolio_div_cagr", 4.0),
-                cpi_rate            = 2.5,
-                custom_monthly_만원 = float(req.monthly_target),
-                annual_savings_growth = req.savings_growth,   # 적립 증액 반영 (프론트와 통일)
-            )
+            stages = getattr(req, "savings_stages", []) or []
+
+            if stages:
+                # 생애주기 모드: 연령별 적립금 스테이지 적용
+                from utils.fire_engine import calc_fire_engine_lifecycle
+                ctx.fire_plan = calc_fire_engine_lifecycle(
+                    current_investable      = req.investable_amount,
+                    savings_stages          = stages,
+                    current_age             = req.age,
+                    target_age              = req.target_fire_age,
+                    avg_net_yield           = ctx.avg_yield_net,
+                    div_growth_rate         = ctx.projection.get("portfolio_div_cagr", 4.0),
+                    cpi_rate                = 2.5,
+                    custom_monthly_man_won  = float(req.monthly_target),
+                )
+            else:
+                # 기존 단일 적립금 모드
+                from utils.fire_engine import calc_fire_engine
+                ctx.fire_plan = calc_fire_engine(
+                    current_investable    = req.investable_amount,
+                    monthly_savings       = req.monthly_savings,
+                    current_age           = req.age,
+                    target_age            = req.target_fire_age,
+                    avg_net_yield         = ctx.avg_yield_net,          # 역할A: 세후 배당수익률
+                    asset_growth_yield    = ctx.avg_total_return_net,   # 역할B: 세후 총수익률
+                    div_growth_rate       = ctx.projection.get("portfolio_div_cagr", 4.0),
+                    cpi_rate              = 2.5,
+                    custom_monthly_만원   = float(req.monthly_target),
+                    annual_savings_growth = req.savings_growth,
+                )
         except Exception as e:
             ctx.add_error(self.name, str(e))
 
@@ -546,10 +565,17 @@ class MonteCarloFilter(BaseFilter):
 # ═══════════════════════════════════════════════════════════════
 class SurvivalFilter(BaseFilter):
     """
-    흩어진 ML(P_BROKEN/P_WEAKENING)·Monte Carlo·집중도를 '생존확률' 단일
-    지표로 통합. 종목별 ML 확률로 배당컷 해저드를 구동하고, 섹터·국가
-    공통충격으로 상관 배당컷을 반영해 '겉은 분산, 실제는 집중'을 드러낸다.
-    "20년간 목표 월배당 유지 확률 84%" 형태의 헤드라인 숫자 생성.
+    Monte Carlo + 집중도를 '배당 유지 시뮬레이션' 단일 지표로 통합.
+    종목별 ML 신호(P_BROKEN/P_WEAKENING)로 배당컷 해저드를 보정하되,
+    ML 신호가 기본 위험률(base_cut)을 초과하는 종목에만 실질적 영향을 준다.
+    섹터·국가 공통충격으로 상관 배당컷을 반영해 '겉은 분산, 실제는 집중'을
+    드러낸다.
+
+    반환하는 survival_probability는 2000회 시뮬레이션 중 20년 전기간
+    명목 월배당이 기준선 이상 유지된 경로의 비율(0~99%)이며, 검증된
+    장기 예측 확률이 아니다. 기준선은 사용자 목표(월배당이 현재 소득
+    이하일 때) 또는 초기 명목 월배당의 80%로 자동 결정되며,
+    threshold_type 필드로 확인할 수 있다.
     """
     name = "Survival"
 
@@ -701,14 +727,16 @@ class ReverseFireFilter(BaseFilter):
             avg_yield_net = ctx.avg_yield_net or 3.5
 
             ctx.reverse_fire = calc_fire_reverse(
-                current_investable  = float(req.investable_amount),
-                monthly_savings     = float(req.monthly_savings),
-                current_age         = int(req.age),
-                target_fire_age     = int(req.target_fire_age),
-                target_monthly_만원 = float(req.monthly_target),
-                avg_net_yield       = avg_yield_net,
-                div_growth_rate     = float(ctx.projection.get("portfolio_div_cagr", 4.0)),
-                cpi_rate            = 2.5,
+                current_investable    = float(req.investable_amount),
+                monthly_savings       = float(req.monthly_savings),
+                current_age           = int(req.age),
+                target_fire_age       = int(req.target_fire_age),
+                target_monthly_만원   = float(req.monthly_target),
+                avg_net_yield         = avg_yield_net,                          # 역할A: 세후 배당수익률
+                asset_growth_yield    = ctx.avg_total_return_net or avg_yield_net,  # 역할B: 세후 총수익률
+                div_growth_rate       = float(ctx.projection.get("portfolio_div_cagr", 4.0)),
+                cpi_rate              = 2.5,
+                annual_savings_growth = float(req.savings_growth),
             )
         except Exception as e:
             ctx.add_error(self.name, str(e))
@@ -827,7 +855,7 @@ PIPELINE_FILTERS: list[type[BaseFilter]] = [
     PersonalizedRankingFilter,  # 3-b. 개인화 랭킹 (Risk Engine + 목표수익률)
     WeightAllocatorFilter,      # 4. 비중 배분
     SurvivalWeightFilter,    # 4-b. Survival Score → 가중치 보정
-    RiskEngineFilter,        # 4-c. composite_risk_score 부착 (XGB 70%+Survival 30%)
+    RiskEngineFilter,        # 4-c. composite_risk_score 부착 (Survival status 70% + hazard 30%)
     SummarizeFilter,         # 5. 수치 요약
     ProjectionFilter,        # 6. 성장 시뮬레이션
     RebalancingFilter,       # 7. 리밸런싱

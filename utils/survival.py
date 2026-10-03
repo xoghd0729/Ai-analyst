@@ -1,27 +1,38 @@
 """
-utils/survival.py — 포트폴리오 생존확률 (Portfolio Survival Probability)
+utils/survival.py — 배당 유지 시뮬레이션 (Dividend Sustainability Simulation)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-왜 만드는가 (헤드라인 지표)
-  사용자가 진짜 궁금한 건 "월배당 얼마"가 아니라
-  "이 월급이 20년 뒤에도 계속 나오는가" 이다.
-  이 모듈은 흩어져 있던 ML(P_BROKEN/P_WEAKENING)·Monte Carlo·집중도를
-  '생존확률' 단일 숫자로 묶는다.
+목적
+  "이 월배당이 20년 뒤에도 계속 나오는가"라는 질문에 답하기 위해,
+  Monte Carlo 시뮬레이션으로 배당 소득 지속성을 추정한다.
 
-기존 Monte Carlo와 무엇이 다른가 (리브랜딩이 아닌 이유)
-  1) ML 구동: 종목별 배당컷 확률을 자산군 일반값이 아니라 검증된
-     모델의 P_BROKEN/P_WEAKENING 으로 구동 (근시일수록 ML 가중, 시간 감쇠).
-  2) 상관 충격: 현실의 배당컷은 독립이 아니라 섹터·국가 단위로 동시 발생
-     (2020 항공/여행, 금리상승기 리츠, 금융위기 은행). 공통충격 인자를 넣어
-     '겉은 분산, 실제는 집중'을 생존확률 하락으로 드러낸다.
+계산 방식
+  1) 기본 위험 가정: 자산군별 연간 배당 삭감 base rate (_RISK_PARAMS)
+  2) ML 위험 신호: XGBoost P_BROKEN/P_WEAKENING이 base rate를 초과할 때만
+     초과분만큼 해저드 상향. 초과하지 않으면 base rate 그대로 사용.
+     ※ ML 신호가 base rate보다 낮은 종목에서는 ML이 결과에 영향을 주지 않음.
+  3) 상관 충격: 섹터·국가 단위 공통 충격 (2015~2024 소표본 또는 가정값)
+  4) 2000회 시뮬레이션으로 threshold 조건을 충족한 경로 비율 계산
+
+신뢰도 주의사항 (감사 결과 2026-10-03 기록)
+  - 반환값 `survival_probability`는 시뮬레이션상 유지 비율이며,
+    검증된 미래 확률이 아님 (장기 실증 백테스트 미수행)
+  - XGBoost 모델: GroupKFold 시간적 오염 확인, OOS ROC-AUC 0.5594 수준
+  - 현재 운영 조건 기준 top-9 KR 종목 중 다수에서 ML이 base rate로 대체됨
+  - 유지 기준(threshold)이 사용자 목표인지 현재 배당의 80%인지 반드시 함께 표시
 
 생존 정의
-  실질(물가조정) 월배당이 '목표(또는 초기의 80%)' 이상을
-  전 기간(또는 만기) 유지할 확률.
+  명목(물가 미조정) 월배당이 threshold(유지 기준) 이상을
+  전 시뮬레이션 기간 내 한 번도 내려가지 않은 경로의 비율.
+
+threshold 결정 로직
+  0 < monthly_target ≤ init_monthly → threshold = monthly_target (사용자 목표)
+  그 외                              → threshold = init_monthly × 0.80
 
 반환
   survival_probability(전기간 유지%), endpoint_probability(만기 유지%),
-  p10/p50 실질 월배당, worst_year_real, concentration(집중 그룹), summary
+  threshold_type(적용된 기준 유형), ml_effective_count(ML 유효 종목 수),
+  p10/p50 실질 월배당, concentration(집중 그룹), summary
 """
 from __future__ import annotations
 
@@ -79,15 +90,20 @@ def _shock_group(rec: dict) -> str:
     return "default"
 
 
-def _ml_hazard(rec: dict, base: float) -> float:
-    """ML 확률(P_BROKEN/P_WEAKENING)을 연간 배당컷 해저드로 변환.
-    근시(1~3년)엔 ML이 지배, 장기엔 base로 회귀(시간감쇠는 호출부에서)."""
+def _ml_hazard(rec: dict, base: float) -> tuple[float, bool]:
+    """XGBoost P_BROKEN/P_WEAKENING을 연간 배당컷 해저드로 변환.
+    근시(1~3년)엔 ML이 지배, 장기엔 base로 회귀(시간감쇠는 호출부에서).
+
+    반환: (해저드값, ML이_실제로_base를_초과했는지)
+    ※ ML값이 base보다 낮거나 데이터 없으면 base 사용 → ml_effective=False
+    """
     p_brk = float(rec.get("P_BROKEN", 0) or 0)
     p_wkn = float(rec.get("P_WEAKENING", 0) or 0)
     if p_brk <= 0 and p_wkn <= 0:
-        return base
+        return base, False
     ml_h = 0.7 * p_brk + 0.35 * p_wkn
-    return max(base, min(0.60, ml_h))
+    final = max(base, min(0.60, ml_h))
+    return final, (final > base)
 
 
 def run_survival(
@@ -129,14 +145,20 @@ def run_survival(
         except Exception:
             mean_growth = float(rec.get("div_growth_rate_pct", 4.0) or 4.0)
         sigma, base_cut, cut_sev = _get_risk_params(etf_cat, cls)
-        ml_h = _ml_hazard(rec, base_cut) if ml_driven else base_cut
+        if ml_driven:
+            ml_h, ml_eff = _ml_hazard(rec, base_cut)
+        else:
+            ml_h, ml_eff = base_cut, False
         grp = _shock_group(rec)
         group_weight[grp] = group_weight.get(grp, 0.0) + invest
         assets.append({
             "invest": invest, "dy": dy, "net_tax": net_tax,
             "mean_growth": mean_growth, "sigma": sigma,
-            "base_cut": base_cut, "ml_h": ml_h, "cut_sev": cut_sev, "grp": grp,
+            "base_cut": base_cut, "ml_h": ml_h, "cut_sev": cut_sev,
+            "grp": grp, "ml_effective": ml_eff,
         })
+
+    ml_effective_count = sum(1 for a in assets if a.get("ml_effective", False))
 
     if not assets:
         return {
@@ -160,8 +182,10 @@ def run_survival(
     # 유지율로 본다. 단, 목표가 현재 소득 이하(인출/은퇴 단계)면 목표를 기준으로.
     if 0 < monthly_target <= init_monthly:
         threshold = monthly_target
+        threshold_type = "user_target"
     else:
         threshold = init_monthly * 0.80
+        threshold_type = "current_80pct"
 
     groups = list(group_weight.keys())
 
@@ -295,15 +319,30 @@ def run_survival(
         "concentration_hhi":     hhi,
         "concentration_groups":  conc,
         "ml_driven":             ml_driven,
+        "ml_effective_count":    ml_effective_count,
+        "threshold_type":        threshold_type,
         "correlated":            correlated,
-        "summary":               _summary(surv, hhi, conc, risk_contribution, threshold),
+        "summary":               _summary(surv, hhi, conc, risk_contribution, threshold,
+                                          threshold_type, ml_effective_count, len(assets)),
     }
 
 
-def _summary(surv: float, hhi: float, conc: list, risk_contrib: list, threshold: float) -> str:
+def _summary(surv: float, hhi: float, conc: list, risk_contrib: list, threshold: float,
+             threshold_type: str = "current_80pct", ml_effective_count: int = 0,
+             total_assets: int = 0) -> str:
     risk = "높음" if hhi >= 0.4 else ("보통" if hhi >= 0.25 else "낮음")
-    msg = (f"20년간 월배당 소득({threshold:.0f}만원 이상) 지속 확률 {surv:.0f}%. "
-           f"집중위험 {risk}(HHI {hhi}).")
+    # threshold 기준을 명확히 표시 (목표 vs 현재 80%)
+    if threshold_type == "user_target":
+        thr_label = f"사용자 목표 {threshold:.0f}만원"
+    else:
+        thr_label = f"현재 명목 월배당의 80% ({threshold:.0f}만원)"
+    msg = (f"20년 배당 유지 시뮬레이션 결과 {surv:.0f}% (시뮬레이션상 유지 비율, "
+           f"기준: {thr_label}). 집중위험 {risk}(HHI {hhi}).")
+    # ML 유효 종목 수 표시 (0이면 ML이 실질적으로 미작동)
+    if total_assets > 0 and ml_effective_count == 0:
+        msg += " ML 위험 신호가 기본 위험률을 초과한 종목 없음 — 기본 위험률 적용."
+    elif total_assets > 0 and ml_effective_count < total_assets:
+        msg += f" ML 위험 신호 유효 종목 {ml_effective_count}/{total_assets}."
     # 비중 대비 위험 기여가 큰 그룹을 짚는다 ("28%인데 위험 52%")
     weight_map = dict(conc)
     for g, rpct in risk_contrib[:1]:

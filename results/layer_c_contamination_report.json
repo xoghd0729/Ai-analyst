@@ -1,0 +1,1159 @@
+{
+  "experiment": "Layer C 간접 오염 측정",
+  "params": {
+    "age": 45,
+    "risk": "moderate",
+    "archetype": "혼합형",
+    "investable": 50000,
+    "monthly_savings": 300,
+    "monthly_target": 200,
+    "annual_income": 8000,
+    "target_fire_age": 55
+  },
+  "rule_spec": {
+    "trap_level_exclude": [
+      "DANGER"
+    ],
+    "overall_score_min": 50.0,
+    "dps_cuts_3y_max": 0,
+    "avg_payout_pct_max": 80.0,
+    "stability_min": 20.0,
+    "financial_min": 10.0
+  },
+  "experiment_a": {
+    "label": "A: ML 적용 (SurvivalWeightFilter 활성화)",
+    "kr_weight_pct": 30.63,
+    "avg_yield_net_pct": 4.049,
+    "monthly_div_만원": 168.7,
+    "months_to_target": 20,
+    "fire_regular_age": 52,
+    "fire_custom_age": 50,
+    "n_stocks": 16
+  },
+  "experiment_b": {
+    "label": "B: ML 영향 제거 (multiplier=1.0)",
+    "kr_weight_pct": 32.01,
+    "avg_yield_net_pct": 4.048,
+    "monthly_div_만원": 168.7,
+    "months_to_target": 20,
+    "fire_regular_age": 52,
+    "fire_custom_age": 50,
+    "n_stocks": 16
+  },
+  "diff": {
+    "kr_weight_pct_diff": -1.38,
+    "avg_yield_net_pct_diff": 0.001,
+    "monthly_div_diff_만원": 0.0,
+    "months_to_target_diff": 0,
+    "fire_regular_age_diff": 0,
+    "fire_custom_age_diff": 0
+  },
+  "portfolio_a": [
+    {
+      "ticker": "000270",
+      "name": "기아",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.4,
+      "capital_gain_rate": 3.5,
+      "overall_score": 95.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 24.1,
+      "stability_score": 35.0,
+      "financial_score": 20.0,
+      "weight_pct": 3.59,
+      "invest_amount": 1795,
+      "hazard_pct": 0.2008,
+      "survival_weight_adj": 0.9197
+    },
+    {
+      "ticker": "026960",
+      "name": "동서",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.0,
+      "capital_gain_rate": 3.5,
+      "overall_score": 93.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 59.2,
+      "stability_score": 35.0,
+      "financial_score": 13.0,
+      "weight_pct": 3.63,
+      "invest_amount": 1815,
+      "hazard_pct": 0.1263,
+      "survival_weight_adj": 0.9495
+    },
+    {
+      "ticker": "175330",
+      "name": "JB금융지주",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.86,
+      "capital_gain_rate": 3.5,
+      "overall_score": 90.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": null,
+      "stability_score": 35.0,
+      "financial_score": 10.0,
+      "weight_pct": 3.59,
+      "invest_amount": 1795,
+      "hazard_pct": 0.0737,
+      "survival_weight_adj": 0.9705
+    },
+    {
+      "ticker": "016360",
+      "name": "삼성증권",
+      "asset_class": "kr_stock",
+      "expected_yield": 2.68,
+      "capital_gain_rate": 3.5,
+      "overall_score": 88.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 24.8,
+      "stability_score": 35.0,
+      "financial_score": 20.0,
+      "weight_pct": 3.62,
+      "invest_amount": 1810,
+      "hazard_pct": 0.0008,
+      "survival_weight_adj": 0.9997
+    },
+    {
+      "ticker": "055550",
+      "name": "신한지주",
+      "asset_class": "kr_stock",
+      "expected_yield": 2.84,
+      "capital_gain_rate": 3.5,
+      "overall_score": 88.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 28.6,
+      "stability_score": 35.0,
+      "financial_score": 20.0,
+      "weight_pct": 3.29,
+      "invest_amount": 1645,
+      "hazard_pct": 0.2267,
+      "survival_weight_adj": 0.9093
+    },
+    {
+      "ticker": "000810",
+      "name": "삼성화재",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.06,
+      "capital_gain_rate": 3.5,
+      "overall_score": 86.5,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": null,
+      "stability_score": 35.0,
+      "financial_score": 11.5,
+      "weight_pct": 3.31,
+      "invest_amount": 1655,
+      "hazard_pct": 0.1741,
+      "survival_weight_adj": 0.9304
+    },
+    {
+      "ticker": "021240",
+      "name": "코웨이",
+      "asset_class": "kr_stock",
+      "expected_yield": 3.8,
+      "capital_gain_rate": 3.5,
+      "overall_score": 85.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 24.0,
+      "stability_score": 35.0,
+      "financial_score": 16.0,
+      "weight_pct": 3.06,
+      "invest_amount": 1530,
+      "hazard_pct": 0.3117,
+      "survival_weight_adj": 0.8753
+    },
+    {
+      "ticker": "000370",
+      "name": "한화손해보험",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.2,
+      "capital_gain_rate": 3.5,
+      "overall_score": 84.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": null,
+      "stability_score": 35.0,
+      "financial_score": 10.0,
+      "weight_pct": 3.2,
+      "invest_amount": 1600,
+      "hazard_pct": 0.1897,
+      "survival_weight_adj": 0.9241
+    },
+    {
+      "ticker": "024800",
+      "name": "메리츠화재",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.8,
+      "capital_gain_rate": 3.5,
+      "overall_score": 84.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": null,
+      "stability_score": 35.0,
+      "financial_score": 10.0,
+      "weight_pct": 3.34,
+      "invest_amount": 1670,
+      "hazard_pct": 0.0818,
+      "survival_weight_adj": 0.9673
+    },
+    {
+      "ticker": "KO",
+      "name": "KO (코카콜라)",
+      "asset_class": "us_stock",
+      "asset_type": "DIVIDEND_ARISTOCRAT",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 3.1,
+      "capital_gain_rate": 4.0,
+      "description": "62년 연속 배당 증가 배당킹. 음료 독점력 — 배당 3.1% + 주가 4% = 총 7.1%",
+      "weight_pct": 5.39,
+      "invest_amount": 2695,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "JNJ",
+      "name": "JNJ (존슨앤존슨)",
+      "asset_class": "us_stock",
+      "asset_type": "DIVIDEND_ARISTOCRAT",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 3.2,
+      "capital_gain_rate": 5.0,
+      "description": "62년 연속 배당 증가 배당킹. 헬스케어 글로벌 1위 — 배당 3.2% + 주가 5% = 총 8.2%",
+      "weight_pct": 5.56,
+      "invest_amount": 2780,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "PG",
+      "name": "PG (프록터앤갬블)",
+      "asset_class": "us_stock",
+      "asset_type": "DIVIDEND_ARISTOCRAT",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 2.5,
+      "capital_gain_rate": 6.0,
+      "description": "67년 연속 배당 증가 배당왕. 생활필수재 독점 — 배당 2.5% + 주가 6% = 총 8.5%",
+      "weight_pct": 4.35,
+      "invest_amount": 2175,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "SCHD",
+      "name": "SCHD",
+      "asset_class": "us_div_etf",
+      "etf_category": "dividend_growth",
+      "asset_type": "DIVIDEND_GROWTH",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 3.6,
+      "capital_gain_rate": 8.0,
+      "div_growth_5y": 10.2,
+      "mdd": -33.0,
+      "volatility": 14.5,
+      "monthly_pay": false,
+      "expense_ratio": 0.06,
+      "description": "배당성장 ETF의 교과서. 10년+ 배당 증가 우량기업 100선. 배당성장률 10%·변동성 낮아 장기 복리 전략의 핵심 자산.",
+      "weight_pct": 13.84,
+      "invest_amount": 6920,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "DGRO",
+      "name": "DGRO",
+      "asset_class": "us_div_etf",
+      "etf_category": "dividend_growth",
+      "asset_type": "DIVIDEND_GROWTH",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 2.5,
+      "capital_gain_rate": 9.0,
+      "div_growth_5y": 9.8,
+      "mdd": -32.0,
+      "volatility": 15.0,
+      "monthly_pay": false,
+      "expense_ratio": 0.08,
+      "description": "5년+ 연속 배당성장 기업 집중. EPS 성장성과 배당 지속성 동시 검증. SCHD 보완재로 함께 보유 시 분산 효과 극대화.",
+      "weight_pct": 9.62,
+      "invest_amount": 4810,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "O",
+      "name": "O (Realty Income 월배당)",
+      "asset_class": "us_reit",
+      "asset_type": "REIT",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 5.5,
+      "capital_gain_rate": 2.0,
+      "description": "30년+ 월배당, 임차인 1000+개. 배당귀족 리츠 표준 — 배당 5.5% + 주가 2% = 총 7.5%",
+      "weight_pct": 17.34,
+      "invest_amount": 8670,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "SGOV",
+      "name": "SGOV (초단기 미국채)",
+      "asset_class": "defensive",
+      "etf_category": "cash_equivalent",
+      "asset_type": "BOND",
+      "account": "일반/연금",
+      "risk_profile": "defensive",
+      "expected_yield": 5.2,
+      "capital_gain_rate": 0.0,
+      "div_growth_5y": 0.0,
+      "mdd": -0.1,
+      "volatility": 0.5,
+      "monthly_pay": true,
+      "expense_ratio": 0.09,
+      "description": "0~3개월 초단기 미국채. 금리 리스크 제로·MDD 거의 없음. 월배당 5.2%로 CMA 대체재. 포트폴리오 현금성 버퍼 역할.",
+      "weight_pct": 13.26,
+      "invest_amount": 6630,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    }
+  ],
+  "portfolio_b": [
+    {
+      "ticker": "000270",
+      "name": "기아",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.4,
+      "capital_gain_rate": 3.5,
+      "overall_score": 95.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 24.1,
+      "stability_score": 35.0,
+      "financial_score": 20.0,
+      "weight_pct": 3.83,
+      "invest_amount": 1915,
+      "hazard_pct": 0.2008,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "026960",
+      "name": "동서",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.0,
+      "capital_gain_rate": 3.5,
+      "overall_score": 93.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 59.2,
+      "stability_score": 35.0,
+      "financial_score": 13.0,
+      "weight_pct": 3.75,
+      "invest_amount": 1875,
+      "hazard_pct": 0.1263,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "175330",
+      "name": "JB금융지주",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.86,
+      "capital_gain_rate": 3.5,
+      "overall_score": 90.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": null,
+      "stability_score": 35.0,
+      "financial_score": 10.0,
+      "weight_pct": 3.63,
+      "invest_amount": 1815,
+      "hazard_pct": 0.0737,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "016360",
+      "name": "삼성증권",
+      "asset_class": "kr_stock",
+      "expected_yield": 2.68,
+      "capital_gain_rate": 3.5,
+      "overall_score": 88.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 24.8,
+      "stability_score": 35.0,
+      "financial_score": 20.0,
+      "weight_pct": 3.55,
+      "invest_amount": 1775,
+      "hazard_pct": 0.0008,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "055550",
+      "name": "신한지주",
+      "asset_class": "kr_stock",
+      "expected_yield": 2.84,
+      "capital_gain_rate": 3.5,
+      "overall_score": 88.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 28.6,
+      "stability_score": 35.0,
+      "financial_score": 20.0,
+      "weight_pct": 3.55,
+      "invest_amount": 1775,
+      "hazard_pct": 0.2267,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "000810",
+      "name": "삼성화재",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.06,
+      "capital_gain_rate": 3.5,
+      "overall_score": 86.5,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": null,
+      "stability_score": 35.0,
+      "financial_score": 11.5,
+      "weight_pct": 3.49,
+      "invest_amount": 1745,
+      "hazard_pct": 0.1741,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "021240",
+      "name": "코웨이",
+      "asset_class": "kr_stock",
+      "expected_yield": 3.8,
+      "capital_gain_rate": 3.5,
+      "overall_score": 85.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": 24.0,
+      "stability_score": 35.0,
+      "financial_score": 16.0,
+      "weight_pct": 3.43,
+      "invest_amount": 1715,
+      "hazard_pct": 0.3117,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "000370",
+      "name": "한화손해보험",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.2,
+      "capital_gain_rate": 3.5,
+      "overall_score": 84.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": null,
+      "stability_score": 35.0,
+      "financial_score": 10.0,
+      "weight_pct": 3.39,
+      "invest_amount": 1695,
+      "hazard_pct": 0.1897,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "024800",
+      "name": "메리츠화재",
+      "asset_class": "kr_stock",
+      "expected_yield": 4.8,
+      "capital_gain_rate": 3.5,
+      "overall_score": 84.0,
+      "grade": "🟢 우량",
+      "ml_status": "INTACT",
+      "dps_cuts_3y": 0,
+      "trap_level": "SAFE",
+      "avg_payout_pct": null,
+      "stability_score": 35.0,
+      "financial_score": 10.0,
+      "weight_pct": 3.39,
+      "invest_amount": 1695,
+      "hazard_pct": 0.0818,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "KO",
+      "name": "KO (코카콜라)",
+      "asset_class": "us_stock",
+      "asset_type": "DIVIDEND_ARISTOCRAT",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 3.1,
+      "capital_gain_rate": 4.0,
+      "description": "62년 연속 배당 증가 배당킹. 음료 독점력 — 배당 3.1% + 주가 4% = 총 7.1%",
+      "weight_pct": 5.28,
+      "invest_amount": 2640,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "JNJ",
+      "name": "JNJ (존슨앤존슨)",
+      "asset_class": "us_stock",
+      "asset_type": "DIVIDEND_ARISTOCRAT",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 3.2,
+      "capital_gain_rate": 5.0,
+      "description": "62년 연속 배당 증가 배당킹. 헬스케어 글로벌 1위 — 배당 3.2% + 주가 5% = 총 8.2%",
+      "weight_pct": 5.45,
+      "invest_amount": 2725,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "PG",
+      "name": "PG (프록터앤갬블)",
+      "asset_class": "us_stock",
+      "asset_type": "DIVIDEND_ARISTOCRAT",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 2.5,
+      "capital_gain_rate": 6.0,
+      "description": "67년 연속 배당 증가 배당왕. 생활필수재 독점 — 배당 2.5% + 주가 6% = 총 8.5%",
+      "weight_pct": 4.26,
+      "invest_amount": 2130,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "SCHD",
+      "name": "SCHD",
+      "asset_class": "us_div_etf",
+      "etf_category": "dividend_growth",
+      "asset_type": "DIVIDEND_GROWTH",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 3.6,
+      "capital_gain_rate": 8.0,
+      "div_growth_5y": 10.2,
+      "mdd": -33.0,
+      "volatility": 14.5,
+      "monthly_pay": false,
+      "expense_ratio": 0.06,
+      "description": "배당성장 ETF의 교과서. 10년+ 배당 증가 우량기업 100선. 배당성장률 10%·변동성 낮아 장기 복리 전략의 핵심 자산.",
+      "weight_pct": 13.57,
+      "invest_amount": 6785,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "DGRO",
+      "name": "DGRO",
+      "asset_class": "us_div_etf",
+      "etf_category": "dividend_growth",
+      "asset_type": "DIVIDEND_GROWTH",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 2.5,
+      "capital_gain_rate": 9.0,
+      "div_growth_5y": 9.8,
+      "mdd": -32.0,
+      "volatility": 15.0,
+      "monthly_pay": false,
+      "expense_ratio": 0.08,
+      "description": "5년+ 연속 배당성장 기업 집중. EPS 성장성과 배당 지속성 동시 검증. SCHD 보완재로 함께 보유 시 분산 효과 극대화.",
+      "weight_pct": 9.43,
+      "invest_amount": 4715,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "O",
+      "name": "O (Realty Income 월배당)",
+      "asset_class": "us_reit",
+      "asset_type": "REIT",
+      "account": "일반/연금",
+      "risk_profile": "stable",
+      "expected_yield": 5.5,
+      "capital_gain_rate": 2.0,
+      "description": "30년+ 월배당, 임차인 1000+개. 배당귀족 리츠 표준 — 배당 5.5% + 주가 2% = 총 7.5%",
+      "weight_pct": 17.0,
+      "invest_amount": 8500,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    },
+    {
+      "ticker": "SGOV",
+      "name": "SGOV (초단기 미국채)",
+      "asset_class": "defensive",
+      "etf_category": "cash_equivalent",
+      "asset_type": "BOND",
+      "account": "일반/연금",
+      "risk_profile": "defensive",
+      "expected_yield": 5.2,
+      "capital_gain_rate": 0.0,
+      "div_growth_5y": 0.0,
+      "mdd": -0.1,
+      "volatility": 0.5,
+      "monthly_pay": true,
+      "expense_ratio": 0.09,
+      "description": "0~3개월 초단기 미국채. 금리 리스크 제로·MDD 거의 없음. 월배당 5.2%로 CMA 대체재. 포트폴리오 현금성 버퍼 역할.",
+      "weight_pct": 13.0,
+      "invest_amount": 6500,
+      "hazard_pct": 0.3,
+      "survival_weight_adj": 1.0
+    }
+  ],
+  "fire_a": {
+    "targets": {
+      "lean": {
+        "label": "린 파이어 (Lean FIRE)",
+        "desc": "식비·통신비 최소 생활",
+        "monthly_target_nominal": 120,
+        "monthly_target_real": 153.61,
+        "required_principal": 45523.0,
+        "shortfall": 0,
+        "already_achieved": true,
+        "monthly_pmt_needed": 0.0,
+        "achievable_by_target": true,
+        "projected_fire_age": 46,
+        "years_to_achieve": 1,
+        "gap_years": -9
+      },
+      "regular": {
+        "label": "일반 파이어 (FIRE)",
+        "desc": "서울 1인 생활비 완전 커버",
+        "monthly_target_nominal": 250,
+        "monthly_target_real": 320.02,
+        "required_principal": 94840.0,
+        "shortfall": 44840.0,
+        "already_achieved": false,
+        "monthly_pmt_needed": 303.7,
+        "achievable_by_target": true,
+        "projected_fire_age": 52,
+        "years_to_achieve": 7,
+        "gap_years": -3
+      },
+      "fat": {
+        "label": "팻 파이어 (Fat FIRE)",
+        "desc": "여유 있는 은퇴 생활",
+        "monthly_target_nominal": 400,
+        "monthly_target_real": 512.03,
+        "required_principal": 151743.0,
+        "shortfall": 101743.0,
+        "already_achieved": false,
+        "monthly_pmt_needed": 689.2,
+        "achievable_by_target": false,
+        "projected_fire_age": 59,
+        "years_to_achieve": 14,
+        "gap_years": 4
+      },
+      "custom": {
+        "label": "맞춤 목표",
+        "desc": "월 200.0만원 배당 목표",
+        "monthly_target_nominal": 200.0,
+        "monthly_target_real": 256.02,
+        "required_principal": 75873.0,
+        "shortfall": 25873.0,
+        "already_achieved": false,
+        "monthly_pmt_needed": 175.3,
+        "achievable_by_target": true,
+        "projected_fire_age": 50,
+        "years_to_achieve": 5,
+        "gap_years": -5
+      }
+    },
+    "current_state": {
+      "investable": 50000,
+      "monthly_savings": 300,
+      "current_monthly_div": 168.72,
+      "current_age": 45,
+      "target_age": 55,
+      "years_to_fire": 10,
+      "avg_net_yield_pct": 4.049192,
+      "asset_growth_yield_pct": 4.049192,
+      "div_growth_rate_pct": 5.0,
+      "cpi_rate_pct": 2.5,
+      "annual_savings_growth_pct": 0.0
+    },
+    "fire_timeline": [
+      {
+        "year": 1,
+        "age": 46,
+        "portfolio": 55730.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": false
+        }
+      },
+      {
+        "year": 2,
+        "age": 47,
+        "portfolio": 61697.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": false
+        }
+      },
+      {
+        "year": 3,
+        "age": 48,
+        "portfolio": 67909.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": false
+        }
+      },
+      {
+        "year": 4,
+        "age": 49,
+        "portfolio": 74378.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": false
+        }
+      },
+      {
+        "year": 5,
+        "age": 50,
+        "portfolio": 81114.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 6,
+        "age": 51,
+        "portfolio": 88128.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 7,
+        "age": 52,
+        "portfolio": 95431.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 8,
+        "age": 53,
+        "portfolio": 103035.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 9,
+        "age": 54,
+        "portfolio": 110953.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 10,
+        "age": 55,
+        "portfolio": 119198.0,
+        "is_target": true,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 11,
+        "age": 56,
+        "portfolio": 127782.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 12,
+        "age": 57,
+        "portfolio": 136721.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 13,
+        "age": 58,
+        "portfolio": 146029.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 14,
+        "age": 59,
+        "portfolio": 155720.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": true,
+          "custom": true
+        }
+      },
+      {
+        "year": 15,
+        "age": 60,
+        "portfolio": 165812.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": true,
+          "custom": true
+        }
+      }
+    ],
+    "recommended_action": "🎉 이미 린 파이어(월 120만원) 달성 수준입니다! ✅ '린 파이어 (Lean FIRE)' 기준으로 46세에 달성 가능합니다 (목표 55세보다 9년 빠름). 💡 현재 적립액에 월 304만원만 추가하면 목표 나이 55세 내 일반 파이어 달성이 가능합니다.",
+    "earliest_fire_type": "lean",
+    "earliest_fire_age": 46
+  },
+  "fire_b": {
+    "targets": {
+      "lean": {
+        "label": "린 파이어 (Lean FIRE)",
+        "desc": "식비·통신비 최소 생활",
+        "monthly_target_nominal": 120,
+        "monthly_target_real": 153.61,
+        "required_principal": 45538.0,
+        "shortfall": 0,
+        "already_achieved": true,
+        "monthly_pmt_needed": 0.0,
+        "achievable_by_target": true,
+        "projected_fire_age": 46,
+        "years_to_achieve": 1,
+        "gap_years": -9
+      },
+      "regular": {
+        "label": "일반 파이어 (FIRE)",
+        "desc": "서울 1인 생활비 완전 커버",
+        "monthly_target_nominal": 250,
+        "monthly_target_real": 320.02,
+        "required_principal": 94870.0,
+        "shortfall": 44870.0,
+        "already_achieved": false,
+        "monthly_pmt_needed": 304.0,
+        "achievable_by_target": true,
+        "projected_fire_age": 52,
+        "years_to_achieve": 7,
+        "gap_years": -3
+      },
+      "fat": {
+        "label": "팻 파이어 (Fat FIRE)",
+        "desc": "여유 있는 은퇴 생활",
+        "monthly_target_nominal": 400,
+        "monthly_target_real": 512.03,
+        "required_principal": 151792.0,
+        "shortfall": 101792.0,
+        "already_achieved": false,
+        "monthly_pmt_needed": 689.5,
+        "achievable_by_target": false,
+        "projected_fire_age": 59,
+        "years_to_achieve": 14,
+        "gap_years": 4
+      },
+      "custom": {
+        "label": "맞춤 목표",
+        "desc": "월 200.0만원 배당 목표",
+        "monthly_target_nominal": 200.0,
+        "monthly_target_real": 256.02,
+        "required_principal": 75897.0,
+        "shortfall": 25897.0,
+        "already_achieved": false,
+        "monthly_pmt_needed": 175.4,
+        "achievable_by_target": true,
+        "projected_fire_age": 50,
+        "years_to_achieve": 5,
+        "gap_years": -5
+      }
+    },
+    "current_state": {
+      "investable": 50000,
+      "monthly_savings": 300,
+      "current_monthly_div": 168.66,
+      "current_age": 45,
+      "target_age": 55,
+      "years_to_fire": 10,
+      "avg_net_yield_pct": 4.047882,
+      "asset_growth_yield_pct": 4.047882,
+      "div_growth_rate_pct": 5.0,
+      "cpi_rate_pct": 2.5,
+      "annual_savings_growth_pct": 0.0
+    },
+    "fire_timeline": [
+      {
+        "year": 1,
+        "age": 46,
+        "portfolio": 55729.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": false
+        }
+      },
+      {
+        "year": 2,
+        "age": 47,
+        "portfolio": 61695.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": false
+        }
+      },
+      {
+        "year": 3,
+        "age": 48,
+        "portfolio": 67907.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": false
+        }
+      },
+      {
+        "year": 4,
+        "age": 49,
+        "portfolio": 74375.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": false
+        }
+      },
+      {
+        "year": 5,
+        "age": 50,
+        "portfolio": 81110.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 6,
+        "age": 51,
+        "portfolio": 88122.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": false,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 7,
+        "age": 52,
+        "portfolio": 95423.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 8,
+        "age": 53,
+        "portfolio": 103026.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 9,
+        "age": 54,
+        "portfolio": 110942.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 10,
+        "age": 55,
+        "portfolio": 119185.0,
+        "is_target": true,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 11,
+        "age": 56,
+        "portfolio": 127767.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 12,
+        "age": 57,
+        "portfolio": 136704.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 13,
+        "age": 58,
+        "portfolio": 146009.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": false,
+          "custom": true
+        }
+      },
+      {
+        "year": 14,
+        "age": 59,
+        "portfolio": 155698.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": true,
+          "custom": true
+        }
+      },
+      {
+        "year": 15,
+        "age": 60,
+        "portfolio": 165786.0,
+        "is_target": false,
+        "achieved": {
+          "lean": true,
+          "regular": true,
+          "fat": true,
+          "custom": true
+        }
+      }
+    ],
+    "recommended_action": "🎉 이미 린 파이어(월 120만원) 달성 수준입니다! ✅ '린 파이어 (Lean FIRE)' 기준으로 46세에 달성 가능합니다 (목표 55세보다 9년 빠름). 💡 현재 적립액에 월 304만원만 추가하면 목표 나이 55세 내 일반 파이어 달성이 가능합니다.",
+    "earliest_fire_type": "lean",
+    "earliest_fire_age": 46
+  }
+}
