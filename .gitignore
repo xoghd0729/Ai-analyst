@@ -39,3 +39,5 @@ data/auth_tokens.json
 data/saved_portfolios.json
 .venv/
 .venv/
+*.docx
+*.txt # 단, 이미 추적 중인 txt는 영향 없음
