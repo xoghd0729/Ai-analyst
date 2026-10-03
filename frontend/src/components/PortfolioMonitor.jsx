@@ -34,21 +34,21 @@ export default function PortfolioMonitor({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ display: 'grid', gap: 12, marginTop: 14 }}>
       <div style={{ background: '#ffffff', border: '1px solid #dfe3ea', borderRadius: 12, padding: 14 }}>
-        <div style={{ color: '#94a3b8', fontSize: 12 }}>이번 달 받을 배당</div>
+        <div style={{ color: 'var(--text-sub)', fontSize: 12 }}>이번 달 받을 배당</div>
         <div style={{ color: '#283143', fontSize: 30, fontWeight: 800, marginTop: 4 }}>
           {Math.round(thisMonthDiv)}만원
         </div>
       </div>
 
       <div style={{ background: '#ffffff', border: '1px solid #dfe3ea', borderRadius: 12, padding: 14 }}>
-        <div style={{ color: '#94a3b8', fontSize: 12 }}>다음 리밸런싱 권장일</div>
+        <div style={{ color: 'var(--text-sub)', fontSize: 12 }}>다음 리밸런싱 권장일</div>
         <div style={{ color: '#f8fafc', fontSize: 18, fontWeight: 700, marginTop: 6 }}>
           {nextDate || '데이터 없음'} ({formatDday(nextDate)})
         </div>
       </div>
 
       <div style={{ background: '#ffffff', border: '1px solid #dfe3ea', borderRadius: 12, padding: 14 }}>
-        <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 8 }}>종목별 ML 점수 변화</div>
+        <div style={{ color: 'var(--text-sub)', fontSize: 12, marginBottom: 8 }}>종목별 ML 점수 변화</div>
         {changed.length ? (
           changed.slice(0, 5).map((r) => (
             <div key={r.ticker} style={{ color: '#283143', fontSize: 12, marginBottom: 6 }}>
@@ -61,12 +61,12 @@ export default function PortfolioMonitor({
       </div>
 
       <div style={{ background: '#ffffff', border: '1px solid #dfe3ea', borderRadius: 12, padding: 14 }}>
-        <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 8 }}>배당 성장 곡선 (10년)</div>
+        <div style={{ color: 'var(--text-sub)', fontSize: 12, marginBottom: 8 }}>배당 성장 곡선 (10년)</div>
         <ResponsiveContainer width="100%" height={180}>
           <LineChart data={curve}>
             <CartesianGrid strokeDasharray="3 3" stroke="#dfe3ea" />
-            <XAxis dataKey="year" tick={{ fontSize: 11, fill: '#94a3b8' }} />
-            <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} />
+            <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'var(--text-sub)' }} />
+            <YAxis tick={{ fontSize: 11, fill: 'var(--text-sub)' }} />
             <Tooltip />
             <Line type="monotone" dataKey="monthly" stroke="#059669" strokeWidth={2} dot={false} />
           </LineChart>

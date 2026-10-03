@@ -13,6 +13,12 @@ import logging
 
 from .context import PipelineContext, PortfolioRequest
 from .filters import PIPELINE_FILTERS
+# 근거 매핑표 import — API 응답에 rationale 포함
+try:
+    from api.routers.portfolio import ARCHETYPE_RATIONALE, SCORING_RATIONALE
+except ImportError:
+    ARCHETYPE_RATIONALE: dict = {}
+    SCORING_RATIONALE: dict = {}
 
 log = logging.getLogger(__name__)
 
@@ -51,12 +57,15 @@ class RecommendationPipeline:
         return {
             # ── 입력 메타 ───────────────────────────────────────
             "input": {
-                "age":            req.age,
-                "annual_income":  req.annual_income,
-                "monthly_target": req.monthly_target,
-                "investable":     req.investable_amount,
-                "risk_tolerance": req.risk_tolerance,
-                "archetype":      req.archetype,
+                "age":                 req.age,
+                "annual_income":       req.annual_income,
+                "monthly_target":      req.monthly_target,
+                "investable":          req.investable_amount,
+                "risk_tolerance":      req.risk_tolerance,
+                "archetype":           req.archetype,
+                "monthly_savings":     req.monthly_savings,
+                "target_fire_age":     req.target_fire_age,
+                "savings_growth":      req.savings_growth,   # 연 적립금 증가율 (%)
             },
 
             # ── 아키타입 ────────────────────────────────────────
@@ -64,6 +73,8 @@ class RecommendationPipeline:
                 "label":        ctx.arch_cfg.get("label", req.archetype),
                 "description":  ctx.arch_cfg.get("description", ""),
                 "etf_priority": ctx.arch_cfg.get("etf_categories_priority", []),
+                # 근거 매핑표: 투자목적 → 외부근거 → 설계방향 → 가중치
+                "rationale":    ARCHETYPE_RATIONALE.get(req.archetype, {}),
             },
 
             # ── 거시 레짐 ───────────────────────────────────────
@@ -137,7 +148,10 @@ class RecommendationPipeline:
             # ── 분석 결과 ───────────────────────────────────────
             "projection":        ctx.projection,
             "living_coverage":   ctx.living_coverage,
-            "portfolio_health":  ctx.health,
+            "portfolio_health":  {
+                **ctx.health,
+                "scoring_rationale": SCORING_RATIONALE,
+            },
             "rebalancing_plan":  ctx.rebalancing_plan,
             "stress_test":       ctx.stress,
             "fx_stress":         ctx.fx_stress,

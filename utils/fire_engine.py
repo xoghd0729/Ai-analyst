@@ -54,15 +54,16 @@ FIRE_TARGETS = {
 
 
 def calc_fire_engine(
-    current_investable:  float,         # 현재 투자금 (만원)
-    monthly_savings:     float,         # 현재 월 적립 가능금액 (만원)
-    current_age:         int,
-    target_age:          int   = 50,    # 목표 FIRE 나이
-    avg_net_yield:       float = 3.5,   # 포트폴리오 세후 연 배당수익률 (%)
-    div_growth_rate:     float = 5.0,   # 연 배당성장률 (%)
-    cpi_rate:            float = 2.5,   # 인플레이션 (%)
-    custom_monthly_만원: float = 0.0,   # 사용자 지정 목표 월배당 (만원)
-    annual_savings_growth: float = 3.0, # 연 저축액 증가율 (소득 상승 반영, %)
+    current_investable:   float,               # 현재 투자금 (만원)
+    monthly_savings:      float,               # 현재 월 적립 가능금액 (만원)
+    current_age:          int,
+    target_age:           int   = 50,          # 목표 FIRE 나이
+    avg_net_yield:        float = 3.5,         # [역할A] 세후 배당수익률 (%) — 목표 원금 역산용
+    div_growth_rate:      float = 5.0,         # 연 배당성장률 (%) — 보수적 설계상 원금 계산에 미사용 (데드)
+    cpi_rate:             float = 2.5,         # 인플레이션 (%)
+    custom_monthly_만원:  float = 0.0,         # 사용자 지정 목표 월배당 (만원)
+    annual_savings_growth: float = 0.0,        # 연 저축액 증가율 (%) — 기본 0%, 명시적 전달 원칙
+    asset_growth_yield:   Optional[float] = None,  # [역할B] 자산 누적 성장률 (%) — None이면 avg_net_yield 사용
 ) -> dict:
     """
     FIRE 목표별 역산 분석.
@@ -118,12 +119,18 @@ def calc_fire_engine(
     }
     """
     years_to_fire = max(target_age - current_age, 1)
+
+    # 역할A: 배당 현금흐름 목표 역산 → 세후 배당수익률
     r_yield   = avg_net_yield   / 100.0
-    r_growth  = div_growth_rate / 100.0
+
+    # 역할B: 자산 누적 성장률 → 총수익률(asset_growth_yield) 또는 배당수익률(하위 호환)
+    r_growth_asset = (asset_growth_yield if asset_growth_yield is not None else avg_net_yield) / 100.0
+
+    r_growth  = div_growth_rate / 100.0  # div_growth_rate: 보수적 설계상 원금 계산에 미사용
     r_cpi     = cpi_rate        / 100.0
     r_savings_growth = annual_savings_growth / 100.0
 
-    # 현재 월 배당 (대략적 추정)
+    # 현재 월 배당 (대략적 추정) — 역할A 수익률 기준
     current_monthly_div = round(current_investable * r_yield / 12, 2)
 
     results = {}
@@ -157,10 +164,10 @@ def calc_fire_engine(
         shortfall = round(required_principal - current_investable, 0)
         already   = shortfall <= 0
 
-        # 월 적립액 역산 (FV 공식)
+        # 월 적립액 역산 (FV 공식) — 역할B: 자산 누적 성장률 사용
         # FV = PMT × ((1+r/12)^(n*12) - 1) / (r/12)
         # 단, 저축액도 매년 r_savings_growth만큼 증가한다고 가정
-        monthly_r = r_yield / 12.0   # 월 수익률 (배당 재투자 가정)
+        monthly_r = r_growth_asset / 12.0   # 월 수익률: 총수익률 기준 (역할B)
         n_months  = years_to_fire * 12
 
         if already:
@@ -172,11 +179,11 @@ def calc_fire_engine(
         else:
             monthly_pmt = round(shortfall / n_months, 1) if n_months > 0 else 0.0
 
-        # 실제 달성 나이 시뮬레이션 (현재 적립액 + 기존 투자금 복리 성장)
+        # 실제 달성 나이 시뮬레이션 — 역할B: 자산 누적 성장률(총수익률) 기준
         projected_fire_age = _simulate_fire_age(
             current_investable = current_investable,
             monthly_savings    = monthly_savings,
-            r_yield_monthly    = monthly_r,
+            r_yield_monthly    = r_growth_asset / 12.0,   # 총수익률 기준
             r_savings_growth   = r_savings_growth,
             required_principal = required_principal,
             current_age        = current_age,
@@ -202,11 +209,11 @@ def calc_fire_engine(
             "gap_years":               gap,    # 음수=일찍 달성, 양수=늦게 달성
         }
 
-    # 연도별 자산 성장 타임라인 (regular 기준)
+    # 연도별 자산 성장 타임라인 (regular 기준) — 역할B: 자산 누적 성장률 기준
     fire_timeline = _build_timeline(
         current_investable = current_investable,
         monthly_savings    = monthly_savings,
-        r_yield_monthly    = r_yield / 12,
+        r_yield_monthly    = r_growth_asset / 12,   # 총수익률 기준
         r_savings_growth   = r_savings_growth,
         current_age        = current_age,
         target_age         = target_age,
@@ -236,15 +243,17 @@ def calc_fire_engine(
     return {
         "targets":           results,
         "current_state": {
-            "investable":          round(current_investable, 0),
-            "monthly_savings":     round(monthly_savings, 1),
-            "current_monthly_div": current_monthly_div,
-            "current_age":         current_age,
-            "target_age":          target_age,
-            "years_to_fire":       years_to_fire,
-            "avg_net_yield_pct":   avg_net_yield,
-            "div_growth_rate_pct": div_growth_rate,
-            "cpi_rate_pct":        cpi_rate,
+            "investable":               round(current_investable, 0),
+            "monthly_savings":          round(monthly_savings, 1),
+            "current_monthly_div":      current_monthly_div,
+            "current_age":              current_age,
+            "target_age":               target_age,
+            "years_to_fire":            years_to_fire,
+            "avg_net_yield_pct":        avg_net_yield,           # 역할A: 배당수익률
+            "asset_growth_yield_pct":   asset_growth_yield if asset_growth_yield is not None else avg_net_yield,  # 역할B: 자산 성장률
+            "div_growth_rate_pct":      div_growth_rate,         # 보수적 설계상 미사용 (데드)
+            "cpi_rate_pct":             cpi_rate,
+            "annual_savings_growth_pct": annual_savings_growth,
         },
         "fire_timeline":         fire_timeline,
         "recommended_action":    recommended,
@@ -420,14 +429,16 @@ def _binary_search_max(
 
 
 def calc_fire_reverse(
-    current_investable:  float,   # 현재 투자금 (만원)
-    monthly_savings:     float,   # 현재 월 적립금 (만원)
-    current_age:         int,
-    target_fire_age:     int,     # 달성하고 싶은 나이
-    target_monthly_만원: float,   # 달성하고 싶은 월배당 목표 (만원)
-    avg_net_yield:       float = 5.0,
-    div_growth_rate:     float = 5.0,
-    cpi_rate:            float = 2.5,
+    current_investable:    float,               # 현재 투자금 (만원)
+    monthly_savings:       float,               # 현재 월 적립금 (만원)
+    current_age:           int,
+    target_fire_age:       int,                 # 달성하고 싶은 나이
+    target_monthly_만원:   float,               # 달성하고 싶은 월배당 목표 (만원)
+    avg_net_yield:         float = 5.0,         # [역할A] 세후 배당수익률 (%)
+    div_growth_rate:       float = 5.0,         # 배당성장률 (데드 파라미터)
+    cpi_rate:              float = 2.5,         # 인플레이션 (%)
+    annual_savings_growth: float = 0.0,         # 연 적립금 증가율 (%, 0=고정)
+    asset_growth_yield:    Optional[float] = None,  # [역할B] 자산 성장률 (None이면 avg_net_yield 사용)
 ) -> dict:
     """
     현재 조건 기준으로 목표(target_fire_age / target_monthly_만원) 달성을 위해
@@ -455,12 +466,14 @@ def calc_fire_reverse(
     """
     # ── 공통 파라미터 묶음 ──────────────────────────────────────────────
     _common = dict(
-        current_age     = current_age,
-        target_age      = target_fire_age,
-        avg_net_yield   = avg_net_yield,
-        div_growth_rate = div_growth_rate,
-        cpi_rate        = cpi_rate,
-        custom_monthly_만원 = target_monthly_만원,
+        current_age           = current_age,
+        target_age            = target_fire_age,
+        avg_net_yield         = avg_net_yield,          # 역할A: 배당수익률
+        asset_growth_yield    = asset_growth_yield,     # 역할B: 총수익률 (None이면 avg_net_yield 사용)
+        div_growth_rate       = div_growth_rate,
+        cpi_rate              = cpi_rate,
+        custom_monthly_만원   = target_monthly_만원,
+        annual_savings_growth = annual_savings_growth,
     )
 
     def _proj_age(investable: float, savings: float) -> int:
@@ -550,14 +563,16 @@ def calc_fire_reverse(
         if m <= 0:
             return True
         r = calc_fire_engine(
-            current_investable  = current_investable,
-            monthly_savings     = monthly_savings,
-            current_age         = current_age,
-            target_age          = target_fire_age,
-            avg_net_yield       = avg_net_yield,
-            div_growth_rate     = div_growth_rate,
-            cpi_rate            = cpi_rate,
-            custom_monthly_만원 = m,
+            current_investable    = current_investable,
+            monthly_savings       = monthly_savings,
+            current_age           = current_age,
+            target_age            = target_fire_age,
+            avg_net_yield         = avg_net_yield,
+            asset_growth_yield    = asset_growth_yield,
+            div_growth_rate       = div_growth_rate,
+            cpi_rate              = cpi_rate,
+            annual_savings_growth = annual_savings_growth,
+            custom_monthly_만원   = m,
         )
         custom = r["targets"].get("custom")
         if not custom:
@@ -656,3 +671,248 @@ def _make_reverse_message(
         )
 
     return "".join(lines)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 생애주기 기반 FIRE 엔진 (Lifecycle FIRE)
+# 연령별로 월 적립금이 달라지는 현실적인 저축 패턴 반영
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _get_monthly_savings_at_age(
+    age: float,
+    savings_stages: list[dict],
+    default_savings: float,
+) -> float:
+    """
+    현재 연령에 해당하는 월 적립금 반환.
+    savings_stages = [{"from_age": 25, "to_age": 27, "monthly_savings": 20}, ...]
+    """
+    if not savings_stages:
+        return default_savings
+    for stage in savings_stages:
+        if stage["from_age"] <= age < stage["to_age"]:
+            return float(stage["monthly_savings"])
+    # 마지막 구간 이후는 마지막 스테이지 값 사용
+    return float(savings_stages[-1]["monthly_savings"])
+
+
+def _simulate_fire_age_lifecycle(
+    current_investable:  float,
+    savings_stages:      list[dict],
+    default_savings:     float,
+    r_yield_monthly:     float,
+    required_principal:  float,
+    current_age:         int,
+    max_years:           int = 50,
+) -> Optional[int]:
+    """생애주기 적립금 기반 FIRE 달성 나이 시뮬레이션."""
+    portfolio = current_investable
+
+    for year in range(1, max_years + 1):
+        sim_age = current_age + year - 1
+        monthly = _get_monthly_savings_at_age(sim_age, savings_stages, default_savings)
+
+        for _ in range(12):
+            portfolio = portfolio * (1 + r_yield_monthly) + monthly
+
+        if portfolio >= required_principal:
+            return current_age + year
+
+    return None
+
+
+def _build_timeline_lifecycle(
+    current_investable:  float,
+    savings_stages:      list[dict],
+    default_savings:     float,
+    r_yield_monthly:     float,
+    current_age:         int,
+    target_age:          int,
+    targets:             dict,
+    years:               int = 35,
+) -> list[dict]:
+    """생애주기 기반 연도별 자산 성장 타임라인."""
+    timeline = []
+    portfolio = current_investable
+
+    for year in range(1, years + 1):
+        sim_age = current_age + year - 1
+        monthly = _get_monthly_savings_at_age(sim_age, savings_stages, default_savings)
+
+        for _ in range(12):
+            portfolio = portfolio * (1 + r_yield_monthly) + monthly
+
+        age = current_age + year
+        achieved = {k: portfolio >= v for k, v in targets.items()}
+
+        timeline.append({
+            "year":        year,
+            "age":         age,
+            "portfolio":   round(portfolio, 0),
+            "monthly_savings": monthly,
+            "is_target":   age == target_age,
+            "achieved":    achieved,
+        })
+
+    return timeline
+
+
+def calc_fire_engine_lifecycle(
+    current_investable:  float,
+    savings_stages:      list[dict],
+    current_age:         int,
+    target_age:          int   = 50,
+    avg_net_yield:       float = 3.5,
+    div_growth_rate:     float = 5.0,
+    cpi_rate:            float = 2.5,
+    custom_monthly_man_won: float = 0.0,
+) -> dict:
+    """
+    생애주기 기반 FIRE 역산 엔진.
+
+    savings_stages 예시:
+      [
+        {"from_age": 25, "to_age": 27, "monthly_savings": 20},
+        {"from_age": 27, "to_age": 30, "monthly_savings": 100},
+        {"from_age": 30, "to_age": 60, "monthly_savings": 200},
+      ]
+
+    반환 구조는 calc_fire_engine()과 동일.
+    """
+    if not savings_stages:
+        # fallback: 스테이지 없으면 기본 엔진으로 위임
+        return calc_fire_engine(
+            current_investable  = current_investable,
+            monthly_savings     = 0.0,
+            current_age         = current_age,
+            target_age          = target_age,
+            avg_net_yield       = avg_net_yield,
+            div_growth_rate     = div_growth_rate,
+            cpi_rate            = cpi_rate,
+            custom_monthly_man_won = custom_monthly_man_won,
+        )
+
+    years_to_fire = max(target_age - current_age, 1)
+    r_yield       = avg_net_yield / 100.0
+    r_yield_mo    = r_yield / 12.0
+    r_cpi         = cpi_rate / 100.0
+
+    # 현재 나이 기준 적립금 (표시용)
+    current_monthly = _get_monthly_savings_at_age(
+        current_age, savings_stages, savings_stages[0]["monthly_savings"]
+    )
+
+    results = {}
+    target_list = dict(FIRE_TARGETS)
+    if custom_monthly_man_won > 0:
+        target_list["custom"] = {
+            "label":       "맞춤 목표",
+            "monthly_man_won": custom_monthly_man_won,
+            "desc":        f"월 {custom_monthly_man_won:,}만원 배당 목표",
+        }
+    else:
+        results["custom"] = None
+
+    for key, tdef in target_list.items():
+        nom_monthly = tdef.get("monthly_man_won") or tdef.get("monthly_만원", 0)
+
+        real_monthly_at_fire = round(nom_monthly * ((1 + r_cpi) ** years_to_fire), 2)
+        annual_target        = real_monthly_at_fire * 12
+        required_principal   = round(annual_target / r_yield, 0) if r_yield > 0 else 0
+
+        shortfall  = round(required_principal - current_investable, 0)
+        already    = shortfall <= 0
+
+        projected_fire_age = _simulate_fire_age_lifecycle(
+            current_investable  = current_investable,
+            savings_stages      = savings_stages,
+            default_savings     = current_monthly,
+            r_yield_monthly     = r_yield_mo,
+            required_principal  = required_principal,
+            current_age         = current_age,
+        )
+
+        achievable         = (projected_fire_age is not None and projected_fire_age <= target_age)
+        years_to_achieve   = (projected_fire_age - current_age) if projected_fire_age else None
+        gap                = (projected_fire_age - target_age)  if projected_fire_age else None
+
+        results[key] = {
+            "label":                   tdef["label"],
+            "desc":                    tdef.get("desc", ""),
+            "monthly_target_nominal":  nom_monthly,
+            "monthly_target_real":     real_monthly_at_fire,
+            "required_principal":      required_principal,
+            "shortfall":               max(shortfall, 0),
+            "already_achieved":        already,
+            "monthly_pmt_needed":      0.0,
+            "achievable_by_target":    achievable,
+            "projected_fire_age":      projected_fire_age,
+            "years_to_achieve":        years_to_achieve,
+            "gap_years":               gap,
+        }
+
+    fire_timeline = _build_timeline_lifecycle(
+        current_investable = current_investable,
+        savings_stages     = savings_stages,
+        default_savings    = current_monthly,
+        r_yield_monthly    = r_yield_mo,
+        current_age        = current_age,
+        target_age         = target_age,
+        targets            = {k: v["required_principal"] for k, v in results.items() if v},
+        years              = min(years_to_fire + 5, 40),
+    )
+
+    earliest_type = None
+    earliest_age  = None
+    for k, v in results.items():
+        if v and v["projected_fire_age"]:
+            if earliest_age is None or v["projected_fire_age"] < earliest_age:
+                earliest_age  = v["projected_fire_age"]
+                earliest_type = k
+
+    return {
+        "targets":        results,
+        "current_state": {
+            "investable":           round(current_investable, 0),
+            "monthly_savings":      current_monthly,
+            "savings_stages":       savings_stages,
+            "current_monthly_div":  round(current_investable * r_yield / 12, 2),
+            "current_age":          current_age,
+            "target_age":           target_age,
+            "years_to_fire":        years_to_fire,
+            "avg_net_yield_pct":    avg_net_yield,
+            "div_growth_rate_pct":  div_growth_rate,
+            "cpi_rate_pct":         cpi_rate,
+            "lifecycle_mode":       True,
+        },
+        "fire_timeline":      fire_timeline,
+        "recommended_action": _make_lifecycle_recommendation(results, savings_stages, target_age, current_age),
+        "earliest_fire_type": earliest_type,
+        "earliest_fire_age":  earliest_age,
+    }
+
+
+def _make_lifecycle_recommendation(
+    results:        dict,
+    savings_stages: list[dict],
+    target_age:     int,
+    current_age:    int,
+) -> str:
+    lines = []
+
+    stage_desc = " -> ".join(
+        f"{s['from_age']}~{s['to_age']}세 월 {s['monthly_savings']:,}만원"
+        for s in savings_stages
+    )
+    lines.append(f"[생애주기 모드] 적립 계획: {stage_desc}")
+
+    lean = results.get("lean")
+    if lean and lean.get("projected_fire_age"):
+        age = lean["projected_fire_age"]
+        gap = age - target_age
+        if gap <= 0:
+            lines.append(f"린 파이어(월 120만원) {age}세 달성 (목표 {target_age}세보다 {abs(gap)}년 빠름).")
+        else:
+            lines.append(f"린 파이어(월 120만원) {age}세 달성 예상 (목표보다 {gap}년 늦음).")
+
+    return " ".join(lines)

@@ -495,81 +495,270 @@ def collect_stock_history(stock: dict, start: int, end: int) -> list[dict]:
     return rows
 
 
+
+
+# ─────────────────────────────────────────────────────────────
+# 4-b. Look-ahead leakage 검사
+# ─────────────────────────────────────────────────────────────
+
+# 학습에 사용할 피처 목록 (미래 정보 없음)
+TRAIN_FEATURES = [
+    "revenue", "op_income", "net_income",
+    "operating_cf", "capex", "fcf",
+    "dividends_paid", "payout_ratio", "dividend_coverage",
+    "total_liab", "total_equity", "debt_ratio",
+    "interest_expense", "interest_coverage",
+    "revenue_yoy_pct",
+    "dps_yoy_pct",   # t-1→t 변화율 (관측 가능)
+]
+
+# 학습 타깃 목록 (forward-looking, leakage 없어야 함)
+TRAIN_TARGETS = ["label_cut_1y", "label_cut_3y", "label_cut_5y", "label_meaningful_1y", "label_mc_raw_1y"]
+
+
+
+def leakage_check(df: pd.DataFrame) -> dict:
+    """
+    시간 기반 look-ahead leakage 검사.
+
+    ■ 검사 항목 (시간 방향 기반 — 상관계수 기반 아님)
+    ─────────────────────────────────────────────────
+    (1) 피처 컬럼에 미래 참조 패턴 (_next, _t1, _future 등) 포함 여부
+    (2) TRAIN_TARGETS 이 label_cut_Ny 형식으로 미래 이벤트 참조 여부 확인
+    (3) label3=BROKEN 클래스 dps_yoy_pct leakage (알려진 이슈, 경고만)
+    (4) 연도 단조성: 각 종목 내 year가 증가 순이어야 함
+
+    ■ 상관계수를 leakage 기준으로 쓰지 않는 이유
+      높은 상관 = 강력한 예측 피처일 수 있음.
+      낮은 상관이라도 미래 데이터 참조면 leakage임.
+      → 시간 방향/컬럼 출처 기반 검사가 더 안전함.
+
+    반환: {"issues": [...], "warnings": [...]}
+    """
+    report: dict = {"issues": [], "warnings": []}
+
+    print("\n🔍 Look-ahead leakage 검사 (시간 기반) 중...")
+
+    # ── (1) 피처에 미래 참조 패턴 ──────────────────────────────
+    leakage_patterns = ["_next", "_t1", "_future", "_forward", "cut_n"]
+    for feat in TRAIN_FEATURES:
+        for pat in leakage_patterns:
+            if pat in feat.lower() and feat in df.columns:
+                msg = f"피처 '{feat}'에 미래 참조 패턴 '{pat}' 포함"
+                report["issues"].append(msg)
+                print(f"  ❌ LEAKAGE: {msg}")
+
+    # ── (2) 타깃 컬럼이 미래 이벤트 참조인지 확인 ───────────────
+    for tgt in TRAIN_TARGETS:
+        if tgt in df.columns:
+            # label_cut_Ny → shift(-N)으로 생성됨 → 정상 forward-looking
+            print(f"  ✅ {tgt}: forward-looking 타깃 (OK)")
+
+    # ── (3) label3 BROKEN leakage 경고 (알려진 이슈) ────────────
+    if "label3" in df.columns and "dps_yoy_pct" in df.columns:
+        broken = df[df["label3"] == 2].copy()
+        if not broken.empty:
+            x2 = pd.to_numeric(broken["dps_yoy_pct"], errors="coerce").dropna()
+            if len(x2) >= 5:
+                neg_rate = float((x2 < 0).mean())
+                msg = (f"label3=BROKEN 행 dps_yoy_pct<0 비율: {neg_rate:.1%} "
+                       f"— BROKEN 클래스 학습 시 dps_yoy_pct가 라벨을 직접 인코딩 "
+                       f"(신규 label_cut_Ny 타깃 사용 권장)")
+                report["warnings"].append(msg)
+                if neg_rate > 0.9:
+                    print(f"  ⚠️  {msg}")
+
+    # ── (4) 연도 단조성: 종목별 year 증가 확인 ──────────────────
+    if "stock_code" in df.columns and "year" in df.columns:
+        bad_codes = []
+        for code, grp in df.groupby("stock_code"):
+            years = grp["year"].dropna().tolist()
+            if years != sorted(years):
+                bad_codes.append(code)
+        if bad_codes:
+            msg = f"year 정렬 이상 종목: {bad_codes[:5]} ..."
+            report["issues"].append(msg)
+            print(f"  ❌ {msg}")
+        else:
+            print("  ✅ 종목별 year 단조 증가 (OK)")
+
+    # ── 결과 출력 ────────────────────────────────────────────────
+    if not report["issues"]:
+        print("  ✅ 시간 기반 leakage 이슈 없음")
+    else:
+        print(f"  → {len(report['issues'])}개 leakage 이슈 발견 (위 내용 확인 필요)")
+
+    return report
+
 # ─────────────────────────────────────────────────────────────
 # 4. 배당 삭감 라벨 자동 생성
 # ─────────────────────────────────────────────────────────────
 
 def label_dividend_cuts(df: pd.DataFrame) -> pd.DataFrame:
     """
-    전년 대비 DPS 감소 → dividend_cut = 1 (삭감)
-                         DPS 동일/증가 → dividend_cut = 0 (유지·인상)
+    ■ 데이터셋 계약 (look-ahead bias 방지)
+    ─────────────────────────────────────────
+    관측시점(t): 종목 × 연도 행 1개
+    피처:        fiscal year t 재무 데이터 (DART 공시는 보통 t+1년 4월 공개)
+    타깃:        fiscal year t+1 ~ t+5 배당 이벤트
 
-    ■ 라벨 정의
-      dividend_cut      : 0 또는 1 (이진 분류 타깃)
-      dps_yoy_pct       : 전년 대비 DPS 변화율 (%)
-      dps_prev          : 전년 DPS (참조용)
+    ∴ label_cut_Ny = 1  ⟺  DPS(t+N) < DPS(t+N-1) 가 t+1~t+N 중 하나라도 발생
+    ∴ label_cut_1y = DPS(t+1) < DPS(t)  (1년 단순 컷)
 
-    ■ 주의: 전년 DPS가 없으면 (첫 해) NaN으로 처리 → 학습에서 제외
+    ■ 주의: label3 (레거시) 의 class=2(BROKEN)는
+       dividend_cut(t) == 1 즉 t년도에 이미 삭감된 행에 붙는다.
+       이 때 피처 dps_yoy_pct(t)는 음수이므로 label 직접 예측 가능 → leakage.
+       따라서 신규 학습은 label_cut_1y / label_cut_3y / label_cut_5y 사용.
+       label3 는 하위 호환용으로만 남긴다.
+
+    ■ 출력 라벨
+      dividend_cut      : t년도 삭감 여부 (0/1) — 중간 계산용
+      dps_yoy_pct       : t-1→t DPS 변화율 (%) — 피처로 사용 가능
+      label_cut_1y      : t→t+1 삭감 여부 (0/1) — 주요 타깃
+      label_cut_3y      : t+1~t+3 중 삭감 있으면 1 — 중기 타깃
+      label_cut_5y      : t+1~t+5 중 삭감 있으면 1 — 장기 타깃
+      label3            : 레거시 3-class (0=INTACT, 1=WEAKENING, 2=BROKEN)
+      meaningful_cut    : t년도 심각한 삭감(dps_yoy_pct<-30% + 회복 없음) — 중간 계산용
+      label_meaningful_1y : t→t+1 심각한 삭감 여부 (0/1) — 기능 B 타깃 (year+1 조회 방식)
     """
     df = df.sort_values(["stock_code", "year"]).copy()
 
-    # None → NaN 변환
     df["dps"]           = pd.to_numeric(df["dps"],           errors="coerce")
     df["dividends_paid"] = pd.to_numeric(df["dividends_paid"], errors="coerce")
 
-    # ── 1차: DPS 기반 라벨 (데이터 있을 때 우선) ──
+    # ── t-1 DPS 피처 (관측시점 t에 알 수 있는 정보) ──
     df["dps_prev"] = df.groupby("stock_code")["dps"].shift(1)
     df["dps_yoy_pct"] = (
         (df["dps"] - df["dps_prev"]) / df["dps_prev"].abs() * 100
     ).round(2)
 
-    # ── 2차: dividends_paid 기반 라벨 (DPS 없을 때 fallback) ──
-    # 총 배당지급액 감소 = 배당 삭감으로 간주
-    # dividends_paid는 DART에서 음수로 오는 경우가 있으므로 abs() 처리
+    # ── dividends_paid 보조 ──
     df["div_paid_abs"]  = df["dividends_paid"].abs()
     df["div_paid_prev"] = df.groupby("stock_code")["div_paid_abs"].shift(1)
     df["div_paid_yoy_pct"] = (
         (df["div_paid_abs"] - df["div_paid_prev"]) / df["div_paid_prev"].abs() * 100
     ).round(2)
 
-    def _label(row):
-        # DPS 데이터가 있으면 DPS 기준
+    # ── t년도 cut 여부 (중간 변수) ──
+    def _cut_flag(row):
         if pd.notna(row.get("dps")) and pd.notna(row.get("dps_prev")):
             return 1 if row["dps"] < row["dps_prev"] else 0
-        # DPS 없으면 dividends_paid 기준 (5% 이상 감소 = 삭감)
         if pd.notna(row.get("div_paid_abs")) and pd.notna(row.get("div_paid_prev")):
             if row["div_paid_prev"] > 0:
                 return 1 if row["div_paid_abs"] < row["div_paid_prev"] * 0.95 else 0
         return None
 
-    df["dividend_cut"] = df.apply(_label, axis=1)
+    df["dividend_cut"] = df.apply(_cut_flag, axis=1)
     df["dividend_cut"] = pd.to_numeric(df["dividend_cut"], errors="coerce")
 
-    # ── 3-class forward-looking 라벨 ──────────────────────────
-    # label3: 현재(t) 피처로 미래(t+1) 삭감을 예측
-    #   0 = INTACT    : 올해 유지, 내년도 유지
-    #   1 = WEAKENING : 올해 유지, 내년 삭감 예정 (전조 상태)
-    #   2 = BROKEN    : 올해 이미 삭감 발생
-    #
-    # leakage 방지: 피처(dps_yoy_pct, payout 등)는 모두 t년도 값.
-    # 마지막 연도는 t+1 미래 불명 → label3=NaN → 학습 제외.
-    df["_cut_next"] = df.groupby("stock_code")["dividend_cut"].shift(-1)
+    # ── 미래 N년치 cut 플래그 미리 계산 ──
+    for n in range(1, 6):
+        df[f"_cut_n{n}"] = df.groupby("stock_code")["dividend_cut"].shift(-n)
+
+    # label_cut_1y: t+1년 삭감 여부
+    df["label_cut_1y"] = df["_cut_n1"].where(df["_cut_n1"].notna())
+
+    # label_cut_3y: t+1 ~ t+3 중 삭감 한 번이라도 있으면 1
+    def _any_cut_3y(row):
+        flags = [row.get(f"_cut_n{n}") for n in range(1, 4)]
+        if all(pd.isna(f) for f in flags):
+            return None
+        vals = [f for f in flags if pd.notna(f)]
+        return 1 if any(v == 1 for v in vals) else 0
+
+    # label_cut_5y: t+1 ~ t+5
+    def _any_cut_5y(row):
+        flags = [row.get(f"_cut_n{n}") for n in range(1, 6)]
+        if all(pd.isna(f) for f in flags):
+            return None
+        vals = [f for f in flags if pd.notna(f)]
+        return 1 if any(v == 1 for v in vals) else 0
+
+    df["label_cut_3y"] = df.apply(_any_cut_3y, axis=1)
+    df["label_cut_5y"] = df.apply(_any_cut_5y, axis=1)
+
+    # ── label3 (레거시, 하위 호환) ──
+    # BROKEN(2): t년도 이미 삭감 → dps_yoy_pct 와 leakage 있음, 신규 학습 비권장
+    # WEAKENING(1): t년도 유지, t+1 삭감 예정 → label_cut_1y=1 과 동일
+    # INTACT(0): t, t+1 모두 유지
+    df["_cut_next"] = df["_cut_n1"]
 
     def _label3(row):
         if pd.isna(row["dividend_cut"]):
             return None
         if row["dividend_cut"] == 1:
-            return 2  # BROKEN
+            return 2  # BROKEN (leakage 주의)
         if pd.notna(row["_cut_next"]) and row["_cut_next"] == 1:
             return 1  # WEAKENING
         if pd.notna(row["_cut_next"]):
             return 0  # INTACT
-        return None   # 마지막 연도, 미래 불명
+        return None
 
     df["label3"] = df.apply(_label3, axis=1)
-    df = df.drop(columns=["_cut_next"])
 
-    # 매출 성장률(%) = 전년 대비 매출 변화율
+    # ── label_meaningful_1y: 기능 B 타깃 (t+1년 심각한 배당 삭감 여부) ──
+    # meaningful_cut(t): dps_yoy_pct(t) < -30% AND 다음 연도 회복 없음
+    # label_meaningful_1y(t) = meaningful_cut(t+1)
+    #
+    # 생성 방식: year+1 조회 (shift(-1) 아님)
+    # 이유: 종목별 연도 갭이 존재하는 경우 shift(-1)은 2년 이상 간격을 1년으로 오처리함.
+    # year+1이 존재하지 않는 행(마지막 관측 연도, 갭 발생 시)은 NaN 유지.
+    #
+    # 회복 조건(dps_yoy_pct(t+1) >= 30)은 라벨 생성에만 사용되며,
+    # 학습 피처(TRAIN_FEATURES)에는 포함되지 않음 → look-ahead bias 없음.
+    def _mc_flag(row):
+        yoy = row.get("dps_yoy_pct")
+        if pd.isna(yoy) or yoy > -30:
+            return 0
+        return 1  # 회복 여부는 아래 후처리에서 적용
+
+    df["_mc_raw"] = df.apply(_mc_flag, axis=1)
+
+    # 회복 조건 적용: t년 삭감이어도 t+1년에 +30% 이상 회복되면 0으로 복원
+    _mc_next_yoy = df.groupby("stock_code")["dps_yoy_pct"].shift(-1)
+    recovery_mask = (_mc_next_yoy >= 30) & (df["_mc_raw"] == 1)
+    df.loc[recovery_mask, "_mc_raw"] = 0
+    df["meaningful_cut"] = df["_mc_raw"]
+
+    # year+1 조회 방식으로 label_meaningful_1y 생성
+    _mc_lookup = df.set_index(["stock_code", "year"])["meaningful_cut"]
+    def _get_mc_next(row):
+        try:
+            return float(_mc_lookup.loc[(row["stock_code"], int(row["year"]) + 1)])
+        except KeyError:
+            return float("nan")
+
+    df["label_meaningful_1y"] = df.apply(_get_mc_next, axis=1)
+
+    # ── label_mc_raw_1y: STEP 4 기준 실험 타깃 (t+1년 심각한 삭감, 회복 조건 없음) ──
+    # label_meaningful_1y 에서 회복 조건(t+2 데이터 필요)을 제거한 버전.
+    # label_mc_raw_1y(t) = (_mc_flag(t+1) == 1) = dps_yoy_pct(t+1) < -30%
+    #
+    # 목적: walk-forward 실험에서 t+2 미래 정보 누수 없이 예측력 검증
+    # 차이: label_meaningful_1y(t) vs label_mc_raw_1y(t) 불일치 케이스 = 회복 케이스(전체 36건)
+    # 주의: 기존 Survival 모델의 학습 타깃(meaningful_cut = 회복 조건 포함)과 정의가 다름.
+    #       실험 결과를 기존 Survival 모델의 성능으로 해석하지 않는다.
+
+    # 생성 방식: dps_yoy_pct set_index 조회 (label_meaningful_1y와 동일 패턴)
+    # _mc_raw는 회복 조건 적용 후 meaningful_cut과 동일하므로 재사용 불가.
+    # dps_yoy_pct(t+1) < -30% 를 직접 year+1 조회.
+    _yoy_lookup = df.set_index(["stock_code", "year"])["dps_yoy_pct"]
+
+    def _get_mc_raw_next(row):
+        """year+1의 dps_yoy_pct < -30% 여부. t+1 데이터만 필요 (t+2 누수 없음)."""
+        try:
+            next_yoy = float(_yoy_lookup.loc[(row["stock_code"], int(row["year"]) + 1)])
+            return 1.0 if next_yoy < -30 else 0.0
+        except (KeyError, ValueError, TypeError):
+            return float("nan")
+
+    df["label_mc_raw_1y"] = df.apply(_get_mc_raw_next, axis=1)
+
+    # 임시 컬럼 제거
+    drop_cols = [f"_cut_n{n}" for n in range(1, 6)] + ["_cut_next", "_mc_raw"]
+    df = df.drop(columns=[c for c in drop_cols if c in df.columns])
+
+    # ── 매출 성장률 피처 ──
     df["revenue"] = pd.to_numeric(df["revenue"], errors="coerce")
     df["_rev_prev"] = df.groupby("stock_code")["revenue"].shift(1)
     df["revenue_yoy_pct"] = (
@@ -594,7 +783,15 @@ COL_ORDER = [
     "revenue_yoy_pct",
     "dps", "dps_prev", "dps_yoy_pct",
     "dividend_cut",
-    "label3",   # 0=INTACT, 1=WEAKENING, 2=BROKEN (t+1 forward-looking)
+    # ── 신규 forward-looking 타깃 (leakage 없음) ──
+    "label_cut_1y",        # t+1 삭감 여부 (0/1) ← 기능 A 타깃
+    "label_cut_3y",        # t+1~t+3 내 삭감 여부 (0/1)
+    "label_cut_5y",        # t+1~t+5 내 삭감 여부 (0/1)
+    "meaningful_cut",      # t년도 심각한 삭감 여부 (0/1) — 중간 계산용
+    "label_meaningful_1y", # t+1년 심각한 삭감 여부 (0/1) ← 기능 B 타깃 (회복 조건 포함, t+2 누수 있음)
+    "label_mc_raw_1y",     # t+1년 심각한 삭감 여부 (0/1) ← STEP 4 기준 실험 타깃 (회복 조건 없음, t+2 누수 없음)
+    # ── 레거시 (하위 호환, BROKEN 클래스에 leakage 있음) ──
+    "label3",              # 0=INTACT, 1=WEAKENING, 2=BROKEN
 ]
 
 COL_KR = {
@@ -757,6 +954,9 @@ def main():
             years_cut = grp[grp["dividend_cut"] == 1]["year"].tolist()
             yr_str = ", ".join(str(y) for y in years_cut) if years_cut else "없음"
             print(f"    {name}: {cut_n}/{total_n}년 삭감 (삭감연도: {yr_str})")
+
+    # leakage 검사
+    leakage_check(df)
 
     # 저장
     print("\n💾 파일 저장 중...")

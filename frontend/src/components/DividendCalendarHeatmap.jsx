@@ -111,7 +111,7 @@ export default function DividendCalendarHeatmap({ calendar }) {
                     {label} 배당 종목
                   </div>
                   {tickers.slice(0, 5).map((t, j) => (
-                    <div key={j} style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+                    <div key={j} style={{ fontSize: 11, color: 'var(--text-sub)', marginTop: 2 }}>
                       {typeof t === 'string' ? t : (t.ticker || t.name || t)}
                     </div>
                   ))}

@@ -29,7 +29,7 @@ const CustomTooltip = ({ active, payload, label }) => {
       background: '#dfe3ea', border: '1px solid #c8d0dc',
       borderRadius: 10, padding: '10px 14px', fontSize: 12, color: '#283143',
     }}>
-      <div style={{ fontWeight: 700, marginBottom: 6, color: '#94a3b8' }}>
+      <div style={{ fontWeight: 700, marginBottom: 6, color: 'var(--text-sub)' }}>
         {label}년차
       </div>
       <div style={{ color: '#059669' }}>낙관(P90): {p90?.toFixed(1)}만원</div>
@@ -76,6 +76,10 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
           <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
             지금 보유분만으로 20년 — 위쪽 '목표 달성확률'(적립 포함)과 기준이 다름
             {regime && <span style={{ color: '#6366f1', marginLeft: 8 }}>({regime} 반영)</span>}
+          </div>
+          <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>
+            밴드는 1,000회 시뮬레이션 결과 —{' '}
+            <span style={{ color: '#ef4444' }}>비관(P10)</span> · 중앙(P50) · <span style={{ color: '#059669' }}>낙관(P90)</span>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -159,7 +163,7 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
           )}
 
           <Legend
-            wrapperStyle={{ fontSize: 12, color: '#94a3b8', paddingTop: 8 }}
+            wrapperStyle={{ fontSize: 12, color: 'var(--text-sub)', paddingTop: 8 }}
           />
         </ComposedChart>
       </ResponsiveContainer>
@@ -201,7 +205,7 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
       {/* 경고 메시지 */}
       {monteCarlo.summary_message && (
         <div style={{
-          marginTop: 12, fontSize: 12, color: '#94a3b8',
+          marginTop: 12, fontSize: 12, color: 'var(--text-sub)',
           padding: '8px 12px', background: '#dfe3ea', borderRadius: 8,
           borderLeft: '3px solid #6366f1',
         }}>

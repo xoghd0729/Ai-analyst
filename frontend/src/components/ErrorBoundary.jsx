@@ -64,7 +64,7 @@ export default class ErrorBoundary extends Component {
           <details style={{
             background: '#fef2f2', padding: '12px 14px', borderRadius: 8,
             border: '1px solid #312e81', marginBottom: 16,
-            fontSize: 12, color: '#94a3b8',
+            fontSize: 12, color: 'var(--text-sub)',
           }}>
             <summary style={{ cursor: 'pointer', color: '#c4b5fd', fontWeight: 600 }}>
               기술적 상세 (개발자용)

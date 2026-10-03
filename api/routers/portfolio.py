@@ -182,6 +182,9 @@ class PortfolioRequest(BaseModel):
     monthly_savings:   float = 0.0      # 월 적립액 (만원) — FIRE 계산용
     savings_growth:    float = 0.0      # 적립 연 증가율 (%) — 소득 상승 반영
     target_fire_age:   int   = 50       # 목표 FIRE 나이
+    savings_stages:    list  = []       # 생애주기 적립 스테이지
+    # 예: [{"from_age":25,"to_age":27,"monthly_savings":20},
+    #       {"from_age":27,"to_age":30,"monthly_savings":100}]
 
 
 # ─────────────────────────────────────────────────────────────
@@ -273,6 +276,348 @@ ARCHETYPE_CONFIG: dict[str, dict] = {
         },
         "description": "안정적 배당 현금흐름 우선. 커버드콜 없이 순수 배당수익. 고배당 ETF + 우량 배당주로 구성.",
         "label": "💰 배당형",
+    },
+}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ARCHETYPE_RATIONALE
+# ─────────────────────────────────────────────────────────────────────────────
+# 각 아키타입의 설계 근거를 명시한다.
+#
+# 구조:  [투자 목표 정의]
+#          ↓
+#        [외부 금융기관 참고]  (Morningstar / Vanguard / CFA Institute)
+#          ↓
+#        [우리 시스템의 설계 방향]
+#          ↓
+#        [axis_overrides 수치]  ← 외부 기관이 이 숫자를 직접 제시한 것이 아님.
+#                                  외부 원칙을 코드 상에서 정규화한 조정값임.
+#
+# 교수님 피드백 대응: "기준이 명확해야 한다"
+#   → 아키타입마다 '왜 이 축을 올리고 내렸는가'를 투자 목적 + 외부 원칙으로 설명
+#   → 이후 실제 데이터 기반 calibration 예정
+# ─────────────────────────────────────────────────────────────────────────────
+ARCHETYPE_RATIONALE: dict[str, dict] = {
+    # ─────────────────────────────────────────────────────────────────────────
+    # 각 아키타입 rationale 구조:
+    #   external_benchmark   - 인용 가능한 외부 기관의 실제 기준점/데이터
+    #   design_interpretation - 그 원칙을 우리 시스템에 어떻게 해석·적용했는가
+    #   internal_value_note   - axis_overrides 숫자가 외부 기관 수치가 아님을 명시
+    #   axis_overrides_rationale - 각 축 방향 설명
+    #   pending_calibration   - 향후 데이터 기반 검증 계획
+    # ─────────────────────────────────────────────────────────────────────────
+
+    "성장형": {
+        "investment_goal": (
+            "배당 자체보다 배당성장률을 우선시하는 장기 복리 전략. "
+            "10~20년 뒤 배당 규모를 극대화하는 것이 핵심 목적."
+        ),
+        "external_benchmark": {
+            "source": "Morningstar — Dividend Growth Category 기준",
+            "data": (
+                "Morningstar는 배당성장 전략에서 현재 배당수익률보다 "
+                "배당 지속성·성장성·재무건전성을 더 중요한 평가 기준으로 다룬다. "
+                "단순 고배당보다 장기 성장 가능성이 높은 종목을 선호하는 방향."
+            ),
+        },
+        "design_interpretation": (
+            "이 원칙을 참고하여 성장형 아키타입은 "
+            "배당성장 ETF(us_etf) 비중을 높이고 방어자산(defensive)·리츠(reit) 비중을 낮췄다. "
+            "'지금 당장 높은 수익률'보다 '10년 뒤 성장한 배당'을 우선하는 설계."
+        ),
+        "internal_value_note": (
+            "axis_overrides 수치(us_etf +0.05 등)는 Morningstar가 제시한 숫자가 아니라 "
+            "5축 가중치 체계 내에서 정규화한 시스템 내부 조정값이다."
+        ),
+        "axis_overrides_rationale": {
+            "us_etf":    "+0.05 — 배당성장 ETF 비중 상향. 성장 방향 핵심축.",
+            "kr_stock":  "+0.03 — 국내 성장 배당주 소량 추가. 환율 분산 겸 국내 접근.",
+            "defensive": "-0.05 — 성장형은 채권·방어자산 없이 주식+성장ETF 집중.",
+            "reit":      "-0.03 — 리츠는 성장보다 현금흐름 중심 → 성장형에서 축소.",
+        },
+        "pending_calibration": "axis_overrides 수치는 향후 백테스트 수익률 기반으로 재검증 예정.",
+    },
+
+    "월배당형": {
+        "investment_goal": (
+            "매월 안정적인 현금흐름 최우선. "
+            "'월급처럼 받는 배당'을 목표로 월분배 ETF + 고배당 리츠 조합."
+        ),
+        "external_benchmark": {
+            "source": "CFA Institute — Basics of Portfolio Planning and Construction (2026)",
+            "data": (
+                "CFA 포트폴리오 관리 원칙은 투자자의 목표(regular income, capital growth 등)와 "
+                "제약조건을 먼저 파악한 뒤 그에 맞는 전략적 자산배분을 설계하도록 명시한다. "
+                "정기적인 현금흐름 필요가 명확한 투자자에게는 이를 포트폴리오 목적으로 반영."
+            ),
+        },
+        "design_interpretation": (
+            "월 현금흐름을 목적으로 하는 투자자를 위해 "
+            "월분배 ETF(us_etf)·리츠(reit) 비중을 높이고, "
+            "방어자산보다 인컴 자산을 우선 배치했다. "
+            "JEPI/JEPQ/SPHD 등 활용은 시스템의 구체적 상품 선택."
+        ),
+        "internal_value_note": (
+            "axis_overrides 수치(us_etf +0.07 등)는 CFA가 제시한 숫자가 아니라 "
+            "인컴 목적 달성을 위한 시스템 내부 정규화값이다."
+        ),
+        "axis_overrides_rationale": {
+            "us_etf":    "+0.07 — 월배당 ETF 중심 구성. 가장 높은 ETF 비중 상향.",
+            "reit":      "+0.03 — 리츠 월배당 활용. 부동산 인컴 소스 추가.",
+            "kr_stock":  "-0.05 — 개별 국내 배당주는 월배당 빈도 낮아 비중 축소.",
+            "defensive": "-0.05 — 월배당 목적상 방어자산보다 인컴 자산 우선.",
+        },
+        "pending_calibration": "커버드콜 ETF 자본 침식 리스크 측정 후 threshold 재검토 예정.",
+    },
+
+    "안정형": {
+        "investment_goal": (
+            "원금 보존 + 안정적 배당. MDD 최소화. "
+            "하락장에서도 포트폴리오를 유지하는 것이 최우선."
+        ),
+        "external_benchmark": {
+            "source": "Vanguard — LifeStrategy Conservative Growth Fund / 자산배분 가이드",
+            "data": (
+                "Vanguard는 위험 수준에 따른 대표 자산배분 기준점을 공개한다: "
+                "Aggressive 80% 주식 / 20% 채권, "
+                "Moderate 60% 주식 / 40% 채권, "
+                "Conservative 40% 주식 / 60% 채권(LifeStrategy Conservative Growth Fund). "
+                "위험수용도가 낮을수록 방어자산(채권·TIPS·현금성) 비중을 높인다."
+            ),
+        },
+        "design_interpretation": (
+            "Vanguard Conservative Allocation(40/60) 원칙을 참고해 "
+            "안정형의 defensive 자산 비중을 상향하고 "
+            "변동성이 큰 us_stock·us_etf 비중을 낮췄다. "
+            "5축 시스템 특성상 채권 비중을 직접 사용하지 않고 "
+            "defensive 축(채권·TIPS·현금성)으로 변환하여 적용."
+        ),
+        "internal_value_note": (
+            "defensive +0.08은 Vanguard가 제시한 숫자가 아니라 "
+            "40/60 방향성을 5축 체계 내에서 정규화한 시스템 내부 조정값이다."
+        ),
+        "axis_overrides_rationale": {
+            "defensive":   "+0.08 — 방어자산 비중 최대화. 안정형 설계 핵심 조정.",
+            "kr_stock":    "+0.03 — 국내 우량 배당주(저변동성) 소량 추가.",
+            "us_stock":    "-0.05 — 개별 미국주 변동성 제어 위해 비중 축소.",
+            "us_etf":      "-0.06 — 성장 중심 ETF 비중 축소. 방어 ETF만 허용.",
+        },
+        "pending_calibration": (
+            "defensive +0.08은 내부 정규화값. "
+            "실제 MDD 데이터 및 Vanguard 40/60 성과 비교로 재검증 예정."
+        ),
+    },
+
+    "은퇴형": {
+        "investment_goal": (
+            "은퇴 후 생활비 조달. 방어자산 + 월배당 + 리츠 삼각 구조. "
+            "원금 소진 없이 배당만으로 생활비 충당."
+        ),
+        "external_benchmark": {
+            "source": "Vanguard — Target Date Fund Glide Path",
+            "data": (
+                "Vanguard TDF는 나이가 올라갈수록 주식 비중을 줄이고 채권·TIPS 비중을 늘리는 "
+                "glide path 원칙을 적용한다. "
+                "은퇴 시점(65세 기준) 약 30% 주식 / 70% 채권·TIPS 구조로 수렴. "
+                "은퇴 접근 시 자본성장보다 안정적 인컴·원금 보호를 우선."
+            ),
+        },
+        "design_interpretation": (
+            "Vanguard glide path의 핵심 원칙(은퇴 접근 → 방어자산 비중 확대·개별주 리스크 축소)을 참고했다. "
+            "현금흐름 중심 시스템 특성상 채권 직접 편입 대신 "
+            "리츠(월세 대체 인컴) + 월배당ETF + 방어자산 삼각 구조로 적용했다. "
+            "이 삼각 구조는 시스템 자체의 설계 — Vanguard가 이 구조를 직접 제시하지는 않는다."
+        ),
+        "internal_value_note": (
+            "axis_overrides 수치(reit +0.05 등)는 Vanguard glide path 수치가 아니라 "
+            "해당 원칙을 5축 체계로 변환한 시스템 내부 조정값이다."
+        ),
+        "axis_overrides_rationale": {
+            "reit":      "+0.05 — 리츠: 월세 대체 인컴. 은퇴형 핵심 현금흐름 축.",
+            "us_etf":    "+0.05 — 월배당 ETF로 정기 현금흐름 확보.",
+            "defensive": "+0.03 — 방어층 추가로 하락장 보호.",
+            "us_stock":  "-0.07 — 개별 미국주 리스크 대폭 축소.",
+            "kr_stock":  "-0.06 — 개별 국내주도 축소. 리츠/ETF로 대체.",
+        },
+        "pending_calibration": "Vanguard TDF glide path 성과 비교 및 SWR(안전 인출률) 기반 검증 예정.",
+    },
+
+    "혼합형": {
+        "investment_goal": (
+            "성장 + 현금흐름 균형. 특정 편향 없이 전방위 최적화된 배당 포트폴리오."
+        ),
+        "external_benchmark": {
+            "source": "CFA Institute — Basics of Portfolio Planning and Construction (2026)",
+            "data": (
+                "CFA 포트폴리오 관리 원칙에서 전략적 자산배분(SAA)은 "
+                "투자자의 목적과 제약조건이 명확하지 않은 경우 "
+                "편향 없는 기본 자산배분 비중(baseline)을 출발점으로 삼는다."
+            ),
+        },
+        "design_interpretation": (
+            "혼합형은 특정 목적 편향 없이 기본 5축 비중을 유지한다. "
+            "axis_overrides = {} (모든 축 조정 없음)으로 설정해 "
+            "다른 아키타입의 베이스라인 역할을 하도록 설계."
+        ),
+        "internal_value_note": (
+            "axis_overrides 없음 = 의도적 설계 선택. "
+            "기본 비중(get_axis_weights)이 시스템의 중립 기준점."
+        ),
+        "axis_overrides_rationale": {
+            "(없음)": "혼합형은 의도적으로 override를 적용하지 않음. 기본 비중이 균형 기준점.",
+        },
+        "pending_calibration": "베이스라인 역할이므로 수치 변경 없음. 기본 비중 자체의 최적화는 MPT 기반 재검토 예정.",
+    },
+
+    "배당형": {
+        "investment_goal": (
+            "안정적 배당 현금흐름 우선. 커버드콜(자본 침식 위험) 배제. "
+            "순수 배당수익: 고배당 ETF + 우량 배당주 중심."
+        ),
+        "external_benchmark": {
+            "source": "Morningstar — Dividend Sustainability 분석 방법론",
+            "data": (
+                "Morningstar는 배당 지속가능성 평가에서 "
+                "실질 영업이익·FCF(잉여현금흐름) 기반의 배당을 "
+                "커버드콜처럼 미래 수익을 선매도하는 구조보다 "
+                "더 안정적인 장기 인컴 소스로 평가한다."
+            ),
+        },
+        "design_interpretation": (
+            "이 원칙을 참고해 배당형은 커버드콜 ETF(monthly_income 카테고리)를 전면 배제하고, "
+            "FCF 기반 실질 배당종목·고배당 ETF 중심으로 구성한다. "
+            "방어자산 비중도 소폭 높여 배당 안정성을 보호."
+        ),
+        "internal_value_note": (
+            "axis_overrides 수치(defensive +0.05 등)는 Morningstar 수치가 아니라 "
+            "배당 지속가능성 원칙을 5축 체계로 정규화한 시스템 내부 조정값이다."
+        ),
+        "axis_overrides_rationale": {
+            "defensive": "+0.05 — 방어자산으로 배당 안정성 보호.",
+            "reit":      "+0.03 — 고배당 리츠 추가 (커버드콜 아닌 실질 배당).",
+            "us_etf":    "+0.02 — 고배당·배당성장 ETF 소량 추가.",
+            "kr_stock":  "+0.02 — 국내 우량 배당주 편입.",
+            "us_stock":  "-0.07 — 개별 미국주 비중 축소. 배당 안정성 불확실 종목 제어.",
+        },
+        "pending_calibration": "커버드콜 배제 효과 백테스트 검증 예정 (MDD 및 수익률 비교).",
+    },
+}
+# ─────────────────────────────────────────────────────────────────────────────
+# SCORING_RATIONALE
+# ─────────────────────────────────────────────────────────────────────────────
+# growth_score, overall_score, 건강도 threshold의 설계 근거를 명시.
+# 이 threshold들은 외부 기관이 직접 제시한 숫자가 아니라
+# 시스템 내부 설계값이며, 향후 데이터 분포 및 백테스트로 검증 예정.
+# ─────────────────────────────────────────────────────────────────────────────
+SCORING_RATIONALE: dict[str, dict] = {
+    # ─────────────────────────────────────────────────────────────────────────
+    # 3층 구조:
+    #   why_this_metric   - 이 지표를 평가축으로 삼는 외부/학술 근거
+    #   internal_design   - 우리 시스템에서 어떻게 설계했는가
+    #   internal_value_note - threshold 수치는 외부 기관 공식 기준이 아님을 명시
+    # ─────────────────────────────────────────────────────────────────────────
+
+    "growth_score": {
+        "description": "포트폴리오 가중 배당성장률(portfolio_div_cagr) 기반 20점 만점 점수",
+        "why_this_metric": {
+            "source": "Morningstar — Dividend Growth Category 분석 방법론",
+            "rationale": (
+                "Morningstar 배당성장 분석에서 배당성장률은 단순 수익률보다 "
+                "배당의 지속가능성과 기업 재무건전성을 반영하는 핵심 평가 변수다. "
+                "따라서 포트폴리오 건강도에서 growth_score를 독립 평가축으로 채택."
+            ),
+        },
+        "internal_design": (
+            "포트폴리오 가중 배당성장률(CAGR)을 0~20점 구간으로 변환. "
+            "상위 기준 8%는 SCHD의 실제 10년 배당성장률(약 10~12%) 수준을 참고해 "
+            "'최우수' 기준점으로 설정한 내부 scoring 구간. "
+            "하위 구간 6/4/2/%는 등간격에 가깝게 설계."
+        ),
+        "internal_value_note": (
+            "8%/6%/4%/2% threshold는 Morningstar가 공식적으로 제시한 기준이 아니라 "
+            "시스템 내부 scoring 설계값이다. "
+            "외부 근거는 '배당성장률을 평가 변수로 사용하는 이유'를 뒷받침하며, "
+            "구체적 구간은 실제 ETF CAGR 분포를 참고한 내부 설계."
+        ),
+        "thresholds": {
+            ">=8%": "20점 — 최우수 (SCHD 실제 10Y CAGR 참고 기준)",
+            ">=6%": "16점 — 우수",
+            ">=4%": "12점 — 양호",
+            ">=2%": "8점  — 보통",
+            "<2%":  "4점  — 미흡",
+        },
+        "pending_calibration": (
+            "실제 포트폴리오 배당성장률 분포 데이터 수집 후 "
+            "구간 경계 및 점수 배분 재조정 예정."
+        ),
+    },
+
+    "overall_score_cutoff": {
+        "description": "종목 선별 기준: overall_score >= 50만 포트폴리오 편입 허용",
+        "why_this_metric": {
+            "source": "CFA Institute — 다차원 종목 평가 접근법 / Morningstar 종목 스크리닝",
+            "rationale": (
+                "단일 지표(예: 배당수익률)만으로 종목을 선별하면 yield trap 등 함정에 빠질 수 있다. "
+                "CFA 포트폴리오 관리 원칙 및 Morningstar 스크리닝 방법론은 "
+                "수익성·성장성·재무건전성 등 다차원 지표를 종합한 점수로 후보를 필터링하는 방식을 지지한다."
+            ),
+        },
+        "internal_design": (
+            "overall_score = yield + stability + financial + growth 4축 가중 합산 (0~100점). "
+            "50점 미만 = 4개 평가축 평균이 절반 이하인 종목 → 최소 품질 기준 미달로 판단해 제외. "
+            "커트라인 50은 '절반 이상의 평가 기준을 통과'라는 직관적 설계 기준."
+        ),
+        "internal_value_note": (
+            "cutoff 50은 외부 기관의 공식 기준이 아니라 시스템 내부 설계값이다. "
+            "이 숫자 자체가 최적이라고 주장하지 않으며, "
+            "향후 실제 배당 컷 이력 데이터와 백테스트로 최적 cutoff를 검증할 예정."
+        ),
+        "pending_calibration": (
+            "실제 배당 삭감 종목의 overall_score 분포 분석 후 "
+            "precision/recall 기반 최적 cutoff 도출 예정."
+        ),
+    },
+
+    "health_grade_threshold": {
+        "description": "포트폴리오 건강도 5단계 등급 (100점 만점, 5축 합산)",
+        "why_this_metric": {
+            "source": (
+                "CFA Institute — Portfolio Planning and Construction / "
+                "Vanguard 포트폴리오 평가 프레임워크"
+            ),
+            "rationale": (
+                "CFA 포트폴리오 관리 원칙은 포트폴리오를 단일 수익률이 아닌 "
+                "안정성·성장성·현금흐름·세금효율·분산도 등 복수의 차원으로 평가한다. "
+                "Vanguard도 포트폴리오 품질 평가 시 분산도·비용·세금효율 등을 종합적으로 고려한다. "
+                "이를 참고해 5개 독립 평가축(stability/growth/cashflow/tax_eff/diversification)을 설계."
+            ),
+        },
+        "internal_design": (
+            "5축 구성: stability 25점 + growth 20점 + cashflow 20점 + "
+            "tax_efficiency 20점 + diversification 15점 = 100점 만점. "
+            "5등급(매우건강/건강/보통/주의/긴급)은 직관적 전달력을 위한 내부 설계. "
+            "85/72/58/44 threshold는 각 축 평균 점수 분포를 근거로 "
+            "대략 80%/70%/55%/40% 달성 수준에 맞춰 설정한 내부값."
+        ),
+        "internal_value_note": (
+            "85/72/58/44 threshold는 외부 금융기관의 공식 등급 기준이 아니라 "
+            "시스템 내부 설계값이다. "
+            "5개 평가축을 사용하는 '이유'는 CFA/Vanguard 원칙으로 뒷받침되지만, "
+            "구체적 경계값은 향후 데이터 분포 기반 calibration 대상."
+        ),
+        "thresholds": {
+            ">=85": "🟢 매우 건강 — 5축 평균 약 80% 이상 달성",
+            ">=72": "🟡 건강     — 5축 평균 약 70% 이상 달성",
+            ">=58": "🟠 보통     — 5축 평균 약 55% 이상 달성",
+            ">=44": "🔴 주의 필요 — 5축 평균 약 40% 이상 달성",
+            "<44":  "🚨 개선 긴급 — 5축 평균 40% 미만",
+        },
+        "pending_calibration": (
+            "실제 사용자 포트폴리오 점수 분포 수집 후 "
+            "상위 20%/50%/70%/90% 백분위 기반 threshold 전환 예정. "
+            "각 축 가중치(25/20/20/20/15)도 백테스트 성과 기반 재검토 예정."
+        ),
     },
 }
 
@@ -615,6 +960,8 @@ def pick_kr_stocks(risk: str, n: int, age: int | None = None) -> list[dict]:
         df = df[df["trap_level"] != "DANGER"]
     # 3. 점수 50점 미만 제외
     if "overall_score" in df.columns:
+        # 커트라인 50: 4축(yield+stability+financial+growth) 합산 절반 이하 종목 제외
+        # (내부 설계 기준 — SCORING_RATIONALE["overall_score_cutoff"] 참조)
         df = df[pd.to_numeric(df["overall_score"], errors="coerce").fillna(0) >= 50]
 
     # ── TabPFN Survival Hard Gate ──────────────────────────────
@@ -1252,6 +1599,9 @@ def calc_portfolio_health(
     # 포트폴리오 가중 배당성장률
     port_cagr = float((projection or {}).get("portfolio_div_cagr", 0) or 0)
 
+    # 배당성장률 구간: Morningstar 배당성장 전략 자료를 참고해 배당성장률을 핵심 평가 변수로 채택.
+    # 8%/6%/4%/2% 기준은 실제 배당성장 ETF(SCHD 등) 역사적 CAGR 분포 기반 내부 설계값.
+    # (SCORING_RATIONALE["growth_score"] 참조)
     if port_cagr >= 8.0:   growth_score = 20.0
     elif port_cagr >= 6.0: growth_score = 16.0
     elif port_cagr >= 4.0: growth_score = 12.0
@@ -1310,6 +1660,9 @@ def calc_portfolio_health(
     # ── 종합 점수 ─────────────────────────────────────────────
     total = round(stability_score + growth_score + cashflow_score + tax_eff_score + divers_score2, 1)
 
+    # 건강도 threshold: 내부 설계값 (외부 기관 직접 인용 없음)
+    # 향후 사용자 점수 분포 백분위 기반으로 calibration 예정
+    # (SCORING_RATIONALE["health_grade_threshold"] 참조)
     if total >= 85:   grade = "🟢 매우 건강"
     elif total >= 72: grade = "🟡 건강"
     elif total >= 58: grade = "🟠 보통"
@@ -1462,6 +1815,7 @@ def recommend_portfolio(req: PortfolioRequest):
         monthly_savings   = req.monthly_savings,
         savings_growth    = req.savings_growth,
         target_fire_age   = req.target_fire_age,
+        savings_stages    = req.savings_stages or [],
     )
     pipeline = RecommendationPipeline(pipe_req)
     return pipeline.execute()
@@ -1978,14 +2332,16 @@ class FireReverseRequest(BaseModel):
       - target_monthly_만원 / target_fire_age → FIRE/Reverse FIRE 전용
       - Ranker 점수(fit_score)에는 영향 없음
     """
-    current_investable:  float         # 현재 투자금 (만원)
-    monthly_savings:     float         # 현재 월 적립금 (만원)
-    current_age:         int
-    target_fire_age:     int   = 55    # 달성하고 싶은 나이
-    target_monthly_만원: float = 100   # 달성하고 싶은 월배당 (만원)
-    avg_net_yield:       float = 5.0   # 포트폴리오 세후 연 수익률 (%)
-    div_growth_rate:     float = 5.0   # 연 배당성장률 (%)
-    cpi_rate:            float = 2.5   # 인플레이션 (%)
+    current_investable:    float         # 현재 투자금 (만원)
+    monthly_savings:       float         # 현재 월 적립금 (만원)
+    current_age:           int
+    target_fire_age:       int   = 55    # 달성하고 싶은 나이
+    target_monthly_만원:   float = 100   # 달성하고 싶은 월배당 (만원)
+    avg_net_yield:         float = 5.0   # [역할A] 세후 배당수익률 (%)
+    asset_growth_yield:    float | None = None  # [역할B] 자산 누적 성장률 (None이면 avg_net_yield 사용)
+    div_growth_rate:       float = 5.0   # 연 배당성장률 (%)
+    cpi_rate:              float = 2.5   # 인플레이션 (%)
+    annual_savings_growth: float = 0.0   # 연 적립금 증가율 (%, 0=고정)
 
 
 @router.post("/fire-reverse")
@@ -2021,14 +2377,49 @@ def fire_reverse(req: FireReverseRequest) -> dict:
     }
     """
     return calc_fire_reverse(
-        current_investable  = req.current_investable,
-        monthly_savings     = req.monthly_savings,
-        current_age         = req.current_age,
-        target_fire_age     = req.target_fire_age,
-        target_monthly_만원 = req.target_monthly_만원,
-        avg_net_yield       = req.avg_net_yield,
-        div_growth_rate     = req.div_growth_rate,
-        cpi_rate            = req.cpi_rate,
+        current_investable    = req.current_investable,
+        monthly_savings       = req.monthly_savings,
+        current_age           = req.current_age,
+        target_fire_age       = req.target_fire_age,
+        target_monthly_만원   = req.target_monthly_만원,
+        avg_net_yield         = req.avg_net_yield,
+        asset_growth_yield    = req.asset_growth_yield,   # 역할B: 총수익률 (None이면 avg_net_yield)
+        div_growth_rate       = req.div_growth_rate,
+        cpi_rate              = req.cpi_rate,
+        annual_savings_growth = req.annual_savings_growth,
+    )
+
+
+# ─────────────────────────────────────────────────────────────
+# POST /api/portfolio/fire-lifecycle  — 생애주기 FIRE 계산
+# ─────────────────────────────────────────────────────────────
+class FireLifecycleRequest(BaseModel):
+    current_investable:   float
+    savings_stages:       list   # [{"from_age":25,"to_age":27,"monthly_savings":20}, ...]
+    current_age:          int
+    target_fire_age:      int    = 50
+    target_monthly_만원:  float  = 100.0
+    avg_net_yield:        float  = 5.0
+    div_growth_rate:      float  = 5.0
+    cpi_rate:             float  = 2.5
+
+
+@router.post("/fire-lifecycle")
+def fire_lifecycle(req: FireLifecycleRequest) -> dict:
+    """
+    생애주기 기반 FIRE 계산.
+    savings_stages = [{"from_age": 25, "to_age": 27, "monthly_savings": 20}, ...]
+    """
+    from utils.fire_engine import calc_fire_engine_lifecycle
+    return calc_fire_engine_lifecycle(
+        current_investable     = req.current_investable,
+        savings_stages         = req.savings_stages,
+        current_age            = req.current_age,
+        target_age             = req.target_fire_age,
+        avg_net_yield          = req.avg_net_yield,
+        div_growth_rate        = req.div_growth_rate,
+        cpi_rate               = req.cpi_rate,
+        custom_monthly_man_won = req.target_monthly_만원,
     )
 
 

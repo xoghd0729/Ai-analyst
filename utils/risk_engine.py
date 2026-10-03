@@ -3,12 +3,20 @@ risk_engine.py  v1
 ==================
 KR / US / ETF 자산별 위험 점수를 통합해 단일 composite_risk_score를 산출.
 
-Layer 1 (현재 상태): XGBoost ml_status   — INTACT/WEAKENING/BROKEN
-Layer 2 (시간 위험):  Survival hazard     — 0.0~1.0 (uncalibrated risk score)
-Layer 3 (시장 환경):  Macro regime        — BULLISH/NEUTRAL/BEARISH
+Layer 1 (현재 상태): Survival-derived ml_status — INTACT/WEAKENING/BROKEN
+  ※ ml_status는 TabPFN Survival hazard를 이산 분류로 변환한 값 (shap_explainer.py 경유).
+  ※ XGBoost(kr_3class_model.pkl)는 런타임에서 호출하지 않는다 (벤치마크 보존용).
+
+Layer 2 (연속 위험): Survival hazard — 0.0~1.0 (uncalibrated risk score)
+  ※ Layer 1과 Layer 2 모두 동일한 TabPFN Survival 출력에서 파생됨.
+
+Layer 3 (시장 환경): Macro regime — BULLISH/NEUTRAL/BEARISH (현재 가중치 0.0, 제외)
 
 composite_risk_score: 0~100 (높을수록 위험)
-risk_gate: PASS(<50) / WARN(50~74) / BLOCK(>=75)
+risk_gate:
+  - conservative: PASS(<50) / BLOCK(>=50)  ← WARN 구간 없음
+  - moderate:     PASS(<50) / WARN(50~64) / BLOCK(>=65)
+  - aggressive:   PASS(<50) / WARN(50~74) / BLOCK(>=75)
 """
 from __future__ import annotations
 import os, json, logging
@@ -19,24 +27,38 @@ log = logging.getLogger(__name__)
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ──────────────────────────────────────────────
-# 가중치: 실험 근거 (risk_ensemble_comparison.py, walk-forward 2019-2024)
+# 가중치: 실험 결과 기반 임시 설정
 #
-# 실험 결과 요약:
-#   XGB 단독:              ROC 0.7803, P@20 0.9420
-#   XGB+Surv 70/30:        ROC 0.7824, P@20 0.9509  ← 최적
-#   XGB+Surv+Macro 70/20/10: ROC 0.7727              ← Macro 추가 시 저하
-#   LR Meta Model:         ROC 0.7831 (OOF 1123개, 차이 미미)
+# [과거 실험] 독립 2모델 구조 (분류모델 별도 + Survival 별도), walk-forward 2019-2024:
+#   분류모델 단독:         ROC 0.7803, P@20 0.9420
+#   분류모델+Surv 70/30:   ROC 0.7824, P@20 0.9509  ← 당시 최적
+#   분류모델+Surv+Macro:   ROC 0.7727              ← Macro 추가 시 저하
+#   (출처: risk_ensemble_report.json — 현재 구조와 모델 구성이 다름)
 #
-# 결론:
-#   - Survival hazard는 현재연도 위험 예측에 직접 사용 부적합 (단독 ROC 0.51)
-#     → Survival의 역할은 "시간축(언제 위험해지는가)", XGB는 "현재 상태"
-#   - Macro는 composite score에 포함 시 노이즈 (성능 저하)
-#     → Macro는 ETF 선호도/비중 조정에만 사용 (risk_engine 제외)
-#   - Rank Aggregation은 확률값 정보 손실로 최악 (ROC 0.7609)
+# [현재 실험] Survival 단일 소스 구조, 단면 평가 2024년, n=62, events=12:
+#   hazard 단독:           ROC 0.6550, PR 0.4207, P@20 0.4167
+#   ml_status 단독 (이산): ROC 0.5208, PR 0.1975, P@20 0.2500  ← 이산화 손실 최대
+#   현재 70:30:            ROC 0.6417, PR 0.2795, P@20 0.2500  ← hazard 단독보다 낮음
+#   최적 w_status=0.05:    ROC 0.7117 (동일 데이터 선택 → 과적합 가능성)
+#   (출처: survival_weight_report.json)
+#
+# [단면 실험, 2026-09-25, 무효화]
+#   survival_weight_experiment.py 결과: hazard 단독 ROC 0.655, 현재 70:30 ROC 0.642
+#   → 단, 타깃이 dividend_cut(t) — 당해 연도 삭감 여부 — 로 예측 목적과 시점 불일치.
+#     올바른 타깃은 label_cut_1y(t) = t+1년 삭감 여부이므로 이 결과를 가중치 근거로 사용하지 않음.
+#     results/survival_weight_report.json은 참고 기록으로 보존.
+#
+# [현재 상태] 70:30은 최적값이 아닌 플레이스홀더.
+#   이 비율을 확정하려면:
+#   (1) label_cut_1y 기반 + walk-forward 실험 결과
+#   (2) 이산 등급(ml_status) vs 연속 점수(hazard) 중 사용 목적에 맞는 방향 합의
+#   위 두 가지가 완료된 후 가중치 재논의.
+#
+# [Macro] composite score 포함 시 ROC 저하 → ETF 비중 조정에만 사용
 # ──────────────────────────────────────────────
-_W_XGB      = 0.70   # Layer 1 (dominant: 데이터로 검증)
-_W_SURVIVAL = 0.30   # Layer 2 (P@20 보완)
-_W_MACRO    = 0.00   # Layer 3 (composite에서 제외 — 성능 저하 확인)
+_W_STATUS   = 0.70   # Layer 1: ml_status (이산 분류) — 복구값. 아래 주석 참조.
+_W_SURVIVAL = 0.30   # Layer 2: Survival hazard (연속값)
+_W_MACRO    = 0.00   # Layer 3: composite 제외 (성능 저하 확인)
 
 # ML Status → risk score 변환
 _ML_SCORE = {
@@ -99,7 +121,7 @@ def _macro_regime(macro: dict | None) -> str:
 def score_asset(
     ticker: str,
     asset_class: str,               # "kr_stock" / "us_stock" / "us_etf" / "kr_reit" 등
-    ml_status: str = "INTACT",      # XGBoost 예측 (KR) or safety tier (US)
+    ml_status: str = "INTACT",      # Survival-derived 분류 (KR) or safety tier (US)
     survival_hazard: float | None = None,   # 직접 전달 시 (없으면 JSON에서 조회)
     macro: dict | None = None,
     risk_tolerance: str = "moderate",
@@ -111,16 +133,17 @@ def score_asset(
         {
             composite_risk_score: float,   # 0~100
             risk_gate: str,                # PASS / WARN / BLOCK
-            layer1_xgb: float,
-            layer2_survival: float,
-            layer3_macro: float,
+            status_score: float,           # Layer 1: Survival-derived ml_status 점수
+            layer2_survival: float,        # Layer 2: Survival hazard 연속값 점수
+            layer3_macro: float,           # Layer 3: Macro adder (현재 0.0)
             hazard: float | None,
         }
     """
     is_etf = "etf" in asset_class.lower() or asset_class in ("us_div_etf", "defensive")
 
-    # ── Layer 1: XGBoost / 안전성 점수 ──────────────────────
-    xgb_score = _ML_SCORE.get(ml_status.upper(), _ML_SCORE["WEAKENING"])
+    # ── Layer 1: Survival-derived ml_status 분류 점수 ────────
+    # ml_status = TabPFN Survival hazard → INTACT/WEAKENING/BROKEN 변환 결과
+    status_score_raw = _ML_SCORE.get(ml_status.upper(), _ML_SCORE["WEAKENING"])
 
     # ── Layer 2: Survival hazard ─────────────────────────────
     if is_etf:
@@ -144,7 +167,7 @@ def score_asset(
     macro_adder = 0.0   # _W_MACRO = 0.0
 
     # ── 복합 점수 계산 ────────────────────────────────────────
-    raw = (xgb_score * _W_XGB) + (surv_score * _W_SURVIVAL) + macro_adder
+    raw = (status_score_raw * _W_STATUS) + (surv_score * _W_SURVIVAL) + macro_adder
     composite = round(max(0.0, min(100.0, raw)), 1)
 
     # ── Risk Gate ─────────────────────────────────────────────
@@ -159,7 +182,7 @@ def score_asset(
     return {
         "composite_risk_score": composite,
         "risk_gate":            gate,
-        "layer1_xgb":           round(xgb_score, 1),
+        "status_score":         round(status_score_raw, 1),
         "layer2_survival":      round(surv_score, 1),
         "layer3_macro":         round(macro_adder, 1),
         "hazard":               round(hazard, 4),

@@ -30,16 +30,16 @@ import api from '../api/client'
 
 // ── 색상 상수 ────────────────────────────────────────────────────
 const C = {
-  cardBg:     '#1e293b',
-  cardBorder: '#334155',
-  text:       '#e2e8f0',
-  muted:      '#94a3b8',
+  cardBg:     'var(--surface)',
+  cardBorder: 'var(--border)',
+  text:       'var(--text)',
+  muted:      'var(--text-sub)',
   green:      '#10b981',
   blue:       '#3b82f6',
   amber:      '#f59e0b',
   red:        '#ef4444',
   purple:     '#a855f7',
-  trackBg:    '#334155',
+  trackBg:    'var(--surface2)',
   trackFill:  '#3b82f6',
 }
 
@@ -249,6 +249,156 @@ function PathCard({ icon, title, value, sub, color, highlight }) {
   )
 }
 
+// ── 클라이언트 사이드 복리 계산 ──────────────────────────────────
+function calcFV(pv, pmt, rAnnualPct, years) {
+  const r = rAnnualPct / 100 / 12
+  const n = years * 12
+  if (r === 0 || n === 0) return pv + pmt * n
+  return pv * Math.pow(1 + r, n) + pmt * ((Math.pow(1 + r, n) - 1) / r)
+}
+
+// ── 미니 자산 전망 카드 (복리 시뮬레이션) ────────────────────────
+function MiniProjection({ sliders, currentAge, avgYield }) {
+  const years = Math.max(sliders.fireAge - currentAge, 1)
+  // avg_dividend_yield_net(세후 수익률) 기준 — ISA·연금 계좌 효과 미반영
+  const yBase = Math.max(avgYield, 1)
+
+  // 3가지 수익률 시나리오 (확률분포 백분위수가 아닌 수익률 가정 차이)
+  const yCons = +(yBase * 0.55).toFixed(2)   // 보수적: 기준의 55%
+  const yBase_ = yBase                        // 기준
+  const yOpti = +(yBase * 1.50).toFixed(2)   // 낙관적: 기준의 150%
+
+  const fvCons  = calcFV(sliders.investable, sliders.savings, yCons,  years)
+  const fvBase  = calcFV(sliders.investable, sliders.savings, yBase_, years)
+  const fvOpti  = calcFV(sliders.investable, sliders.savings, yOpti,  years)
+
+  // 세후 월배당 = 예상자산 × 해당 시나리오 세후 수익률 / 12
+  // (단순 배당수익률 근사 — 실제 tax_optimizer의 계좌별 세법 로직 미반영)
+  const mCons  = (fvCons  * yCons  / 100) / 12
+  const mBase  = (fvBase  * yBase_ / 100) / 12
+  const mOpti  = (fvOpti  * yOpti  / 100) / 12
+
+  const fmt  = v => v.toLocaleString(undefined, { maximumFractionDigits: 0 })
+  const fmtM = v => `${fmt(Math.round(v))}만원`
+  const fmtY = v => `${v.toFixed(1)}%`
+
+  const barMax  = fvOpti || 1
+  const consPct = Math.min((fvCons / barMax) * 100, 100)
+  const basePct = Math.min((fvBase / barMax) * 100, 100)
+
+  const scenarios = [
+    { key: 'cons', label: '보수적', yield: yCons,  fv: fvCons, m: mCons, color: C.red   },
+    { key: 'base', label: '기준',   yield: yBase_, fv: fvBase, m: mBase, color: C.blue  },
+    { key: 'opti', label: '낙관적', yield: yOpti,  fv: fvOpti, m: mOpti, color: C.green },
+  ]
+
+  return (
+    <div style={{
+      marginTop: 14,
+      background: C.cardBg,
+      border: `1px solid ${C.cardBorder}`,
+      borderRadius: 14, padding: '16px 18px',
+    }}>
+      {/* 헤더 */}
+      <div style={{ display: 'flex', justifyContent: 'space-between',
+                    alignItems: 'flex-start', marginBottom: 12 }}>
+        <div style={{ fontSize: 12, color: C.muted }}>
+          📈 {sliders.fireAge}세 간이 자산 성장 추정 — 공식 FIRE 분석과 별도 계산
+        </div>
+        <div style={{
+          fontSize: 10, color: C.amber,
+          background: `${C.amber}18`, border: `1px solid ${C.amber}40`,
+          borderRadius: 6, padding: '2px 7px',
+        }}>
+          간이 추정치
+        </div>
+      </div>
+
+      {/* 가정 요약 */}
+      <div style={{
+        display: 'flex', gap: 12, fontSize: 10, color: C.muted,
+        marginBottom: 12, paddingBottom: 10,
+        borderBottom: `1px solid ${C.cardBorder}`,
+      }}>
+        <span>기준 수익률: <b style={{ color: C.text }}>{fmtY(yBase)}</b> (세후 총수익률)</span>
+        <span>기간: <b style={{ color: C.text }}>{years}년</b></span>
+        <span style={{ color: C.amber }}>CPI·적립금증가율 미반영</span>
+      </div>
+
+      {/* 시나리오 범위 바 */}
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between',
+                      fontSize: 10, color: C.muted, marginBottom: 4 }}>
+          {scenarios.map(s => (
+            <span key={s.key} style={{ color: s.color }}>
+              {s.label} ({fmtY(s.yield)})
+            </span>
+          ))}
+        </div>
+        <div style={{ position: 'relative', height: 10, borderRadius: 5,
+                      background: `${C.green}28` }}>
+          {/* 보수적 채움 */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, bottom: 0,
+            width: `${consPct}%`, background: `${C.red}50`, borderRadius: 5,
+          }} />
+          {/* 기준 마커 */}
+          <div style={{
+            position: 'absolute', top: -2, bottom: -2,
+            left: `${basePct}%`, width: 3,
+            background: C.blue, borderRadius: 2,
+            transform: 'translateX(-50%)',
+          }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between',
+                      marginTop: 5, fontSize: 11, fontWeight: 600 }}>
+          {scenarios.map(s => (
+            <span key={s.key} style={{ color: s.color }}>{fmtM(s.fv)}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* 간이 월배당 추정 카드 3개 */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+        {scenarios.map(s => (
+          <div key={s.key} style={{
+            flex: 1, textAlign: 'center', padding: '8px 6px',
+            background: `${s.color}0d`, borderRadius: 8,
+            border: `1px solid ${s.color}30`,
+          }}>
+            <div style={{ fontSize: 10, color: C.muted, marginBottom: 2 }}>
+              {s.label}
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: s.color }}>
+              {fmtM(s.m)}/월
+            </div>
+            <div style={{ fontSize: 9, color: C.muted, marginTop: 2 }}>
+              간이 추정 · 총수익률 {fmtY(s.yield)}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 계산 범위 및 한계 명시 */}
+      <div style={{
+        fontSize: 10, color: '#64748b', lineHeight: 1.8,
+        padding: '10px 12px',
+        background: 'var(--surface2)',
+        borderRadius: 8,
+        borderLeft: `3px solid ${C.amber}`,
+      }}>
+        <b style={{ color: C.amber }}>간이 추정치입니다.</b> MiniProjection은 빠른 자산 성장 확인을 위한
+        참고용 계산이며, 공식 FIRE 분석과 계산 가정이 다를 수 있습니다.<br />
+        <span style={{ color: '#ef4444' }}>● CPI(물가상승률) 미반영</span> &nbsp;
+        <span style={{ color: '#ef4444' }}>● 적립금 증가율 미반영</span> &nbsp;
+        <span>● ISA·연금 절세 미반영</span><br />
+        공식 FIRE 역산(위 결과)은 영구 연금 공식 + CPI 1회 환산 + 목표 원금 역산 방식으로 별도 계산.
+        장기(10년+) 시나리오일수록 두 결과의 차이가 커질 수 있습니다.
+      </div>
+    </div>
+  )
+}
+
 // ── 역산 결과 섹션 ────────────────────────────────────────────────
 function ResultSection({ rv, sliders }) {
   if (!rv) return (
@@ -334,7 +484,7 @@ function ResultSection({ rv, sliders }) {
       {rv.message && (
         <div style={{
           marginTop: 14, padding: '10px 14px',
-          background: '#0f172a', borderRadius: 10,
+          background: 'var(--surface)', borderRadius: 10,
           fontSize: 12, color: C.muted,
           border: `1px solid ${C.cardBorder}`,
           lineHeight: 1.7,
@@ -359,9 +509,15 @@ export default function InteractiveSimulator({ portfolio }) {
     fireAge:       inp.target_fire_age   ?? 55,
   })
 
-  const [result,  setResult]  = useState(portfolio?.reverse_fire ?? null)
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState(null)
+  const [result,       setResult]       = useState(portfolio?.reverse_fire ?? null)
+  const [loading,      setLoading]      = useState(false)
+  const [error,        setError]        = useState(null)
+  const [lifecycleMode, setLifecycleMode] = useState(false)
+  const [stages, setStages] = useState([
+    { from_age: inp.age ?? 25, to_age: (inp.age ?? 25) + 2,  monthly_savings: 20  },
+    { from_age: (inp.age ?? 25) + 2, to_age: (inp.age ?? 25) + 5,  monthly_savings: 100 },
+    { from_age: (inp.age ?? 25) + 5, to_age: 65, monthly_savings: 200 },
+  ])
 
   const timerRef = useRef(null)
 
@@ -379,8 +535,11 @@ export default function InteractiveSimulator({ portfolio }) {
   }, [portfolio])
   const currentAge = inp.age ?? 40
 
-  // avg_net_yield: 포트폴리오 계산값 우선, 없으면 5.0
-  const avgYield = sum.avg_dividend_yield_net ?? 5.0
+  // ── 수익률 역할 분리 (Q1 결정) ──────────────────────────────────
+  // 배당 목표 역산 (fire-reverse): 실제 배당 현금흐름 기반 → avg_dividend_yield_net
+  // 자산 성장 시뮬레이션 (MiniProjection): 배당+자본차익 → avg_total_return_net
+  const dividendYield = sum.avg_dividend_yield_net ?? 4.2    // fire-reverse용 (배당수익률)
+  const growthYield   = sum.avg_total_return_net  ?? 4.42   // MiniProjection용 (총수익률)
 
   // ── debounced API 호출 ──
   useEffect(() => {
@@ -389,16 +548,33 @@ export default function InteractiveSimulator({ portfolio }) {
       setLoading(true)
       setError(null)
 
-      api.post('/api/portfolio/fire-reverse', {
-        current_investable:   sliders.investable,
-        monthly_savings:      sliders.savings,
-        current_age:          currentAge,
-        target_fire_age:      sliders.fireAge,
-        'target_monthly_만원': sliders.monthlyTarget,
-        avg_net_yield:        avgYield,
-        div_growth_rate:      5.0,
-        cpi_rate:             2.5,
-      })
+      const endpoint = lifecycleMode ? '/api/portfolio/fire-lifecycle' : '/api/portfolio/fire-reverse'
+      const body = lifecycleMode
+        ? {
+            current_investable:  sliders.investable,
+            savings_stages:      stages,
+            current_age:         currentAge,
+            target_fire_age:     sliders.fireAge,
+            'target_monthly_만원': sliders.monthlyTarget,
+            avg_net_yield:       dividendYield,           // 역할A: 세후 배당수익률
+            asset_growth_yield:  growthYield,            // 역할B: 세후 총수익률
+            div_growth_rate:     5.0,
+            cpi_rate:            2.5,
+          }
+        : {
+            current_investable:   sliders.investable,
+            monthly_savings:      sliders.savings,
+            current_age:          currentAge,
+            target_fire_age:      sliders.fireAge,
+            'target_monthly_만원': sliders.monthlyTarget,
+            avg_net_yield:        dividendYield,           // 역할A: 세후 배당수익률 (목표 원금 역산)
+            asset_growth_yield:   growthYield,            // 역할B: 세후 총수익률 (자산 누적 성장)
+            div_growth_rate:      5.0,
+            cpi_rate:             2.5,
+            annual_savings_growth: inp.savings_growth ?? 0.0,
+          }
+
+      api.post(endpoint, body)
         .then(res  => setResult(res.data))
         .catch(err => {
           console.error('InteractiveSimulator API error:', err)
@@ -408,7 +584,7 @@ export default function InteractiveSimulator({ portfolio }) {
     }, 300)
 
     return () => clearTimeout(timerRef.current)
-  }, [sliders.investable, sliders.savings, sliders.monthlyTarget, sliders.fireAge])
+  }, [sliders.investable, sliders.savings, sliders.monthlyTarget, sliders.fireAge, lifecycleMode, stages])
 
   // ── 슬라이더 변경 핸들러 ──
   const updateSlider = (key, value) =>
@@ -458,8 +634,103 @@ export default function InteractiveSimulator({ portfolio }) {
             </span>
           </div>
 
-          {/* 슬라이더 4개 */}
-          {SLIDERS.map(cfg => (
+          {/* ── 생애주기 모드 토글 ── */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            marginBottom: 16, padding: '10px 12px',
+            background: lifecycleMode ? `${C.purple}15` : 'var(--surface2)',
+            borderRadius: 10, border: `1px solid ${lifecycleMode ? C.purple + '50' : C.cardBorder}`,
+            cursor: 'pointer',
+          }} onClick={() => setLifecycleMode(m => !m)}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: lifecycleMode ? C.purple : C.text }}>
+                🔄 생애주기 적립 모드
+              </div>
+              <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>
+                연령대별 적립금을 다르게 설정
+              </div>
+            </div>
+            <div style={{
+              width: 36, height: 20, borderRadius: 10,
+              background: lifecycleMode ? C.purple : C.cardBorder,
+              position: 'relative', transition: 'background 0.2s',
+            }}>
+              <div style={{
+                position: 'absolute', top: 2,
+                left: lifecycleMode ? 18 : 2,
+                width: 16, height: 16, borderRadius: '50%',
+                background: '#fff', transition: 'left 0.2s',
+              }} />
+            </div>
+          </div>
+
+          {/* ── 생애주기 스테이지 에디터 ── */}
+          {lifecycleMode && (
+            <div style={{ marginBottom: 16 }}>
+              {stages.map((s, i) => (
+                <div key={i} style={{
+                  display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto',
+                  gap: 6, marginBottom: 8, alignItems: 'center',
+                }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: C.muted, marginBottom: 2 }}>시작 나이</div>
+                    <input type="number" min={currentAge} max={80} value={s.from_age}
+                      onChange={e => setStages(prev => prev.map((st, j) =>
+                        j === i ? { ...st, from_age: Number(e.target.value) } : st
+                      ))}
+                      style={{ width: '100%', padding: '4px 6px', borderRadius: 6, fontSize: 12,
+                        border: `1px solid ${C.cardBorder}`, background: 'var(--surface)',
+                        color: C.text }}
+                    />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: C.muted, marginBottom: 2 }}>종료 나이</div>
+                    <input type="number" min={currentAge + 1} max={80} value={s.to_age}
+                      onChange={e => setStages(prev => prev.map((st, j) =>
+                        j === i ? { ...st, to_age: Number(e.target.value) } : st
+                      ))}
+                      style={{ width: '100%', padding: '4px 6px', borderRadius: 6, fontSize: 12,
+                        border: `1px solid ${C.cardBorder}`, background: 'var(--surface)',
+                        color: C.text }}
+                    />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: C.muted, marginBottom: 2 }}>월 적립(만원)</div>
+                    <input type="number" min={0} max={2000} value={s.monthly_savings}
+                      onChange={e => setStages(prev => prev.map((st, j) =>
+                        j === i ? { ...st, monthly_savings: Number(e.target.value) } : st
+                      ))}
+                      style={{ width: '100%', padding: '4px 6px', borderRadius: 6, fontSize: 12,
+                        border: `1px solid ${C.cardBorder}`, background: 'var(--surface)',
+                        color: C.text }}
+                    />
+                  </div>
+                  <button onClick={() => setStages(prev => prev.filter((_, j) => j !== i))}
+                    style={{ padding: '4px 6px', background: 'transparent', border: 'none',
+                      color: C.red, cursor: 'pointer', fontSize: 14, marginTop: 16 }}>
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button onClick={() => {
+                const last = stages[stages.length - 1]
+                setStages(prev => [...prev, {
+                  from_age: last?.to_age ?? currentAge + 5,
+                  to_age: (last?.to_age ?? currentAge + 5) + 5,
+                  monthly_savings: 100,
+                }])
+              }} style={{
+                width: '100%', padding: '6px', fontSize: 11,
+                background: `${C.purple}10`, border: `1px dashed ${C.purple}50`,
+                borderRadius: 8, color: C.purple, cursor: 'pointer',
+              }}>
+                + 구간 추가
+              </button>
+            </div>
+          )}
+
+          {/* 슬라이더 4개 — 생애주기 모드에서 savings 슬라이더 숨김 */}
+          {SLIDERS.filter(cfg => !(lifecycleMode && cfg.key === 'savings')).map(cfg => (
             <Slider
               key={cfg.key}
               config={cfg}
@@ -499,6 +770,7 @@ export default function InteractiveSimulator({ portfolio }) {
           ) : (
             <ResultSection rv={result} sliders={sliders} />
           )}
+          <MiniProjection sliders={sliders} currentAge={currentAge} avgYield={growthYield} />
         </div>
 
       </div>

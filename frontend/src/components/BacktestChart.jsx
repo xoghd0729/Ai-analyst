@@ -34,10 +34,10 @@ const C = {
   kospi:      '#f59e0b',   // 노랑 — KOSPI
   sp500:      '#a855f7',   // 보라 — S&P 500
   zero:       '#475569',   // 회색 — 0% 기준선
-  cardBg:     '#1e293b',   // 카드 배경
-  cardBorder: '#334155',   // 카드 테두리
-  text:       '#e2e8f0',   // 기본 텍스트
-  muted:      '#94a3b8',   // 보조 텍스트
+  cardBg:     'var(--surface)',   // 카드 배경
+  cardBorder: 'var(--border)',   // 카드 테두리
+  text:       'var(--text)',   // 기본 텍스트
+  muted:      'var(--text-sub)',   // 보조 텍스트
   green:      '#10b981',   // 긍정 지표
   amber:      '#f59e0b',   // 경고 지표
 }
@@ -58,7 +58,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
   return (
     <div style={{
-      background: '#0f172a', border: `1px solid ${C.cardBorder}`,
+      background: 'var(--surface)', border: `1px solid ${C.cardBorder}`,
       borderRadius: 10, padding: '10px 14px', fontSize: 12, minWidth: 170,
     }}>
       <div style={{ fontWeight: 700, marginBottom: 8, color: C.text }}>{label}년</div>
@@ -211,7 +211,7 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
           {grade && (
             <span style={{
               fontSize: 11, padding: '2px 8px', borderRadius: 6,
-              background: '#0f172a', color: C.muted,
+              background: 'var(--surface)', color: C.muted,
               border: `1px solid ${C.cardBorder}`,
             }}>
               {grade}
@@ -240,10 +240,10 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
           sub={worst_year ? `최악 ${worst_year.year}년 ${fmtPct(worst_year.return_pct)}` : undefined}
         />
         <StatCard
-          label="샤프 비율"
+          label="샤프 비율 (위험 대비 수익성)"
           value={Number(sharpe_ratio).toFixed(2)}
           color={sharpeColor}
-          sub={best_year ? `최고 ${best_year.year}년 ${fmtPct(best_year.return_pct)}` : undefined}
+          sub={best_year ? `최고 ${best_year.year}년 ${fmtPct(best_year.return_pct)} · 높을수록 위험 대비 수익 우위` : '높을수록 위험 대비 수익 우위'}
         />
       </div>
 

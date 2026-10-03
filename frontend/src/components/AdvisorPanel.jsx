@@ -18,10 +18,10 @@ import { useState } from 'react'
 import api from '../api/client'
 
 const C = {
-  cardBg:     '#1e293b',
-  cardBorder: '#334155',
-  text:       '#e2e8f0',
-  muted:      '#94a3b8',
+  cardBg:     'var(--surface)',
+  cardBorder: 'var(--border)',
+  text:       'var(--text)',
+  muted:      'var(--text-sub)',
   green:      '#10b981',
   blue:       '#3b82f6',
   amber:      '#f59e0b',
@@ -101,7 +101,7 @@ export default function AdvisorPanel({ portfolio }) {
       }}>
         <div>
           <div style={{ fontSize: 15, fontWeight: 700 }}>AI Portfolio Advisor</div>
-          <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>
+          <div style={{ fontSize: 13, color: C.text, marginTop: 2 }}>
             계산 완료된 분석 결과를 AI가 해석합니다
           </div>
         </div>

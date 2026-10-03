@@ -50,7 +50,7 @@ const CustomTooltip = ({ active, payload }) => {
       borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#283143',
     }}>
       <div style={{ fontWeight: 700, marginBottom: 4 }}>{d?.fullLabel}</div>
-      <div style={{ color: '#94a3b8' }}>
+      <div style={{ color: 'var(--text-sub)' }}>
         {d?.score} / {d?.max}점 ({d?.pct}%)
       </div>
       {d?.action && (
@@ -103,7 +103,7 @@ export default function HealthRadarChart({ health }) {
           }}>
             {grade}
           </div>
-          <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 2 }}>
+          <div style={{ fontSize: 13, color: 'var(--text-sub)', marginTop: 2 }}>
             {total_score} / {max_score}점 ({totalPct}%)
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function HealthRadarChart({ health }) {
           <PolarGrid stroke="#dfe3ea" />
           <PolarAngleAxis
             dataKey="subject"
-            tick={{ fill: '#94a3b8', fontSize: 12 }}
+            tick={{ fill: 'var(--text-sub)', fontSize: 12 }}
           />
           <PolarRadiusAxis
             angle={90} domain={[0, 100]}
@@ -139,7 +139,7 @@ export default function HealthRadarChart({ health }) {
         {data.map(d => (
           <div key={d.subject}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 3 }}>
-              <span style={{ color: '#94a3b8' }}>{d.subject}</span>
+              <span style={{ color: 'var(--text-sub)' }}>{d.subject}</span>
               <span style={{ color: d.pct >= 70 ? '#059669' : d.pct >= 40 ? '#d97706' : '#ef4444', fontWeight: 600 }}>
                 {d.score}/{d.max}
               </span>

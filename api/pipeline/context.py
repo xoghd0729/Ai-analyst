@@ -26,6 +26,11 @@ class PortfolioRequest:
     monthly_savings:   float = 100.0
     savings_growth:    float = 0.0     # 적립 연 증가율(%) — 소득 상승 반영
     target_fire_age:   int   = 50
+    savings_stages:    list  = field(default_factory=list)
+    # 생애주기 적립 스테이지 예시:
+    # [{"from_age": 25, "to_age": 27, "monthly_savings": 20},
+    #  {"from_age": 27, "to_age": 30, "monthly_savings": 100},
+    #  {"from_age": 30, "to_age": 60, "monthly_savings": 200}]
 
     def __post_init__(self) -> None:
         """

@@ -401,7 +401,9 @@ export default function StockDetail() {
                     : '재무 지표상 배당이 안정적으로 유지될 가능성이 높습니다.'}
                 </div>
                 <div className="risk-note">
-                  XGBoost AI 모델이 FCF·배당성향·현금흐름 등 7개 재무지표를 분석한 결과입니다.
+                  배당 삭감까지 걸리는 시간을 확률로 예측하는 Survival 리스크 모델 결과입니다.
+                  FCF(잉여현금흐름)·배당성향·이자보상배율·부채비율 등 DART 공시 재무지표를 학습하여
+                  INTACT(안정) / WEAKENING(약화) / BROKEN(위험) 3단계로 분류합니다.
                 </div>
               </div>
             </div>

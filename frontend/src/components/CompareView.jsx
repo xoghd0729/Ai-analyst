@@ -23,11 +23,11 @@ import api from '../api/client'
 
 // ── 색상 팔레트 ──────────────────────────────────────────────────
 const C = {
-  bg:        '#0f172a',
-  cardBg:    '#1e293b',
-  border:    '#334155',
-  text:      '#e2e8f0',
-  muted:     '#94a3b8',
+  bg:        'var(--surface)',
+  cardBg:    'var(--surface)',
+  border:    'var(--border)',
+  text:      'var(--text)',
+  muted:     'var(--text-sub)',
   green:     '#10b981',
   red:       '#ef4444',
   amber:     '#f59e0b',
@@ -194,7 +194,7 @@ function Field({ label, value, onChange, type = 'number', min, max, step = 1 }) 
         onChange={e => onChange(type === 'number' ? Number(e.target.value) : e.target.value)}
         min={min} max={max} step={step}
         style={{
-          width: '100%', background: '#0f172a', border: `1px solid ${C.border}`,
+          width: '100%', background: 'var(--surface)', border: `1px solid ${C.border}`,
           borderRadius: 8, padding: '7px 10px', color: C.text,
           fontSize: 13, boxSizing: 'border-box',
         }}
@@ -213,7 +213,7 @@ function Select({ label, value, onChange, options }) {
         value={value}
         onChange={e => onChange(e.target.value)}
         style={{
-          width: '100%', background: '#0f172a', border: `1px solid ${C.border}`,
+          width: '100%', background: 'var(--surface)', border: `1px solid ${C.border}`,
           borderRadius: 8, padding: '7px 10px', color: C.text,
           fontSize: 13, boxSizing: 'border-box',
         }}

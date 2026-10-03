@@ -23,10 +23,10 @@ import api from '../api/client'
 
 // ── 색상 상수 ────────────────────────────────────────────────────
 const C = {
-  cardBg:     '#1e293b',
-  cardBorder: '#334155',
-  text:       '#e2e8f0',
-  muted:      '#94a3b8',
+  cardBg:     'var(--surface)',
+  cardBorder: 'var(--border)',
+  text:       'var(--text)',
+  muted:      'var(--text-sub)',
   green:      '#10b981',
   blue:       '#3b82f6',
   amber:      '#f59e0b',
@@ -61,7 +61,7 @@ const CustomTooltip = ({ active, payload }) => {
 
   return (
     <div style={{
-      background: '#0f172a', border: `1px solid ${C.cardBorder}`,
+      background: 'var(--surface)', border: `1px solid ${C.cardBorder}`,
       borderRadius: 10, padding: '10px 14px', fontSize: 12,
     }}>
       <div style={{ display: 'flex', gap: 16, justifyContent: 'space-between', marginBottom: 2 }}>
@@ -110,7 +110,7 @@ function OptPortCard({ title, icon, data, color }) {
           { label: 'Sharpe',   value: sharpe?.toFixed(2),             color: color   },
         ].map(({ label, value, color: c }) => (
           <div key={label} style={{
-            background: '#0f172a', borderRadius: 8,
+            background: 'var(--surface)', borderRadius: 8,
             padding: '6px 10px', fontSize: 11,
           }}>
             <div style={{ color: C.muted }}>{label}</div>
