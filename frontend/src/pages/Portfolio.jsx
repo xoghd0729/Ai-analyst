@@ -423,6 +423,20 @@ const RESULT_SECTIONS = [
 ]
 
 
+// ── 발표 데모 고정 시나리오 (DEMO_RUNBOOK.md 기준값) ─────────────
+// "25세가 50세에 월 200만원 배당을 받으려면?" 역산 스토리
+const DEMO_PRESENTATION = {
+  key:   'demo_presentation',
+  icon:  '🎬',
+  title: '발표 데모 시나리오',
+  label: '25세 · 시드 5,000만 · 월 적립 100만',
+  story: '"50세에 월 200만원 배당" 역산 시나리오',
+  form: {
+    age: 25, monthly_invest: 100, reserve: 5000,
+    monthly_target: 100, risk_tolerance: 'moderate', invest_growth: 5,
+  },
+}
+
 // ── 데모 페르소나 4종 (캡스톤 발표용 · 나이 단계별) ──────────────
 // 같은 시스템이 인생 단계(25·35·45·60)에 따라 다른 배분·생존확률을 내는지 보여줌
 const PERSONAS = [
@@ -811,6 +825,8 @@ export default function Portfolio() {
         monthly_target: Number(f.monthly_target),
         invest_growth:  Number(f.invest_growth ?? 0),
       })
+      // 데모 모드 또는 모든 분석 결과 → 상세 분석 자동 펼침
+      setShowAnalysis(true)
     } catch (err) {
       console.error('API 오류:', err)
       const msg = err?.response?.data?.detail || err?.message || '알 수 없는 오류'
@@ -1057,6 +1073,39 @@ export default function Portfolio() {
         <div className="card form-card">
           <h3 className="card-title">내 정보 입력</h3>
 
+          {/* ── 발표 데모 버튼 (DEMO_RUNBOOK 고정 시나리오) ── */}
+          <button
+            type="button"
+            onClick={() => handlePersonaClick(DEMO_PRESENTATION)}
+            disabled={loading}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+              padding: '12px 16px', marginBottom: 8,
+              background: activePersona === 'demo_presentation'
+                ? 'rgba(139,92,246,.18)'
+                : 'linear-gradient(135deg, rgba(139,92,246,.1) 0%, rgba(37,99,235,.08) 100%)',
+              border: `2px solid ${activePersona === 'demo_presentation' ? '#7c3aed' : 'rgba(139,92,246,.4)'}`,
+              borderRadius: 10, cursor: loading ? 'wait' : 'pointer',
+              transition: 'all .2s',
+            }}
+          >
+            <span style={{ fontSize: 22 }}>🎬</span>
+            <div style={{ flex: 1, textAlign: 'left' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
+                발표 데모 시작
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-sub)', marginTop: 1 }}>
+                {DEMO_PRESENTATION.label} — {DEMO_PRESENTATION.story}
+              </div>
+            </div>
+            <span style={{
+              fontSize: 10, padding: '2px 7px', borderRadius: 5, fontWeight: 700,
+              background: '#7c3aed', color: '#fff',
+            }}>
+              {loading && activePersona === 'demo_presentation' ? '분석 중...' : '▶ 시작'}
+            </span>
+          </button>
+
           {/* ── 데모 페르소나 빠른 선택 (캡스톤 발표용) ── */}
           <div style={{
             display: 'flex', flexDirection: 'column', gap: 6,
@@ -1253,6 +1302,25 @@ export default function Portfolio() {
         {/* ── 결과 ── */}
         {result ? (
           <div className="result-section">
+
+            {/* 발표 데모 시나리오 배너 */}
+            {activePersona === 'demo_presentation' && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '9px 14px', marginBottom: 10,
+                background: 'linear-gradient(135deg, rgba(139,92,246,.1) 0%, rgba(37,99,235,.08) 100%)',
+                border: '1px solid rgba(139,92,246,.35)',
+                borderRadius: 10, fontSize: 12,
+              }}>
+                <span style={{ fontSize: 18 }}>🎬</span>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontWeight: 700, color: 'var(--text)' }}>발표 데모 시나리오 — </span>
+                  <span style={{ color: 'var(--text-sub)' }}>
+                    {DEMO_PRESENTATION.label} · {DEMO_PRESENTATION.story}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* 저장 바 */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, alignItems: 'center', marginBottom: 4 }}>
