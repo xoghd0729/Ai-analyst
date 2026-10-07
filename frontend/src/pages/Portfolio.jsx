@@ -20,6 +20,7 @@ import CompareView             from '../components/CompareView'
 import RationalePanel          from '../components/RationalePanel'
 import ScoringRationale        from '../components/ScoringRationale'
 import DataFreshnessPanel      from '../components/DataFreshnessPanel'
+import StockRationaleCard      from '../components/StockRationaleCard'
 import './Portfolio.css'
 
 const RISK_OPTIONS = [
@@ -2557,6 +2558,7 @@ export default function Portfolio() {
                         <div className="rec-asset-label" style={{ color: ASSET_COLOR[r.asset_class] }}>
                           {r.asset_class_label}
                         </div>
+                        <StockRationaleCard rec={r} />
                       </td>
                       <td>
                         <span className={`badge ${r.account.includes('ISA') ? 'badge-green' : 'badge-blue'}`}>

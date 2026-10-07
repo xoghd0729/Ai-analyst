@@ -1054,6 +1054,13 @@ def pick_kr_stocks(risk: str, n: int, age: int | None = None) -> list[dict]:
             "ml_status":         ml_st,
             "dps_cuts_3y":       cuts,
             "latest_yoy_pct":    float(row.get("latest_yoy_pct", 0) or 0),
+            # 서브스코어 — ranking.csv 4개 축 (KR 전용)
+            "kr_score_breakdown": {
+                "yield_score": float(row.get("yield_score", 0) or 0),
+                "stability":   float(row.get("stability",   0) or 0),
+                "financial":   float(row.get("financial",   0) or 0),
+                "growth":      float(row.get("growth",      0) or 0),
+            },
         })
     return stocks
 
