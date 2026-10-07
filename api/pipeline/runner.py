@@ -252,8 +252,10 @@ class RecommendationPipeline:
             try: return datetime.fromtimestamp(os.path.getmtime(p)).strftime("%Y-%m-%d")
             except: return "unknown"
         return {
-            "kr_stock_ranking": mtime(os.path.join(BASE_DIR, "data", "ranking.csv")),
-            "ml_scoring":       mtime(os.path.join(BASE_DIR, "data", "ml_scoring_results.csv")),
-            "us_stock_scores":  mtime(os.path.join(BASE_DIR, "data", "us_stock_scores.csv")),
-            "etf_quality":      mtime(os.path.join(BASE_DIR, "data", "etf_quality_cache.json")),
+            "kr_stock_ranking":  mtime(os.path.join(BASE_DIR, "data",    "ranking.csv")),
+            "ml_scoring":        mtime(os.path.join(BASE_DIR, "data",    "ml_scoring_results.csv")),
+            "us_stock_scores":   mtime(os.path.join(BASE_DIR, "data",    "us_stock_scores.csv")),
+            "etf_quality":       mtime(os.path.join(BASE_DIR, "data",    "etf_quality_cache.json")),
+            "dividend_dataset":  mtime(os.path.join(BASE_DIR, "data",    "dividend_dataset.csv")),
+            "survival_model":    mtime(os.path.join(BASE_DIR, "results", "survival_pd_v4.json")),
         }

@@ -19,6 +19,7 @@ import AdvisorPanel            from '../components/AdvisorPanel'
 import CompareView             from '../components/CompareView'
 import RationalePanel          from '../components/RationalePanel'
 import ScoringRationale        from '../components/ScoringRationale'
+import DataFreshnessPanel      from '../components/DataFreshnessPanel'
 import './Portfolio.css'
 
 const RISK_OPTIONS = [
@@ -2132,6 +2133,11 @@ export default function Portfolio() {
             </button>
 
             {showAnalysis && (<>
+
+            {/* 데이터 기준일 / 출처 배너 */}
+            {result.data_freshness && (
+              <DataFreshnessPanel freshness={result.data_freshness} />
+            )}
 
             {/* ★ 단일 헤드라인: AI 현금흐름 건강도 */}
             {result.survival?.health_score != null && (() => {
