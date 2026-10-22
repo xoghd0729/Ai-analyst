@@ -1,0 +1,347 @@
+{
+  "generated_at": "2026-10-14T16:50:25.422822",
+  "description": "TTM DPS vs price×yield% 비교 검증 결과",
+  "methodology": {
+    "ttm_window": "cache fetched_at 기준 과거 365일",
+    "estimate_method": "price_usd × div_yield% / 100",
+    "error_pct_formula": "(estimate - ttm) / ttm × 100"
+  },
+  "results": {
+    "SCHD": {
+      "price_cache_usd": 33.04,
+      "yield_cache_pct": 3.24,
+      "estimate_dps": 1.070496,
+      "ttm_dps": 1.055,
+      "error_pct": 1.47,
+      "error_pct_raw": 1.47,
+      "payment_count": 4,
+      "payment_count_warning": false,
+      "warning_reason": null,
+      "ttm_reliable": true,
+      "payments": [
+        {
+          "date": "2025-12-10",
+          "amount": 0.278
+        },
+        {
+          "date": "2026-03-25",
+          "amount": 0.257
+        },
+        {
+          "date": "2026-06-24",
+          "amount": 0.253
+        },
+        {
+          "date": "2026-09-23",
+          "amount": 0.267
+        }
+      ],
+      "price_on_cache_date": 33.26,
+      "cache_date": "2026-10-12",
+      "fetch_error": null
+    },
+    "PRU": {
+      "price_cache_usd": 113.09,
+      "yield_cache_pct": 4.95,
+      "estimate_dps": 5.597955,
+      "ttm_dps": 5.55,
+      "error_pct": 0.86,
+      "error_pct_raw": 0.86,
+      "payment_count": 4,
+      "payment_count_warning": false,
+      "warning_reason": null,
+      "ttm_reliable": true,
+      "payments": [
+        {
+          "date": "2025-11-18",
+          "amount": 1.35
+        },
+        {
+          "date": "2026-02-17",
+          "amount": 1.4
+        },
+        {
+          "date": "2026-05-26",
+          "amount": 1.4
+        },
+        {
+          "date": "2026-08-25",
+          "amount": 1.4
+        }
+      ],
+      "price_on_cache_date": 113.39,
+      "cache_date": "2026-10-12",
+      "fetch_error": null
+    },
+    "PEP": {
+      "price_cache_usd": 125.97,
+      "yield_cache_pct": 4.7,
+      "estimate_dps": 5.92059,
+      "ttm_dps": 5.806,
+      "error_pct": 1.97,
+      "error_pct_raw": 1.97,
+      "payment_count": 4,
+      "payment_count_warning": false,
+      "warning_reason": null,
+      "ttm_reliable": true,
+      "payments": [
+        {
+          "date": "2025-12-05",
+          "amount": 1.423
+        },
+        {
+          "date": "2026-03-06",
+          "amount": 1.423
+        },
+        {
+          "date": "2026-06-05",
+          "amount": 1.48
+        },
+        {
+          "date": "2026-09-04",
+          "amount": 1.48
+        }
+      ],
+      "price_on_cache_date": 126.68,
+      "cache_date": "2026-10-12",
+      "fetch_error": null
+    },
+    "JEPI": {
+      "price_cache_usd": 56.77,
+      "yield_cache_pct": 8.16,
+      "estimate_dps": 4.632432,
+      "ttm_dps": 4.563,
+      "error_pct": 1.52,
+      "error_pct_raw": 1.52,
+      "payment_count": 12,
+      "payment_count_warning": false,
+      "warning_reason": null,
+      "ttm_reliable": true,
+      "payments": [
+        {
+          "date": "2025-11-03",
+          "amount": 0.346
+        },
+        {
+          "date": "2025-12-01",
+          "amount": 0.371
+        },
+        {
+          "date": "2025-12-31",
+          "amount": 0.427
+        },
+        {
+          "date": "2026-02-02",
+          "amount": 0.344
+        },
+        {
+          "date": "2026-03-02",
+          "amount": 0.351
+        },
+        {
+          "date": "2026-04-01",
+          "amount": 0.421
+        },
+        {
+          "date": "2026-05-01",
+          "amount": 0.448
+        },
+        {
+          "date": "2026-06-01",
+          "amount": 0.389
+        },
+        {
+          "date": "2026-07-01",
+          "amount": 0.387
+        },
+        {
+          "date": "2026-08-03",
+          "amount": 0.367
+        },
+        {
+          "date": "2026-09-01",
+          "amount": 0.371
+        },
+        {
+          "date": "2026-10-01",
+          "amount": 0.341
+        }
+      ],
+      "price_on_cache_date": 56.96,
+      "cache_date": "2026-10-12",
+      "fetch_error": null
+    },
+    "JEPQ": {
+      "price_cache_usd": 61.09,
+      "yield_cache_pct": 11.05,
+      "estimate_dps": 6.750445,
+      "ttm_dps": 6.886,
+      "error_pct": -1.97,
+      "error_pct_raw": -1.97,
+      "payment_count": 12,
+      "payment_count_warning": false,
+      "warning_reason": null,
+      "ttm_reliable": true,
+      "payments": [
+        {
+          "date": "2025-11-03",
+          "amount": 0.476
+        },
+        {
+          "date": "2025-12-01",
+          "amount": 0.553
+        },
+        {
+          "date": "2025-12-31",
+          "amount": 0.576
+        },
+        {
+          "date": "2026-02-02",
+          "amount": 0.466
+        },
+        {
+          "date": "2026-03-02",
+          "amount": 0.509
+        },
+        {
+          "date": "2026-04-01",
+          "amount": 0.559
+        },
+        {
+          "date": "2026-05-01",
+          "amount": 0.591
+        },
+        {
+          "date": "2026-06-01",
+          "amount": 0.564
+        },
+        {
+          "date": "2026-07-01",
+          "amount": 0.637
+        },
+        {
+          "date": "2026-08-03",
+          "amount": 0.705
+        },
+        {
+          "date": "2026-09-01",
+          "amount": 0.683
+        },
+        {
+          "date": "2026-10-01",
+          "amount": 0.567
+        }
+      ],
+      "price_on_cache_date": 60.93,
+      "cache_date": "2026-10-12",
+      "fetch_error": null
+    },
+    "VYM": {
+      "price_cache_usd": 158.75,
+      "yield_cache_pct": 2.37,
+      "estimate_dps": 3.762375,
+      "ttm_dps": 3.676,
+      "error_pct": 2.35,
+      "error_pct_raw": 2.35,
+      "payment_count": 4,
+      "payment_count_warning": false,
+      "warning_reason": null,
+      "ttm_reliable": true,
+      "payments": [
+        {
+          "date": "2025-12-19",
+          "amount": 0.947
+        },
+        {
+          "date": "2026-03-20",
+          "amount": 0.862
+        },
+        {
+          "date": "2026-06-18",
+          "amount": 0.98
+        },
+        {
+          "date": "2026-09-18",
+          "amount": 0.887
+        }
+      ],
+      "price_on_cache_date": 159.24,
+      "cache_date": "2026-10-12",
+      "fetch_error": null
+    },
+    "HDV": {
+      "price_cache_usd": 28.71,
+      "yield_cache_pct": 3.05,
+      "estimate_dps": 0.875655,
+      "ttm_dps": 0.8522,
+      "error_pct": null,
+      "error_pct_raw": 2.75,
+      "payment_count": 6,
+      "payment_count_warning": true,
+      "warning_reason": "소액 이벤트 2건 탐지 (최대 $0.2506의 40% 미만): ['2026-07-15', '2026-09-16']. 자본이득분배·특별분배 혼입 가능 — TTM 수치 재확인 필요",
+      "ttm_reliable": false,
+      "payments": [
+        {
+          "date": "2025-12-16",
+          "amount": 0.2506
+        },
+        {
+          "date": "2026-03-17",
+          "amount": 0.1686
+        },
+        {
+          "date": "2026-06-15",
+          "amount": 0.185
+        },
+        {
+          "date": "2026-07-15",
+          "amount": 0.087
+        },
+        {
+          "date": "2026-08-19",
+          "amount": 0.105
+        },
+        {
+          "date": "2026-09-16",
+          "amount": 0.056
+        }
+      ],
+      "price_on_cache_date": 29.07,
+      "cache_date": "2026-10-12",
+      "fetch_error": null
+    },
+    "DGRO": {
+      "price_cache_usd": 77.29,
+      "yield_cache_pct": 1.98,
+      "estimate_dps": 1.530342,
+      "ttm_dps": 1.494,
+      "error_pct": 2.43,
+      "error_pct_raw": 2.43,
+      "payment_count": 4,
+      "payment_count_warning": false,
+      "warning_reason": null,
+      "ttm_reliable": true,
+      "payments": [
+        {
+          "date": "2025-12-16",
+          "amount": 0.447
+        },
+        {
+          "date": "2026-03-17",
+          "amount": 0.331
+        },
+        {
+          "date": "2026-06-15",
+          "amount": 0.331
+        },
+        {
+          "date": "2026-09-15",
+          "amount": 0.385
+        }
+      ],
+      "price_on_cache_date": 77.79,
+      "cache_date": "2026-10-12",
+      "fetch_error": null
+    }
+  }
+}
