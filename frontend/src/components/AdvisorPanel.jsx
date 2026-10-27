@@ -144,7 +144,7 @@ export default function AdvisorPanel({ portfolio }) {
         }}>
           <div style={{ fontSize: 24, marginBottom: 8 }}>🤖</div>
           <div style={{ fontSize: 13 }}>
-            qwen3:14b가 포트폴리오를 분석 중입니다...
+            포트폴리오 계산 결과를 분석 중입니다...
           </div>
           <div style={{ fontSize: 11, marginTop: 4 }}>
             (Ollama 미실행 시 기본 분석으로 대체됩니다)
@@ -224,7 +224,7 @@ export default function AdvisorPanel({ portfolio }) {
           <div style={{ fontSize: 20, marginBottom: 8 }}>🤖</div>
           <div style={{ fontSize: 12 }}>
             "AI 분석 요청" 버튼을 클릭하면<br />
-            qwen3:14b가 계산 결과를 해석하고 맞춤 조언을 제공합니다
+            계산 완료된 결과를 해석해 맞춤 조언을 제공합니다 (로컬 LLM 연결 시 AI 문장 추가, 미연결 시 기본 분석)
           </div>
         </div>
       )}

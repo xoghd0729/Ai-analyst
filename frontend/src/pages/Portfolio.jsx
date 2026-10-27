@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import * as auth from '../api/auth'
 import {
   PieChart, Pie, Cell, Tooltip as PieTooltip, ResponsiveContainer,
@@ -17,6 +17,8 @@ import InteractiveSimulator    from '../components/InteractiveSimulator'
 import EfficientFrontierChart  from '../components/EfficientFrontierChart'
 import AdvisorPanel            from '../components/AdvisorPanel'
 import CompareView             from '../components/CompareView'
+import InputWizard             from '../components/InputWizard'
+import { fmtMan } from '../utils/format'
 import RationalePanel          from '../components/RationalePanel'
 import ScoringRationale        from '../components/ScoringRationale'
 import DataFreshnessPanel      from '../components/DataFreshnessPanel'
@@ -423,6 +425,30 @@ const RESULT_SECTIONS = [
 ]
 
 
+const RESULT_TABS = [
+  { id: 'dash',     group: '요약',        icon: '🏠', label: '대시보드' },
+  { id: 'why',      group: '요약',        icon: '🎯', label: '목표 달성 근거' },
+  { id: 'recs',     group: '포트폴리오',  icon: '📋', label: '추천 종목' },
+  { id: 'alloc',    group: '포트폴리오',  icon: '📐', label: '자산 배분' },
+  { id: 'tax',      group: '포트폴리오',  icon: '💰', label: '절세 · 근거' },
+  { id: 'growth',   group: 'FIRE · 시뮬', icon: '📈', label: '복리 · 현금흐름' },
+  { id: 'fire',     group: 'FIRE · 시뮬', icon: '🔥', label: 'FIRE 달성' },
+  { id: 'mc',       group: 'FIRE · 시뮬', icon: '🎲', label: 'Monte Carlo' },
+  { id: 'sim',      group: 'FIRE · 시뮬', icon: '🎚️', label: 'FIRE 시뮬레이터' },
+  { id: 'health',   group: '위험 · AI',   icon: '🛡️', label: '건강 · 위험' },
+  { id: 'ai',       group: '위험 · AI',   icon: '🤖', label: 'AI 분석' },
+  { id: 'frontier', group: '검증',        icon: '📐', label: 'MPT 프론티어' },
+  { id: 'compare',  group: '검증',        icon: '⚖️', label: '포트폴리오 비교' },
+  { id: 'backtest', group: '검증',        icon: '📊', label: '백테스트' },
+]
+const SEC_TAB = {
+  'sec-hero':'dash','sec-headline':'dash','sec-survival':'mc','sec-recs':'recs',
+  'sec-shap':'tax','sec-axis':'alloc','sec-growth':'growth','sec-cashflow':'fire',
+  'sec-montecarlo':'mc','sec-health':'health','sec-monitor':'backtest','sec-advisor':'ai',
+  'sec-simulator':'sim','sec-frontier':'frontier','sec-compare':'compare','sec-backtest':'backtest','sec-fire':'fire',
+}
+
+
 // ── 발표 데모 고정 시나리오 (DEMO_RUNBOOK.md 기준값) ─────────────
 // "25세가 50세에 월 200만원 배당을 받으려면?" 역산 스토리
 const DEMO_PRESENTATION = {
@@ -711,7 +737,9 @@ export default function Portfolio() {
   const [loading,   setLoading]   = useState(false)
   const [error,     setError]     = useState(null)
   const [activePersona, setActivePersona] = useState(null)
-  const [showAnalysis, setShowAnalysis] = useState(false)   // 상세 분석 접기/펼치기
+  const [showAnalysis, setShowAnalysis] = useState(true)    // (탭 구조로 대체 — 항상 펼침)
+  const [rtab, setRtab] = useState('dash')                   // 결과 화면
+  const [formOpen, setFormOpen] = useState(true)               // 입력 폼 표시 여부
   const [showAllHoldings, setShowAllHoldings] = useState(false)  // 포트폴리오 전체 보기
   const [resultLoaded, setResultLoaded] = useState(false)        // 저장본 불러온 결과 여부
 
@@ -826,7 +854,7 @@ export default function Portfolio() {
         invest_growth:  Number(f.invest_growth ?? 0),
       })
       // 데모 모드 또는 모든 분석 결과 → 상세 분석 자동 펼침
-      setShowAnalysis(true)
+      setShowAnalysis(true); setRtab("dash"); setFormOpen(false)
     } catch (err) {
       console.error('API 오류:', err)
       const msg = err?.response?.data?.detail || err?.message || '알 수 없는 오류'
@@ -838,6 +866,24 @@ export default function Portfolio() {
 
   // 폼 제출 (수동)
   const handleSubmit = () => runRecommend()
+
+  // 결과 화면 페이지 이동 (이전/다음 버튼 + ← → 키)
+  const pageIdx = Math.max(0, RESULT_TABS.findIndex(t => t.id === rtab))
+  const goPage = (d) => {
+    const n = RESULT_TABS[pageIdx + d]
+    if (n) setRtab(n.id)
+  }
+  useEffect(() => {
+    if (!result || formOpen) return
+    const onKey = (e) => {
+      const tag = (e.target?.tagName || '').toLowerCase()
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return
+      if (e.key === 'ArrowRight') goPage(1)
+      if (e.key === 'ArrowLeft') goPage(-1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [pageIdx, result, formOpen])
 
   // 페르소나 자동 입력 + 즉시 추천 실행
   const handlePersonaClick = (persona) => {
@@ -980,7 +1026,7 @@ export default function Portfolio() {
   }
 
   return (
-    <div className="portfolio-page">
+    <div className={`portfolio-page ${(!result || formOpen) ? 'wizmode' : ''} ${result && !formOpen ? 'compact' : ''}`}>
       <div className="page-header">
         <div className="page-title">
           AI Cashflow OS
@@ -1068,9 +1114,16 @@ export default function Portfolio() {
         </div>
       )}
 
-      <div className="portfolio-layout">
+      <div className={`portfolio-layout full ${(!result || formOpen) ? 'wiz-open' : ''}`}>
+        {(!result || formOpen) && (
+          <InputWizard
+            form={form} onChange={handleChange} onSubmit={handleSubmit}
+            onPersona={handlePersonaClick} demo={DEMO_PRESENTATION} personas={PERSONAS}
+            loading={loading} error={error}
+          />
+        )}
         {/* ── 입력 폼 ── */}
-        <div className="card form-card">
+        <div className="card form-card" style={{ display: 'none' }}>
           <h3 className="card-title">내 정보 입력</h3>
 
           {/* ── 발표 데모 버튼 (DEMO_RUNBOOK 고정 시나리오) ── */}
@@ -1245,7 +1298,7 @@ export default function Portfolio() {
         </div>
 
         {/* ── 섹션 네비게이션 — 결과 있을 때만 floating sidebar ── */}
-        {result && (
+        {false && result && (
           <nav
             aria-label="섹션 빠른 점프"
             style={{
@@ -1330,6 +1383,31 @@ export default function Portfolio() {
               </button>
             </div>
 
+            {/* ── 결과 레이아웃: 좌측 사이드바 + 우측 콘텐츠 ── */}
+            <div className="result-layout">
+            <nav className="result-side" role="tablist" aria-label="결과 메뉴">
+              <div className="result-side-title">FinSight</div>
+              <button type="button" className="result-side-item edit" onClick={() => setFormOpen(v => !v)}>
+                <span className="rsi-icon">✏️</span>
+                <span className="rsi-label">{formOpen ? '입력창 닫기' : '입력 수정'}</span>
+              </button>
+              {RESULT_TABS.map((t, i) => (
+                <React.Fragment key={t.id}>
+                  {(i === 0 || RESULT_TABS[i - 1].group !== t.group) && (
+                    <div className="result-side-group">{t.group}</div>
+                  )}
+                  <button type="button" role="tab" aria-selected={rtab === t.id}
+                    className={`result-side-item ${rtab === t.id ? 'active' : ''}`}
+                    onClick={() => { setRtab(t.id); setFormOpen(false) }}>
+                    <span className="rsi-icon">{t.icon}</span>
+                    <span className="rsi-label">{t.label}</span>
+                  </button>
+                </React.Fragment>
+              ))}
+            </nav>
+            <div className="result-main">
+
+            <div className="rt wide" hidden={rtab !== 'dash'}>
             {/* 🗺️ 결과 가이드 — 핵심 요약 + 다음 확인 섹션 안내 */}
             {(() => {
               const tgt   = Number(result.monthly_target) || 1
@@ -1340,8 +1418,11 @@ export default function Portfolio() {
                 : raCount <= 2      ? { label: '보통', color: '#d97706' }
                 : { label: '높음', color: '#ef4444' }
               const scrollTo = (id) => {
-                const el = document.getElementById(id)
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                if (SEC_TAB[id]) setRtab(SEC_TAB[id])
+                setTimeout(() => {
+                  const el = document.getElementById(id)
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }, 60)
               }
               return (
                 <div style={{
@@ -1410,6 +1491,8 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'dash'}>
             {/* ① 대시보드 헤드라인 — 목표·달성·진행률 한 카드 */}
             {(() => {
               const curAge = Number(result.input?.age ?? result.age ?? form.age)
@@ -1511,6 +1594,8 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'why'}>
             {/* 계산 가정 요약 — 핵심 결과 카드 직후 (접기 가능) */}
             {(() => {
               const s   = result?.summary || {}
@@ -1669,6 +1754,8 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'why'}>
             {/* ★ 목표 달성 근거 — "왜 N세인가" (항상 표시) */}
             {compoundData?.length > 1 && achieveAge && (() => {
               const fmt = (manwon) => manwon >= 10000
@@ -1735,6 +1822,8 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'why'}>
             {/* ★ 목표 달성 가속기 — "행동을 바꾸면 몇 년 빨라지나" (항상 표시) */}
             {(growthScenarios?.some(x => x.age) || investScenarios?.some(x => x.age)) && (() => {
               const baseAge = investScenarios?.find(x => x.extra === 0)?.age || null
@@ -1819,6 +1908,8 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'ai'}>
             {/* ★ AI 모델 정보 카드 (항상 표시 — 발표 방어용) */}
             <div className="card" style={{ borderLeft: '3px solid #1456f0' }}>
               <h3 className="card-title">🤖 AI 모델 정보
@@ -1875,6 +1966,8 @@ export default function Portfolio() {
               </div>
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'recs'}>
             {/* ★ 투자 성향 정보 (항상 표시) */}
             {(() => {
               const riskKey = result.input?.risk_tolerance || form.risk_tolerance || 'moderate'
@@ -1937,6 +2030,8 @@ export default function Portfolio() {
               </>)
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'recs'}>
             {/* ② 추천 포트폴리오 — "그래서 뭘 사야 하나" */}
             {result.recommendations?.length > 0 && (() => {
               const recs = [...result.recommendations].sort((a, b) => b.weight_pct - a.weight_pct)
@@ -1964,7 +2059,7 @@ export default function Portfolio() {
                           </span>
                           <span style={{ color: '#d97706', fontWeight: 600 }}>→ 엔진 상한 20% 적용</span>
                           <span style={{ color: 'var(--text-sub)', fontSize: 11.5 }}>
-                            현재 자산({result.input?.investable?.toLocaleString()}만원)으로 목표({result.input?.monthly_target}만원/월)를
+                            현재 자산({fmtMan(result.input?.investable)})으로 목표({result.input?.monthly_target}만원/월)를
                             즉시 달성하려면 비현실적 수익률이 필요 — 적립 복리로 장기 달성 계획 수립
                           </span>
                         </div>
@@ -1973,7 +2068,7 @@ export default function Portfolio() {
                         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                           <span style={{ fontWeight: 700, color: '#059669' }}>🎯 역산 목표수익률</span>
                           <span style={{ fontWeight: 800, fontSize: 15, color: '#059669' }}>{Number(tgtYield).toFixed(2)}%</span>
-                          <span style={{ color: 'var(--text-sub)' }}>월 {result.input?.monthly_target}만원 목표 ÷ 투자금 {result.input?.investable?.toLocaleString()}만원으로 산출</span>
+                          <span style={{ color: 'var(--text-sub)' }}>월 {result.input?.monthly_target}만원 목표 ÷ 투자금 {fmtMan(result.input?.investable)}으로 산출</span>
                         </div>
                       )}
                     </div>
@@ -2112,6 +2207,8 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'recs'}>
             {/* ②-b 오늘의 액션 — "투자 코치" */}
             {(() => {
               const actions = []
@@ -2151,6 +2248,8 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'why'}>
             {/* ②-c 내 현금흐름 여정 타임라인 */}
             {compoundData?.length > 1 && (() => {
               const startAge = compoundData[0].age
@@ -2194,20 +2293,17 @@ export default function Portfolio() {
               )
             })()}
 
-            {/* ③ 상세 분석 접기/펼치기 */}
-            <button type="button" onClick={() => setShowAnalysis(v => !v)} className="card"
-              style={{ width: '100%', textAlign: 'center', cursor: 'pointer', fontWeight: 700, fontSize: 14,
-                       color: 'var(--blue)', border: '1px dashed var(--blue)', background: 'transparent' }}>
-              {showAnalysis ? '▲ 상세 분석 접기' : '▼ 상세 분석 보기 (건강도·생존확률·FIRE·백테스트 등)'}
-            </button>
-
+            </div>
             {showAnalysis && (<>
 
+            <div className="rt wide" hidden={rtab !== 'dash'}>
             {/* 데이터 기준일 / 출처 배너 */}
             {result.data_freshness && (
               <DataFreshnessPanel freshness={result.data_freshness} />
             )}
 
+            </div>
+            <div className="rt half" hidden={rtab !== 'dash'}>
             {/* ★ 단일 헤드라인: AI 현금흐름 건강도 */}
             {result.survival?.health_score != null && (() => {
               const sv = result.survival
@@ -2256,6 +2352,8 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt half" hidden={rtab !== 'dash'}>
             {/* HERO (보조 지표) */}
             <div id="sec-hero" className="hero-card">
               <div className="hero-grid">
@@ -2315,6 +2413,8 @@ export default function Portfolio() {
               </div>
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'tax'}>
             {/* AI 포트폴리오 설명 */}
             {portfolioInsight?.length > 0 && (
               <div className="card ai-insight-card">
@@ -2333,6 +2433,8 @@ export default function Portfolio() {
               </div>
             )}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'health'}>
             {/* ── AI 리스크 경보 ── */}
             {result.risk_alerts?.length > 0 && (
               <div className="card risk-alert-card">
@@ -2366,6 +2468,8 @@ export default function Portfolio() {
               </div>
             )}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'alloc'}>
             {/* 4축 구성 요약 + 분산 근거 설명 */}
             {result.axis_summary?.length > 0 && (
               <div id="sec-axis" className="card" style={{ scrollMarginTop: 16 }}>
@@ -2419,6 +2523,8 @@ export default function Portfolio() {
               </div>
             )}
 
+            </div>
+            <div className="rt half" hidden={rtab !== 'growth'}>
             {/* 복리 성장 그래프 */}
             <div id="sec-growth" className="card" style={{ scrollMarginTop: 16 }}>
               <h3 className="card-title">
@@ -2487,6 +2593,8 @@ export default function Portfolio() {
               </div>
             </div>
 
+            </div>
+            <div className="rt half" hidden={rtab !== 'growth'}>
             {/* 월배당 현금흐름 캘린더 */}
             <div className="card">
               <h3 className="card-title">
@@ -2533,6 +2641,8 @@ export default function Portfolio() {
               </div>
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'alloc'}>
             {/* 도넛 + 종목 근거 */}
             <div className="card">
               <h3 className="card-title">🧩 AI 포트폴리오 구성
@@ -2602,6 +2712,8 @@ export default function Portfolio() {
               </div>
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'alloc'}>
             {/* 추천 종목 테이블 */}
             <div id="sec-recs" className="card" style={{ scrollMarginTop: 16 }}>
               <h3 className="card-title">📋 종목별 적립 배분</h3>
@@ -2655,9 +2767,13 @@ export default function Portfolio() {
               </div>
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'tax'}>
             {/* SHAP 배당 삭감 예측 근거 (XAI) */}
             <ShapExplainPanel recs={result.recommendations} />
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'tax'}>
             {/* ISA 절세 전략 */}
             <div className="card isa-card">
               <h3 className="card-title">💰 ISA 절세 전략</h3>
@@ -2668,7 +2784,7 @@ export default function Portfolio() {
                 </div>
                 <div className="isa-item">
                   <div className="isa-label">연간 납입 권장</div>
-                  <div className="isa-value">{result.isa_strategy.recommended_annual.toLocaleString()}만원</div>
+                  <div className="isa-value">{fmtMan(result.isa_strategy.recommended_annual)}</div>
                 </div>
                 <div className="isa-item">
                   <div className="isa-label">비과세 한도</div>
@@ -2685,6 +2801,8 @@ export default function Portfolio() {
 
             {/* ══ 신규 분석 패널 ══════════════════════════════════════ */}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'fire'}>
             {/* FIRE 통합 카드 — 배당목표 / Lean / 일반 FIRE 한눈에 (헤드라인과 동일 엔진) */}
             {fireTargets?.length > 0 && (
                 <div className="card" id="sec-fire" style={{ scrollMarginTop: 16 }}>
@@ -2727,6 +2845,8 @@ export default function Portfolio() {
 
             {/* 목표 달성 근거 — 상단에 이미 표시됨 (상세 분석에서는 복리 성장 그래프로 대체) */}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'fire'}>
             {/* 현금흐름 마일스톤 — "내 인생이 어떻게 변하나" */}
             <div id="sec-cashflow" style={{ scrollMarginTop: 16 }}>
               <CashflowMilestone
@@ -2736,6 +2856,8 @@ export default function Portfolio() {
               />
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'health'}>
             {/* Portfolio Health OS 레이더 차트 */}
             {result.portfolio_health && (
               <div id="sec-health" style={{ scrollMarginTop: 16 }}>
@@ -2747,11 +2869,15 @@ export default function Portfolio() {
               </div>
             )}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'fire'}>
             {/* 배당 캘린더 히트맵 */}
             {result.dividend_calendar && (
               <DividendCalendarHeatmap calendar={result.dividend_calendar} />
             )}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'mc'}>
             {/* Monte Carlo 밴드 차트 (백엔드 MC 결과 우선, 없으면 프론트 mc) */}
             {(result.monte_carlo?.p50_monthly || mc?.fanData) && (
               <div id="sec-montecarlo" style={{ scrollMarginTop: 16 }}>
@@ -2771,6 +2897,8 @@ export default function Portfolio() {
               </div>
             )}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'mc'}>
             {/* 포트폴리오 배당 유지 시뮬레이션 */}
             {result.survival?.survival_probability != null && (() => {
               const s = result.survival
@@ -2894,6 +3022,8 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'health'}>
             {/* 행동편향 진단 요약 */}
             {result.behavioral_finance?.bias_count > 0 && (
               <div style={{
@@ -2919,20 +3049,25 @@ export default function Portfolio() {
                     </div>
                   </div>
                 </div>
-                {result.behavioral_finance.biases?.slice(0, 3).map((b, i) => (
+                {(result.behavioral_finance.biases || []).filter(b => b.detected).slice(0, 3).map((b, i) => (
                   <div key={i} style={{
-                    padding: '8px 12px', marginTop: 6,
+                    padding: '10px 14px', marginTop: 8,
                     background: '#ffffff', borderRadius: 8,
                     borderLeft: `3px solid ${b.severity === 'high' ? '#ef4444' : b.severity === 'medium' ? '#d97706' : '#64748b'}`,
-                    fontSize: 12, color: 'var(--text-sub)',
+                    fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.6,
                   }}>
-                    <span style={{ fontWeight: 600, color: '#283143' }}>{b.bias_name}</span>
-                    {' — '}{b.message}
+                    <div style={{ fontWeight: 700, color: '#283143' }}>
+                      {b.name} <span style={{ fontWeight: 500, fontSize: 12 }}>{b.severity_label}</span>
+                    </div>
+                    <div>{b.evidence}</div>
+                    {b.debiasing_action && <div style={{ marginTop: 4 }}>💡 {b.debiasing_action}</div>}
                   </div>
                 ))}
               </div>
             )}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'ai'}>
             {/* 스토리텔링 — 백엔드가 다양한 형태로 반환 (string / {narrative: {...}}) */}
             {(() => {
               const story = result.storytelling
@@ -2981,26 +3116,36 @@ export default function Portfolio() {
               )
             })()}
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'ai'}>
             {/* ── AI Portfolio Advisor ── */}
             <div id="sec-advisor" style={{ scrollMarginTop: 16 }}>
               <AdvisorPanel portfolio={result} />
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'sim'}>
             {/* ── FIRE 역산 시뮬레이터 ── */}
             <div id="sec-simulator" style={{ scrollMarginTop: 16 }}>
               <InteractiveSimulator portfolio={result} />
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'frontier'}>
             {/* ── MPT 효율적 프론티어 ── */}
             <div id="sec-frontier" style={{ scrollMarginTop: 16 }}>
               <EfficientFrontierChart portfolio={result} />
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'compare'}>
             {/* ── 포트폴리오 비교 ── */}
             <div id="sec-compare" style={{ scrollMarginTop: 16 }}>
               <CompareView portfolio={result} />
             </div>
 
+            </div>
+            <div className="rt wide" hidden={rtab !== 'backtest'}>
             {/* ── 21년 백테스팅 — "이 추천이 과거에도 통했는가?" ── */}
             <div id="sec-backtest" style={{ scrollMarginTop: 16 }}>
               <BacktestChart portfolio={result} startYear={2005} endYear={2024} />
@@ -3014,8 +3159,17 @@ export default function Portfolio() {
                 projection={result.projection}
               />
             </div>
+            </div>
 
             </>)}
+
+            <div className="result-pager">
+              <button type="button" className="wz-btn ghost" disabled={pageIdx === 0} onClick={() => goPage(-1)}>◀ 이전</button>
+              <span className="rp-title"><b>{pageIdx + 1} / {RESULT_TABS.length}</b> · {RESULT_TABS[pageIdx].icon} {RESULT_TABS[pageIdx].label}</span>
+              <button type="button" className="wz-btn primary" disabled={pageIdx === RESULT_TABS.length - 1} onClick={() => goPage(1)}>다음 ▶</button>
+            </div>
+            </div>{/* /result-main */}
+            </div>{/* /result-layout */}
 
           </div>
         ) : (

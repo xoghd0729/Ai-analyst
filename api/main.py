@@ -11,6 +11,7 @@ AI 현금흐름 운영체제 — FastAPI 백엔드.
   수동 갱신: python utils/data_pipeline.py
 """
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -55,7 +56,9 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:5173",
         "http://localhost:5174",
+        *[o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()],
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",   # Vercel 배포/프리뷰 도메인
     allow_methods=["*"],
     allow_headers=["*"],
 )

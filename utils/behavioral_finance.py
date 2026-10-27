@@ -506,7 +506,7 @@ def _detect_under_diversification(stats: dict) -> dict:
         ) if detected else "",
         "debiasing_action": (
             f"자산군을 {n_cls}개 → 최소 4개로 확대하고, "
-            "종목도 {n_assets}개 → 8개 이상으로 늘리세요. "
+            f"종목도 {n_assets}개 → 8개 이상으로 늘리세요. "
             "ETF 1~2개 추가만으로도 분산도가 크게 개선됩니다."
         ) if detected else "",
     }

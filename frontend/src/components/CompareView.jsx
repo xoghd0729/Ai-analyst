@@ -17,7 +17,7 @@
 import { useState } from 'react'
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ResponsiveContainer, Legend,
+  ResponsiveContainer, Legend, Tooltip,
 } from 'recharts'
 import api from '../api/client'
 
@@ -63,55 +63,67 @@ const ARCHETYPE_OPTIONS = [
   { value: '은퇴형', label: '은퇴형' },
 ]
 
-// ── 레이더 차트 ──────────────────────────────────────────────────
-function PortRadar({ label, color, radarData }) {
-  if (!radarData?.length) return (
-    <div style={{
-      flex: 1, minWidth: 260, padding: 20, textAlign: 'center',
-      color: C.muted, fontSize: 12,
-    }}>
-      데이터 없음
-    </div>
+// ── 겹친 레이더 차트 (A·B를 한 차트에 겹쳐서 차이가 보이게) ─────────
+function OverlayRadar({ labelA, labelB, radarA, radarB }) {
+  const base = radarA?.length ? radarA : radarB
+  if (!base?.length) return (
+    <div style={{ padding: 20, textAlign: 'center', color: C.muted, fontSize: 12 }}>데이터 없음</div>
   )
-
-  const data = radarData.map(d => ({
-    axis:  RADAR_LABELS[d.axis] || d.axis,
-    score: d.pct,
-    max:   100,
+  const mapOf = arr => Object.fromEntries((arr || []).map(d => [d.axis, Number(d.pct) || 0]))
+  const ma = mapOf(radarA), mb = mapOf(radarB)
+  const data = base.map(d => ({
+    axis: RADAR_LABELS[d.axis] || d.axis,
+    A: ma[d.axis] ?? 0,
+    B: mb[d.axis] ?? 0,
   }))
 
   return (
-    <div style={{
-      flex: 1, minWidth: 260,
-      background: C.cardBg, border: `1px solid ${color}40`,
-      borderRadius: 14, padding: '16px 12px',
-    }}>
+    <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 16 }}>
       <div style={{
-        fontSize: 12, fontWeight: 700, color,
-        marginBottom: 10, textAlign: 'center',
+        flex: '1 1 380px', minWidth: 300, background: C.cardBg,
+        border: `1px solid ${C.border}`, borderRadius: 14, padding: '14px 12px',
       }}>
-        {label}
+        <ResponsiveContainer width="100%" height={300}>
+          <RadarChart data={data} outerRadius="72%">
+            <PolarGrid stroke={C.border} />
+            <PolarAngleAxis dataKey="axis" tick={{ fill: C.muted, fontSize: 12 }} />
+            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: C.muted, fontSize: 9 }} />
+            <Radar name="A" dataKey="A" stroke={C.colorA} fill={C.colorA} fillOpacity={0.28} strokeWidth={2.5} />
+            <Radar name="B" dataKey="B" stroke={C.colorB} fill={C.colorB} fillOpacity={0.28} strokeWidth={2.5} />
+            <Tooltip />
+            <Legend />
+          </RadarChart>
+        </ResponsiveContainer>
       </div>
-      <ResponsiveContainer width="100%" height={220}>
-        <RadarChart data={data}>
-          <PolarGrid stroke={C.border} />
-          <PolarAngleAxis
-            dataKey="axis"
-            tick={{ fill: C.muted, fontSize: 10 }}
-          />
-          <PolarRadiusAxis
-            angle={90} domain={[0, 100]}
-            tick={{ fill: C.muted, fontSize: 8 }}
-          />
-          <Radar
-            name={label}
-            dataKey="score"
-            stroke={color}
-            fill={color}
-            fillOpacity={0.2}
-          />
-        </RadarChart>
-      </ResponsiveContainer>
+
+      {/* 축별 점수 + 차이 */}
+      <div style={{
+        flex: '1 1 300px', minWidth: 260, background: C.cardBg,
+        border: `1px solid ${C.border}`, borderRadius: 14, padding: '14px 16px',
+      }}>
+        <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>축별 점수 차이 (B − A)</div>
+        {data.map(d => {
+          const diff = Math.round((d.B - d.A) * 10) / 10
+          const col = diff === 0 ? C.muted : diff > 0 ? C.colorB : C.colorA
+          return (
+            <div key={d.axis} style={{
+              display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: 10, alignItems: 'center',
+              padding: '6px 0', borderBottom: `1px solid ${C.border}30`, fontSize: 13,
+            }}>
+              <span>{d.axis}</span>
+              <span style={{ color: C.colorA, fontWeight: 600 }}>{Math.round(d.A)}</span>
+              <span style={{ color: C.colorB, fontWeight: 600 }}>{Math.round(d.B)}</span>
+              <span style={{ color: col, fontWeight: 800, minWidth: 48, textAlign: 'right' }}>
+                {diff > 0 ? '+' : ''}{diff}
+              </span>
+            </div>
+          )
+        })}
+        <div style={{ fontSize: 11, color: C.muted, marginTop: 8 }}>
+          <span style={{ color: C.colorA, fontWeight: 700 }}>A</span> {labelA} ·{' '}
+          <span style={{ color: C.colorB, fontWeight: 700 }}>B</span> {labelB}
+        </div>
+      </div>
     </div>
   )
 }
@@ -146,12 +158,17 @@ function MetricRow({ metric }) {
         {fmt(va)}{unit}
       </div>
 
-      {/* 라벨 */}
+      {/* 라벨 + 차이 */}
       <div style={{
         textAlign: 'center', fontSize: 11, color: C.muted,
-        minWidth: 110, lineHeight: 1.4,
+        minWidth: 130, lineHeight: 1.4,
       }}>
         {label}
+        {Math.abs(vb - va) >= 0.05 && (
+          <div style={{ fontSize: 11, fontWeight: 800, color: winner === 'a' ? C.colorA : C.colorB }}>
+            차이 {vb - va > 0 ? '+' : ''}{fmt(vb - va)}{unit}
+          </div>
+        )}
       </div>
 
       {/* B 값 */}
@@ -236,8 +253,8 @@ export default function CompareView({ portfolio }) {
     annual_income:     inp.annual_income     || 5000,
     monthly_target:    inp.monthly_target    || 100,
     investable_amount: inp.investable        || inp.investable_amount || 5000,
-    risk_tolerance:    inp.risk_tolerance    || 'moderate',
-    archetype:         inp.archetype         || '혼합형',
+    risk_tolerance:    'conservative',
+    archetype:         '안정형',
     monthly_savings:   inp.monthly_savings   || 50,
     target_fire_age:   inp.target_fire_age   || 55,
   })
@@ -247,16 +264,36 @@ export default function CompareView({ portfolio }) {
     age:               inp.age               || 40,
     annual_income:     inp.annual_income     || 5000,
     monthly_target:    inp.monthly_target    || 100,
-    investable_amount: (inp.investable || inp.investable_amount || 5000) + 2000,
+    investable_amount: inp.investable        || inp.investable_amount || 5000,
     risk_tolerance:    'aggressive',
     archetype:         '성장형',
-    monthly_savings:   (inp.monthly_savings || 50) + 20,
-    target_fire_age:   (inp.target_fire_age || 55) - 5,
+    monthly_savings:   inp.monthly_savings   || 50,
+    target_fire_age:   inp.target_fire_age   || 55,
   })
 
   const [result,  setResult]  = useState(null)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(null)
+
+  // 비교 프리셋 — 차이가 뚜렷한 시나리오를 한 번에 세팅
+  const base = {
+    age: inp.age || 40, annual_income: inp.annual_income || 5000,
+    monthly_target: inp.monthly_target || 100,
+    investable_amount: inp.investable || inp.investable_amount || 5000,
+    monthly_savings: inp.monthly_savings || 50, target_fire_age: inp.target_fire_age || 55,
+  }
+  const PRESETS = [
+    { key: 'risk', label: '안정형 vs 공격형',
+      a: { ...base, risk_tolerance: 'conservative', archetype: '안정형' },
+      b: { ...base, risk_tolerance: 'aggressive',   archetype: '성장형' } },
+    { key: 'raise', label: '현재 vs 취업·승진 후 월 투자 2배',
+      a: { ...base, risk_tolerance: 'moderate', archetype: '혼합형' },
+      b: { ...base, risk_tolerance: 'moderate', archetype: '혼합형', monthly_savings: base.monthly_savings * 2 } },
+    { key: 'income', label: '성장형 vs 월배당형',
+      a: { ...base, risk_tolerance: 'moderate', archetype: '성장형' },
+      b: { ...base, risk_tolerance: 'moderate', archetype: '월배당형' } },
+  ]
+  const applyPreset = (pr) => { setFormA(pr.a); setFormB(pr.b); setResult(null) }
 
   const updA = k => v => setFormA(prev => ({ ...prev, [k]: v }))
   const updB = k => v => setFormB(prev => ({ ...prev, [k]: v }))
@@ -293,6 +330,19 @@ export default function CompareView({ portfolio }) {
         <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>
           두 가지 포트폴리오 설정을 동시에 분석해 최적 전략을 선택합니다
         </div>
+      </div>
+
+      {/* ── 비교 프리셋 ── */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        {PRESETS.map(pr => (
+          <button key={pr.key} type="button" onClick={() => applyPreset(pr)}
+            style={{
+              padding: '8px 14px', borderRadius: 999, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              background: C.cardBg, border: `1px solid ${C.border}`, color: C.text,
+            }}>
+            {pr.label}
+          </button>
+        ))}
       </div>
 
       {/* ── 입력 패널 ── */}
@@ -360,11 +410,8 @@ export default function CompareView({ portfolio }) {
       {/* ── 결과 ── */}
       {result && !loading && (
         <>
-          {/* 레이더 차트 2개 */}
-          <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-            <PortRadar label={labelA} color={C.colorA} radarData={radarA} />
-            <PortRadar label={labelB} color={C.colorB} radarData={radarB} />
-          </div>
+          {/* 레이더 — A·B 겹쳐서 표시 + 축별 차이 */}
+          <OverlayRadar labelA={labelA} labelB={labelB} radarA={radarA} radarB={radarB} />
 
           {/* 승패 요약 카드 */}
           <div style={{

@@ -27,6 +27,7 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import api from '../api/client'
+import { fmtMan } from '../utils/format'
 
 // ── 색상 상수 ────────────────────────────────────────────────────
 const C = {
@@ -52,7 +53,7 @@ const SLIDERS = [
     min:    0,
     max:    50000,
     step:   500,
-    format: v => `${v.toLocaleString()}만원`,
+    format: v => fmtMan(v),
     color:  C.blue,
   },
   {
@@ -62,7 +63,7 @@ const SLIDERS = [
     min:    0,
     max:    500,
     step:   10,
-    format: v => `${v.toLocaleString()}만원`,
+    format: v => fmtMan(v),
     color:  C.purple,
   },
   {
@@ -72,7 +73,7 @@ const SLIDERS = [
     min:    10,
     max:    500,
     step:   10,
-    format: v => `${v.toLocaleString()}만원`,
+    format: v => fmtMan(v),
     color:  C.green,
   },
   {
@@ -171,13 +172,12 @@ function HeadlineCard({ rv, fireAge }) {
           🎉 목표 달성 가능
         </div>
         <div style={{ fontSize: 18, fontWeight: 700, color: C.text }}>
-          {fireAge}세에 월 {target_monthly_만원}만원 배당 달성!
+          현재 조건이면 {current_fire_age}세에 월 {target_monthly_만원}만원 배당 달성!
         </div>
         <div style={{ fontSize: 12, color: '#86efac', marginTop: 6 }}>
-          현재 조건으로 {current_fire_age}세 FIRE 가능 —
-          목표보다 {fireAge - current_fire_age >= 0
+          내가 정한 목표 {fireAge}세보다 {fireAge - current_fire_age >= 0
             ? `${fireAge - current_fire_age}년 일찍`
-            : `${current_fire_age - fireAge}년 늦게`} 달성
+            : `${current_fire_age - fireAge}년 늦게`} 달성 · 슬라이더를 바꾸면 이 나이가 바뀝니다
         </div>
       </div>
     )
@@ -279,7 +279,7 @@ function MiniProjection({ sliders, currentAge, avgYield }) {
   const mOpti  = (fvOpti  * yOpti  / 100) / 12
 
   const fmt  = v => v.toLocaleString(undefined, { maximumFractionDigits: 0 })
-  const fmtM = v => `${fmt(Math.round(v))}만원`
+  const fmtM = v => fmtMan(v)
   const fmtY = v => `${v.toFixed(1)}%`
 
   const barMax  = fvOpti || 1
