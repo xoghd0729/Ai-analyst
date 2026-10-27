@@ -6,4 +6,7 @@ const api = axios.create({
   timeout: 120000,   // 무료 호스팅 콜드스타트(최대 ~60초) 대비
 })
 
+// 사이트 접속 즉시 서버를 깨워둔다 (무료 호스팅 콜드스타트 완화)
+api.get('/api/health').catch(() => {})
+
 export default api

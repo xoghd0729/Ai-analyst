@@ -450,13 +450,13 @@ const SEC_TAB = {
 
 
 // ── 발표 데모 고정 시나리오 (DEMO_RUNBOOK.md 기준값) ─────────────
-// "25세가 50세에 월 200만원 배당을 받으려면?" 역산 스토리
+// "25세가 월 100만원 배당을 받으려면?" 역산 스토리
 const DEMO_PRESENTATION = {
   key:   'demo_presentation',
   icon:  '🎬',
   title: '발표 데모 시나리오',
   label: '25세 · 시드 5,000만 · 월 적립 100만',
-  story: '"50세에 월 200만원 배당" 역산 시나리오',
+  story: '"월 100만원 배당" 역산 시나리오',
   form: {
     age: 25, monthly_invest: 100, reserve: 5000,
     monthly_target: 100, risk_tolerance: 'moderate', invest_growth: 5,

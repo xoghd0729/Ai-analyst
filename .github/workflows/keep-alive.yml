@@ -1,0 +1,11 @@
+name: keep-alive
+# Render 무료 서버가 15분 무요청 시 잠드는 것을 막기 위해 5분마다 헬스체크 호출
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS --max-time 60 https://finsight-api-pgdg.onrender.com/api/health > /dev/null
