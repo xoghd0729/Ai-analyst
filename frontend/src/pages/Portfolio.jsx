@@ -17,6 +17,7 @@ import InteractiveSimulator    from '../components/InteractiveSimulator'
 import EfficientFrontierChart  from '../components/EfficientFrontierChart'
 import AdvisorPanel            from '../components/AdvisorPanel'
 import CompareView             from '../components/CompareView'
+import Landing                 from '../components/Landing'
 import InputWizard             from '../components/InputWizard'
 import { fmtMan } from '../utils/format'
 import RationalePanel          from '../components/RationalePanel'
@@ -738,6 +739,7 @@ export default function Portfolio() {
   const [error,     setError]     = useState(null)
   const [activePersona, setActivePersona] = useState(null)
   const [showAnalysis, setShowAnalysis] = useState(true)    // (탭 구조로 대체 — 항상 펼침)
+  const [sideCollapsed, setSideCollapsed] = useState(false)   // 사이드바 접기
   const [rtab, setRtab] = useState('dash')                   // 결과 화면
   const [formOpen, setFormOpen] = useState(true)               // 입력 폼 표시 여부
   const [showAllHoldings, setShowAllHoldings] = useState(false)  // 포트폴리오 전체 보기
@@ -974,54 +976,14 @@ export default function Portfolio() {
   const yearsInt    = yearsToGoal ? Math.floor(yearsToGoal) : null
   const monthsRem   = yearsToGoal ? Math.round((yearsToGoal - yearsInt) * 12) : null
 
-  // ── 로그인 게이트 화면 (로그인 없이도 "둘러보기"로 바로 사용 가능) ──
+  // ── 첫 화면: 랜딩 (로그인 없이 바로 사용 가능) ──
   if (!entered) {
     return (
-      <div style={{
-        minHeight: 'calc(100vh - 60px)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'var(--bg, #f6f8fb)', padding: 20,
-      }}>
-        <div className="card" style={{ width: '100%', maxWidth: 420, padding: 32, textAlign: 'center' }}>
-          <div style={{ fontSize: 30, marginBottom: 8 }}>📈</div>
-          <h2 style={{ margin: '0 0 4px', fontSize: 22, color: 'var(--text, #1f2937)' }}>AI 기반 배당·포트폴리오 최적화 시스템</h2>
-          <div style={{ fontSize: 13, color: 'var(--text-sub, #64748b)', marginBottom: 22 }}>
-            배당 삭감 예측 기반 소득 지속성 분석 시스템
-          </div>
-
-          <input type="email" placeholder="이메일" value={authForm.email}
-            onChange={(e) => setAuthForm(f => ({ ...f, email: e.target.value }))}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleAuth() }}
-            style={{ width: '100%', padding: '11px 12px', marginBottom: 8, borderRadius: 8, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
-          <input type="password" placeholder="비밀번호 (4자 이상)" value={authForm.password}
-            onChange={(e) => setAuthForm(f => ({ ...f, password: e.target.value }))}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleAuth() }}
-            style={{ width: '100%', padding: '11px 12px', marginBottom: 8, borderRadius: 8, border: '1px solid #d1d5db', fontSize: 14, boxSizing: 'border-box' }} />
-          {authMsg && <div style={{ fontSize: 12, color: '#dc2626', marginBottom: 8 }}>{authMsg}</div>}
-
-          <button type="button" onClick={handleAuth}
-            style={{ width: '100%', padding: '11px', borderRadius: 8, border: 'none', background: '#1456f0', color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
-            {authMode === 'login' ? '로그인' : '가입하기'}
-          </button>
-
-          <div style={{ fontSize: 13, color: 'var(--text-sub, #64748b)', margin: '12px 0' }}>
-            {authMode === 'login' ? '계정이 없으신가요? ' : '이미 계정이 있으신가요? '}
-            <button type="button" onClick={() => { setAuthMode(m => m === 'login' ? 'register' : 'login'); setAuthMsg('') }}
-              style={{ background: 'none', border: 'none', color: '#1456f0', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>
-              {authMode === 'login' ? '회원가입' : '로그인'}
-            </button>
-          </div>
-
-          <div style={{ borderTop: '1px solid #eef1f5', paddingTop: 14 }}>
-            <button type="button" onClick={() => setEntered(true)}
-              style={{ width: '100%', padding: '11px', borderRadius: 8, border: '1px solid #d1d5db', background: '#fff', color: 'var(--border)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
-              로그인 없이 둘러보기 →
-            </button>
-            <div style={{ fontSize: 11.5, color: 'var(--text-muted, #cbd5e1)', marginTop: 8 }}>
-              로그인하지 않아도 모든 분석 기능을 사용할 수 있습니다. 로그인하면 포트폴리오 저장·변화 추적이 가능합니다.
-            </div>
-          </div>
-        </div>
-      </div>
+      <Landing
+        onStart={() => setEntered(true)}
+        onDemo={() => { setEntered(true); handlePersonaClick(DEMO_PRESENTATION) }}
+        onLogin={() => { setAuthMode('login'); setAuthOpen(true); setEntered(true) }}
+      />
     )
   }
 
@@ -1384,10 +1346,13 @@ export default function Portfolio() {
             </div>
 
             {/* ── 결과 레이아웃: 좌측 사이드바 + 우측 콘텐츠 ── */}
-            <div className="result-layout">
+            <div className={`result-layout ${sideCollapsed ? 'collapsed' : ''}`}>
             <nav className="result-side" role="tablist" aria-label="결과 메뉴">
-              <div className="result-side-title">배당·포트폴리오 최적화</div>
-              <button type="button" className="result-side-item edit" onClick={() => setFormOpen(v => !v)}>
+              <div className="rs-brand">
+                <span className="rs-logo">📈</span>
+                <span className="rs-brand-txt"><b>배당·포트폴리오 최적화</b><small>Team FinSight</small></span>
+              </div>
+              <button type="button" className="result-side-item edit" title="입력 수정" onClick={() => setFormOpen(v => !v)}>
                 <span className="rsi-icon">✏️</span>
                 <span className="rsi-label">{formOpen ? '입력창 닫기' : '입력 수정'}</span>
               </button>
@@ -1396,7 +1361,7 @@ export default function Portfolio() {
                   {(i === 0 || RESULT_TABS[i - 1].group !== t.group) && (
                     <div className="result-side-group">{t.group}</div>
                   )}
-                  <button type="button" role="tab" aria-selected={rtab === t.id}
+                  <button type="button" role="tab" aria-selected={rtab === t.id} title={t.label}
                     className={`result-side-item ${rtab === t.id ? 'active' : ''}`}
                     onClick={() => { setRtab(t.id); setFormOpen(false) }}>
                     <span className="rsi-icon">{t.icon}</span>
@@ -1404,8 +1369,22 @@ export default function Portfolio() {
                   </button>
                 </React.Fragment>
               ))}
+              <button type="button" className="rs-hide" onClick={() => setSideCollapsed(v => !v)}
+                title={sideCollapsed ? '메뉴 펼치기' : '메뉴 숨기기'}>
+                <span className="rsi-icon">{sideCollapsed ? '»' : '«'}</span>
+                <span className="rsi-label">숨기기</span>
+              </button>
             </nav>
             <div className="result-main">
+            <header className="result-head">
+              <div>
+                <h2>{RESULT_TABS[pageIdx].icon} {RESULT_TABS[pageIdx].label}</h2>
+                <p>{RESULT_TABS[pageIdx].group} · 분석 결과를 한 화면씩 확인하세요</p>
+              </div>
+              <div className="rh-tools">
+                <button type="button" className="rh-btn" onClick={() => setFormOpen(v => !v)}>✏️ 입력 수정</button>
+              </div>
+            </header>
 
             <div className="rt wide" hidden={rtab !== 'dash'}>
             {/* 🗺️ 결과 가이드 — 핵심 요약 + 다음 확인 섹션 안내 */}
