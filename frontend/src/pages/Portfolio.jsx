@@ -983,7 +983,7 @@ export default function Portfolio() {
       }}>
         <div className="card" style={{ width: '100%', maxWidth: 420, padding: 32, textAlign: 'center' }}>
           <div style={{ fontSize: 30, marginBottom: 8 }}>📈</div>
-          <h2 style={{ margin: '0 0 4px', fontSize: 22, color: 'var(--text, #1f2937)' }}>AI Cashflow OS</h2>
+          <h2 style={{ margin: '0 0 4px', fontSize: 22, color: 'var(--text, #1f2937)' }}>AI 기반 배당·포트폴리오 최적화 시스템</h2>
           <div style={{ fontSize: 13, color: 'var(--text-sub, #64748b)', marginBottom: 22 }}>
             배당 삭감 예측 기반 소득 지속성 분석 시스템
           </div>
@@ -1029,7 +1029,7 @@ export default function Portfolio() {
     <div className={`portfolio-page ${(!result || formOpen) ? 'wizmode' : ''} ${result && !formOpen ? 'compact' : ''}`}>
       <div className="page-header">
         <div className="page-title">
-          AI Cashflow OS
+          AI 기반 배당·포트폴리오 최적화 시스템
           <span style={{
             marginLeft: 12, fontSize: 13, fontWeight: 500, color: 'var(--text-sub)',
             verticalAlign: 'middle',
@@ -1386,7 +1386,7 @@ export default function Portfolio() {
             {/* ── 결과 레이아웃: 좌측 사이드바 + 우측 콘텐츠 ── */}
             <div className="result-layout">
             <nav className="result-side" role="tablist" aria-label="결과 메뉴">
-              <div className="result-side-title">FinSight</div>
+              <div className="result-side-title">배당·포트폴리오 최적화</div>
               <button type="button" className="result-side-item edit" onClick={() => setFormOpen(v => !v)}>
                 <span className="rsi-icon">✏️</span>
                 <span className="rsi-label">{formOpen ? '입력창 닫기' : '입력 수정'}</span>
@@ -2330,7 +2330,7 @@ export default function Portfolio() {
                   <div style={{ textAlign: 'center', minWidth: 150 }}>
                     <div style={{ fontSize: 12, color: 'var(--text-sub)', fontWeight: 600 }}>AI 현금흐름 건강도
                       <div style={{ fontSize: 9.5, fontWeight: 400, color: 'var(--text-muted, #94a3b8)', marginTop: 2 }}>
-                        AI Cashflow OS 내부 산정 지표 · 공인 금융기관 평가 아님
+                        본 시스템 내부 산정 지표 · 공인 금융기관 평가 아님
                       </div>
                     </div>
                     <div style={{ fontSize: 56, fontWeight: 800, color: gColor, lineHeight: 1.05 }}>

@@ -76,7 +76,7 @@ export default function InputWizard({ form, onChange, onSubmit, onPersona, demo,
 
       {step === 0 && (
         <div className="wz-body">
-          <div className="wz-eyebrow">FINSIGHT · AI 현금흐름 운영체제</div>
+          <div className="wz-eyebrow">AI 기반 배당·포트폴리오 최적화 시스템 · TEAM FINSIGHT</div>
           <h1 className="wz-title">목표 월배당에서 거꾸로,<br />내 FIRE 시점을 계산해요</h1>
           <p className="wz-hint">질문 5개에 답하면 포트폴리오·달성 시점·위험·절세까지 한 번에 보여드려요</p>
 

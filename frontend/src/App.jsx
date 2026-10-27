@@ -12,7 +12,7 @@ export default function App() {
         <nav className="navbar">
           <div className="nav-brand">
             <span className="nav-logo">📈</span>
-            <span className="nav-title">AI Cashflow OS</span>
+            <span className="nav-title">AI 기반 배당·포트폴리오 최적화 시스템</span>
           </div>
           <div className="nav-links">
             <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>

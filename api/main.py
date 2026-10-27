@@ -1,5 +1,5 @@
 """
-AI 현금흐름 운영체제 — FastAPI 백엔드.
+AI 기반 배당·포트폴리오 최적화 시스템 — FastAPI 백엔드 (Team FinSight).
 
 실행 방법:
   cd ~/ai-analyst
@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AI 현금흐름 운영체제",
+    title="AI 기반 배당·포트폴리오 최적화 시스템",
     description=(
         "미래 월급형 현금흐름을 설계·분석·방어·관리하는 AI 운영체제.\n\n"
         "5축 자산 유니버스 × Pipe-and-Filter 분석 파이프라인 × "
@@ -73,7 +73,7 @@ app.include_router(auth.router,      prefix="/api/auth",      tags=["사용자"]
 def root():
     return {
         "status":  "ok",
-        "message": "AI 현금흐름 운영체제 API v2.0",
+        "message": "AI 기반 배당·포트폴리오 최적화 시스템 API v2.0",
         "docs":    "/docs",
         "health":  "/api/health",
     }
@@ -128,7 +128,7 @@ def health_check():
 
     return {
         "status":    overall,
-        "service":   "AI Cashflow OS",
+        "service":   "AI 기반 배당·포트폴리오 최적화 시스템",
         "version":   "2.0.0",
         "timestamp": datetime.now().isoformat(timespec="seconds"),
         "checks":    checks,
