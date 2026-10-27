@@ -5,7 +5,7 @@ import {
   LineChart, Line, Area, AreaChart, XAxis, YAxis, CartesianGrid,
   Tooltip, ReferenceLine, Legend, ComposedChart,
 } from 'recharts'
-import api from '../api/client'
+import api, { wakeServer } from '../api/client'
 import HealthRadarChart    from '../components/HealthRadarChart'
 import DividendCalendarHeatmap from '../components/DividendCalendarHeatmap'
 import MonteCarloChart     from '../components/MonteCarloChart'
@@ -18,6 +18,8 @@ import EfficientFrontierChart  from '../components/EfficientFrontierChart'
 import AdvisorPanel            from '../components/AdvisorPanel'
 import CompareView             from '../components/CompareView'
 import Landing                 from '../components/Landing'
+import Icon                    from '../components/Icon'
+import GoalHero                from '../components/GoalHero'
 import InputWizard             from '../components/InputWizard'
 import { fmtMan } from '../utils/format'
 import RationalePanel          from '../components/RationalePanel'
@@ -740,6 +742,7 @@ export default function Portfolio() {
   const [activePersona, setActivePersona] = useState(null)
   const [showAnalysis, setShowAnalysis] = useState(true)    // (탭 구조로 대체 — 항상 펼침)
   const [sideCollapsed, setSideCollapsed] = useState(false)   // 사이드바 접기
+  const [wakeSec, setWakeSec] = useState(null)               // 서버 깨우는 중 경과(초)
   const [rtab, setRtab] = useState('dash')                   // 결과 화면
   const [formOpen, setFormOpen] = useState(true)               // 입력 폼 표시 여부
   const [showAllHoldings, setShowAllHoldings] = useState(false)  // 포트폴리오 전체 보기
@@ -832,8 +835,10 @@ export default function Portfolio() {
   // 단일 진실의 원천: form override를 받을 수 있게
   const runRecommend = async (overrideForm) => {
     const f = overrideForm || form
-    setLoading(true); setError(null)
+    setLoading(true); setError(null); setWakeSec(null)
     try {
+      await wakeServer(sec => setWakeSec(sec))
+      setWakeSec(null)
       // investable_amount = 초기 여유자금(reserve)만. monthly_invest는 monthly_savings로 별도 전달.
       // reserve=0이면 백엔드가 target_yield=5%로 폴백하고 양호하게 처리함.
       const investable = Number(f.reserve)
@@ -860,7 +865,7 @@ export default function Portfolio() {
     } catch (err) {
       console.error('API 오류:', err)
       const msg = err?.response?.data?.detail || err?.message || '알 수 없는 오류'
-      setError(`서버 연결 실패. FastAPI 서버를 확인하세요. (${msg})`)
+      setError(`서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요. (${msg})`)
     } finally {
       setLoading(false)
     }
@@ -1082,6 +1087,7 @@ export default function Portfolio() {
             form={form} onChange={handleChange} onSubmit={handleSubmit}
             onPersona={handlePersonaClick} demo={DEMO_PRESENTATION} personas={PERSONAS}
             loading={loading} error={error}
+            loadingMsg={wakeSec != null ? `서버를 깨우는 중... ${wakeSec}초 경과 (처음 접속 시 1~2분 걸릴 수 있어요)` : '분석 중... 잠시만 기다려 주세요'}
           />
         )}
         {/* ── 입력 폼 ── */}
@@ -1319,41 +1325,15 @@ export default function Portfolio() {
           <div className="result-section">
 
             {/* 발표 데모 시나리오 배너 */}
-            {activePersona === 'demo_presentation' && (
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '9px 14px', marginBottom: 10,
-                background: 'linear-gradient(135deg, rgba(139,92,246,.1) 0%, rgba(37,99,235,.08) 100%)',
-                border: '1px solid rgba(139,92,246,.35)',
-                borderRadius: 10, fontSize: 12,
-              }}>
-                <span style={{ fontSize: 18 }}>🎬</span>
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontWeight: 700, color: 'var(--text)' }}>발표 데모 시나리오 — </span>
-                  <span style={{ color: 'var(--text-sub)' }}>
-                    {DEMO_PRESENTATION.label} · {DEMO_PRESENTATION.story}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* 저장 바 */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, alignItems: 'center', marginBottom: 4 }}>
-              {saveMsg && <span style={{ fontSize: 12, color: saveMsg.startsWith('✓') ? '#059669' : '#dc2626' }}>{saveMsg}</span>}
-              <button type="button" onClick={handleSavePortfolio} style={authBtn(true)}>
-                💾 {authEmail ? '이 포트폴리오 저장' : '로그인하고 저장'}
-              </button>
-            </div>
-
             {/* ── 결과 레이아웃: 좌측 사이드바 + 우측 콘텐츠 ── */}
             <div className={`result-layout ${sideCollapsed ? 'collapsed' : ''}`}>
             <nav className="result-side" role="tablist" aria-label="결과 메뉴">
               <div className="rs-brand">
-                <span className="rs-logo">📈</span>
+                <span className="rs-logo"><Icon name="logo" size={20} strokeWidth={2.2} /></span>
                 <span className="rs-brand-txt"><b>배당·포트폴리오 최적화</b><small>Team FinSight</small></span>
               </div>
               <button type="button" className="result-side-item edit" title="입력 수정" onClick={() => setFormOpen(v => !v)}>
-                <span className="rsi-icon">✏️</span>
+                <span className="rsi-icon"><Icon name="edit" /></span>
                 <span className="rsi-label">{formOpen ? '입력창 닫기' : '입력 수정'}</span>
               </button>
               {RESULT_TABS.map((t, i) => (
@@ -1364,215 +1344,59 @@ export default function Portfolio() {
                   <button type="button" role="tab" aria-selected={rtab === t.id} title={t.label}
                     className={`result-side-item ${rtab === t.id ? 'active' : ''}`}
                     onClick={() => { setRtab(t.id); setFormOpen(false) }}>
-                    <span className="rsi-icon">{t.icon}</span>
+                    <span className="rsi-icon"><Icon name={t.id} /></span>
                     <span className="rsi-label">{t.label}</span>
                   </button>
                 </React.Fragment>
               ))}
               <button type="button" className="rs-hide" onClick={() => setSideCollapsed(v => !v)}
                 title={sideCollapsed ? '메뉴 펼치기' : '메뉴 숨기기'}>
-                <span className="rsi-icon">{sideCollapsed ? '»' : '«'}</span>
+                <span className="rsi-icon"><Icon name={sideCollapsed ? 'chevR' : 'chevL'} /></span>
                 <span className="rsi-label">숨기기</span>
               </button>
             </nav>
             <div className="result-main">
             <header className="result-head">
               <div>
-                <h2>{RESULT_TABS[pageIdx].icon} {RESULT_TABS[pageIdx].label}</h2>
+                <h2><span className="rh-ic"><Icon name={RESULT_TABS[pageIdx].id} size={20} /></span>{RESULT_TABS[pageIdx].label}</h2>
                 <p>{RESULT_TABS[pageIdx].group} · 분석 결과를 한 화면씩 확인하세요</p>
               </div>
               <div className="rh-tools">
-                <button type="button" className="rh-btn" onClick={() => setFormOpen(v => !v)}>✏️ 입력 수정</button>
+                {activePersona === 'demo_presentation' && <span className="rh-chip">🎬 발표 데모 · {DEMO_PRESENTATION.label}</span>}
+                {saveMsg && <span style={{ fontSize: 12, color: saveMsg.startsWith('✓') ? '#059669' : '#dc2626' }}>{saveMsg}</span>}
+                <button type="button" className="rh-btn" onClick={handleSavePortfolio}>
+                  💾 {authEmail ? '저장' : '로그인하고 저장'}
+                </button>
+                <button type="button" className="rh-btn" onClick={() => setFormOpen(v => !v)}><Icon name="edit" size={15} /> 입력 수정</button>
               </div>
             </header>
 
             <div className="rt wide" hidden={rtab !== 'dash'}>
-            {/* 🗺️ 결과 가이드 — 핵심 요약 + 다음 확인 섹션 안내 */}
-            {(() => {
-              const tgt   = Number(result.monthly_target) || 1
-              const achAge = achieveAge ? Math.ceil(achieveAge) : (mc?.p50Age ? Math.ceil(mc.p50Age) : null)
-              const prob  = mc?.achieveProb ?? 0
-              const raCount = (result.risk_alerts || []).length
-              const riskLevel = raCount === 0 ? { label: '낮음', color: '#059669' }
-                : raCount <= 2      ? { label: '보통', color: '#d97706' }
-                : { label: '높음', color: '#ef4444' }
-              const scrollTo = (id) => {
-                if (SEC_TAB[id]) setRtab(SEC_TAB[id])
-                setTimeout(() => {
-                  const el = document.getElementById(id)
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }, 60)
-              }
-              return (
-                <div style={{
-                  background: 'var(--surface)', border: '1px solid var(--border)',
-                  borderRadius: 10, padding: '12px 14px', marginBottom: 8, fontSize: 12.5,
-                }}>
-                  {/* 요약 한 줄 */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 10, alignItems: 'center' }}>
-                    <span style={{ fontWeight: 700, color: 'var(--text)', fontSize: 13 }}>📋 현재 분석 요약</span>
-                    <span style={{ color: 'var(--text-sub)' }}>목표 {tgt}만원</span>
-                    <span style={{ color: 'var(--text-sub)' }}>→</span>
-                    <span style={{ fontWeight: 700, color: '#2563eb' }}>
-                      {achAge ? `예상 ${achAge}세 달성` : '달성 시점 계산 중'}
-                    </span>
-                    <span style={{ fontSize: 10, color: 'var(--text-muted, #94a3b8)',
-                         background: 'rgba(148,163,184,.12)', borderRadius: 4, padding: '1px 5px' }}>
-                      가정 기반 추정
-                    </span>
-                    <span style={{ color: 'var(--text-sub)', margin: '0 2px' }}>·</span>
-                    <span style={{ color: 'var(--text-sub)' }}>달성 확률</span>
-                    <span style={{ fontWeight: 700, color: prob >= 80 ? '#059669' : prob >= 50 ? '#d97706' : '#ef4444' }}>
-                      {prob}%
-                    </span>
-                    <span style={{ color: 'var(--text-sub)', margin: '0 2px' }}>·</span>
-                    <span style={{ color: 'var(--text-sub)' }}>배당 위험</span>
-                    <span style={{ fontWeight: 700, color: riskLevel.color }}>{riskLevel.label}</span>
-                  </div>
-                  {/* 섹션 네비게이션 */}
-                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: 8 }}>
-                    <div style={{
-                      fontSize: 10.5, fontWeight: 700, color: 'var(--text-sub)',
-                      textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 5,
-                    }}>
-                      다음으로 확인해보세요
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                      {[
-                        { n: 1, text: '목표 달성 시점 확인', id: 'sec-headline' },
-                        { n: 2, text: 'Monte Carlo로 변동 가능성 확인', id: 'sec-montecarlo' },
-                        { n: 3, text: '목표 시점을 앞당기려면 FIRE 역산 시뮬레이터에서 조건 조정', id: 'sec-simulator' },
-                      ].map(step => (
-                        <button
-                          key={step.n}
-                          type="button"
-                          onClick={() => scrollTo(step.id)}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 7,
-                            background: 'none', border: 'none', cursor: 'pointer',
-                            padding: '2px 0', textAlign: 'left',
-                          }}
-                        >
-                          <span style={{
-                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                            width: 17, height: 17, borderRadius: '50%',
-                            background: 'rgba(37,99,235,.12)', color: '#2563eb',
-                            fontSize: 10, fontWeight: 700, flexShrink: 0,
-                          }}>{step.n}</span>
-                          <span style={{ color: '#2563eb', fontSize: 12.5, textDecoration: 'underline', textDecorationColor: 'rgba(37,99,235,.3)' }}>
-                            {step.text}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )
-            })()}
-
-            </div>
-            <div className="rt wide" hidden={rtab !== 'dash'}>
-            {/* ① 대시보드 헤드라인 — 목표·달성·진행률 한 카드 */}
+            {/* 대시보드 첫 카드: 핵심 숫자 하나 + 목표 달성 확률 + 월배당 전망 밴드 */}
             {(() => {
               const curAge = Number(result.input?.age ?? result.age ?? form.age)
               const achAge = achieveAge ? Math.ceil(achieveAge) : (mc?.p50Age ? Math.ceil(mc.p50Age) : null)
-              const left = achAge ? achAge - curAge : null
               const fireTargetAge = Number(result.input?.target_fire_age) || 50
               const gap = achAge ? fireTargetAge - achAge : null
               const tgt = Number(result.monthly_target) || 1
               const curMonthly = (result.recommendations || []).reduce((s, r) => s + (r.est_monthly_div_after_tax || 0), 0)
-              const prog = Math.min(100, curMonthly / tgt * 100)
               const netY = (afterTaxYield && afterTaxYield > 0) ? afterTaxYield : 4.0
-              const targetAsset = (tgt * 12) / (netY / 100)            // 만원
+              const targetAsset = (tgt * 12) / (netY / 100)
               const curAsset = Number(result.monthly_invest || 0) * 12 + Number(result.reserve || 0)
-              const fmt = (m) => m >= 10000 ? `${(m / 10000).toFixed(1)}억` : `${Math.round(m).toLocaleString()}만`
-              const Box = ({ label, value, sub, big }) => (
-                <div style={{ flex: 1, minWidth: 92, textAlign: 'center' }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-sub)' }}>{label}</div>
-                  <div style={{ fontSize: big ? 38 : 20, fontWeight: 800, color: big ? '#2563eb' : 'var(--text)', lineHeight: 1.1 }}>{value}</div>
-                  {sub && <div style={{ fontSize: 10.5, color: 'var(--text-sub)', marginTop: 2 }}>{sub}</div>}
-                </div>
-              )
+              const raCount = (result.risk_alerts || []).length
+              const riskLevel = raCount === 0 ? { label: '낮음', color: '#059669' }
+                : raCount <= 2 ? { label: '보통', color: '#d97706' } : { label: '높음', color: '#dc2626' }
               return (
-                <div className="card" id="sec-headline" style={{ borderTop: '3px solid #2563eb' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                    <div style={{ fontSize: 13, color: 'var(--text-sub)', fontWeight: 700 }}>
-                      🎯 목표 월배당 {tgt}만원 — 언제 도달하나
-                    </div>
-                    {gap != null && (
-                      <div style={{ fontSize: 13, fontWeight: 800, padding: '4px 12px', borderRadius: 999,
-                           background: gap >= 0 ? 'rgba(5,150,105,.12)' : 'rgba(220,38,38,.1)',
-                           color: gap >= 0 ? '#059669' : '#dc2626' }}>
-                        {gap > 0 ? `🎉 목표보다 ${gap}년 빠름` : gap === 0 ? `목표 시점에 정확히 달성` : `목표 대비 +${-gap}년`}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 10 }}>
-                    <Box label="예상 달성" value={achAge ? `${achAge}세` : '미달성'} big
-                         sub={achieveAge ? '복리 시뮬레이션 · 가정 기반 추정' : 'Monte Carlo P50 · 가정 기반 추정'} />
-                    <Box label="현재 나이" value={`${curAge}세`} />
-                    <Box label="남은 기간" value={left != null ? `${left}년` : '—'} />
-                    <Box label="달성 확률" value={mc ? `${mc.achieveProb}%` : '—'} sub="적립 포함" />
-                  </div>
-                  <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-sub)',
-                       background: 'var(--surface2)', borderRadius: 8, padding: '6px 10px' }}>
-                    💰 현재 월 <b>{result.monthly_invest}만원</b> 투자
-                    {result.invest_growth > 0 && ` · 연 ${result.invest_growth}% 증액`}
-                    {' · '}배당 재투자 복리
-                  </div>
-
-                  {/* FIRE 진행률 — 원형 게이지 + 자산 바 */}
-                  <div style={{ display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', marginTop: 14 }}>
-                    {(() => {
-                      const R = 46, C = 2 * Math.PI * R
-                      const pct = Math.max(0, Math.min(100, prog))
-                      return (
-                        <div style={{ position: 'relative', width: 120, height: 120 }}>
-                          <svg width="120" height="120" style={{ transform: 'rotate(-90deg)' }}>
-                            <circle cx="60" cy="60" r={R} fill="none" stroke="var(--surface2)" strokeWidth="11" />
-                            <circle cx="60" cy="60" r={R} fill="none" stroke="#2563eb" strokeWidth="11"
-                              strokeLinecap="round" strokeDasharray={C}
-                              strokeDashoffset={C * (1 - pct / 100)} />
-                          </svg>
-                          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-                               alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ fontSize: 26, fontWeight: 800, color: '#2563eb', lineHeight: 1 }}>{pct.toFixed(1)}%</div>
-                            <div style={{ fontSize: 10, color: 'var(--text-sub)', marginTop: 2 }}>FIRE 진행도</div>
-                          </div>
-                        </div>
-                      )
-                    })()}
-                    <div style={{ flex: 1, minWidth: 200 }}>
-                      {(() => {
-                        const lv = prog >= 100 ? { n: 6, t: 'FIRE 달성', c: '#7c3aed' }
-                          : prog >= 75 ? { n: 5, t: 'FIRE 근접', c: '#2563eb' }
-                          : prog >= 50 ? { n: 4, t: '경제적 독립 진입', c: '#059669' }
-                          : prog >= 25 ? { n: 3, t: '성장기', c: '#059669' }
-                          : prog >= 10 ? { n: 2, t: '새싹', c: '#d97706' }
-                          : { n: 1, t: '현금흐름 씨앗', c: '#d97706' }
-                        return (
-                          <div style={{ display: 'inline-block', marginBottom: 8, fontSize: 12, fontWeight: 700,
-                               padding: '3px 10px', borderRadius: 999, background: `${lv.c}1f`, color: lv.c }}>
-                            LV.{lv.n} {lv.t}
-                          </div>
-                        )
-                      })()}
-                      <div style={{ fontSize: 13, marginBottom: 8 }}>
-                        월배당 <b>{curMonthly.toFixed(1)}만</b> / 목표 <b>{tgt}만</b>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-                        <span style={{ color: 'var(--text-sub)' }}>목표 자산</span>
-                        <span style={{ fontWeight: 700 }}>{fmt(curAsset)}원 → {fmt(targetAsset)}원 ({Math.min(100, curAsset / targetAsset * 100).toFixed(1)}%)</span>
-                      </div>
-                      <div style={{ height: 10, background: 'var(--surface2)', borderRadius: 5, overflow: 'hidden' }}>
-                        <div style={{ width: `${Math.max(Math.min(100, curAsset / targetAsset * 100), 1)}%`, height: '100%', background: '#059669' }} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <GoalHero
+                  target={tgt} achAge={achAge} curAge={curAge} prob={mc?.achieveProb ?? 0}
+                  riskLabel={riskLevel.label} riskColor={riskLevel.color}
+                  curMonthly={curMonthly} curAsset={curAsset} targetAsset={targetAsset}
+                  monthlyInvest={Number(result.monthly_invest || 0)} growth={Number(result.invest_growth || 0)}
+                  fanData={mc?.fanData || []} gap={gap}
+                  onGo={(id) => { setRtab(id); setFormOpen(false) }}
+                />
               )
             })()}
-
             </div>
             <div className="rt wide" hidden={rtab !== 'why'}>
             {/* 계산 가정 요약 — 핵심 결과 카드 직후 (접기 가능) */}
@@ -3144,7 +2968,7 @@ export default function Portfolio() {
 
             <div className="result-pager">
               <button type="button" className="wz-btn ghost" disabled={pageIdx === 0} onClick={() => goPage(-1)}>◀ 이전</button>
-              <span className="rp-title"><b>{pageIdx + 1} / {RESULT_TABS.length}</b> · {RESULT_TABS[pageIdx].icon} {RESULT_TABS[pageIdx].label}</span>
+              <span className="rp-title"><b>{pageIdx + 1} / {RESULT_TABS.length}</b> · {RESULT_TABS[pageIdx].label}</span>
               <button type="button" className="wz-btn primary" disabled={pageIdx === RESULT_TABS.length - 1} onClick={() => goPage(1)}>다음 ▶</button>
             </div>
             </div>{/* /result-main */}

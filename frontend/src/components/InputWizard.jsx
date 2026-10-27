@@ -49,7 +49,7 @@ const GROWTHS = [
   { v: 0, l: '고정' }, { v: 3, l: '보수 3%' }, { v: 5, l: '평균 5%' }, { v: 8, l: '고성장 8%' },
 ]
 
-export default function InputWizard({ form, onChange, onSubmit, onPersona, demo, personas, loading, error }) {
+export default function InputWizard({ form, onChange, onSubmit, onPersona, demo, personas, loading, error, loadingMsg }) {
   const [step, setStep] = useState(0)          // 0 = 시작 화면, 1~5 = 질문
   const cur = step > 0 ? STEPS[step - 1] : null
   const last = step === STEPS.length
@@ -99,7 +99,7 @@ export default function InputWizard({ form, onChange, onSubmit, onPersona, demo,
               </button>
             ))}
           </div>
-          {loading && <div className="wz-loading">⏳ 분석 중... 잠시만 기다려 주세요</div>}
+          {loading && <div className="wz-loading">⏳ {loadingMsg || '분석 중... 잠시만 기다려 주세요'}</div>}
         </div>
       )}
 
@@ -159,6 +159,7 @@ export default function InputWizard({ form, onChange, onSubmit, onPersona, demo,
             </>
           )}
 
+          {loading && last && <div className="wz-loading">⏳ {loadingMsg || '분석 중...'}</div>}
           {error && <div className="wz-error">{error}</div>}
 
           <div className="wz-nav">
