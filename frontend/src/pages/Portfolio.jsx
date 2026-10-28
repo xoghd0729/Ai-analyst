@@ -1939,7 +1939,7 @@ export default function Portfolio() {
                             <span className="rtbl-bar"><i style={{ width: `${Math.min(100, r.weight_pct * 6)}%`, background: col }} /></span>
                             <b>{r.weight_pct}%</b>
                           </div>
-                          <div className="num">{r.expected_yield != null ? `${Number(r.expected_yield).toFixed(1)}%` : '-'}</div>
+                          <div className="num">{(r.dividend_yield ?? r.expected_yield) ? `${Number(r.dividend_yield ?? r.expected_yield).toFixed(1)}%` : '-'}</div>
                           <div className="num">
                             {crs != null ? (
                               <span style={{ color: gateColor, fontWeight: 700 }}>{Math.round(crs)} <small>{gateLabel}</small></span>
