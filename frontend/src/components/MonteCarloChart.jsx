@@ -13,6 +13,7 @@
  *   - 밴드 영역: P10~P90 사이 반투명 채움
  *   - 목표선: 월 목표 배당금 기준선
  */
+import { noEmoji } from '../utils/text'
 import {
   ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ReferenceLine, ResponsiveContainer, Legend,
@@ -209,7 +210,7 @@ export default function MonteCarloChart({ monteCarlo, monthlyTarget }) {
           padding: '8px 12px', background: '#dfe3ea', borderRadius: 8,
           borderLeft: '3px solid #6366f1',
         }}>
-          {monteCarlo.summary_message}
+          {noEmoji(monteCarlo.summary_message)}
         </div>
       )}
     </div>

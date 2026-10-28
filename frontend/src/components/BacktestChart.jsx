@@ -26,6 +26,7 @@ import {
   ResponsiveContainer, Cell,
 } from 'recharts'
 import api from '../api/client'
+import { noEmoji } from '../utils/text'
 
 // ── 색상 상수 ────────────────────────────────────────────────────
 const C = {
@@ -152,7 +153,7 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
       padding: '32px', textAlign: 'center', color: C.muted, fontSize: 13,
       background: C.cardBg, borderRadius: 14, border: `1px solid ${C.cardBorder}`,
     }}>
-      📊 과거 성과 데이터 계산 중...
+      과거 성과 데이터 계산 중...
     </div>
   )
 
@@ -220,7 +221,7 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
         </div>
         {summary_message && (
           <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>
-            {summary_message}
+            {noEmoji(summary_message)}
           </div>
         )}
       </div>

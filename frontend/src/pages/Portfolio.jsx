@@ -19,6 +19,7 @@ import AdvisorPanel            from '../components/AdvisorPanel'
 import CompareView             from '../components/CompareView'
 import Landing                 from '../components/Landing'
 import Icon                    from '../components/Icon'
+import { noEmoji } from '../utils/text'
 import GoalHero                from '../components/GoalHero'
 import InputWizard             from '../components/InputWizard'
 import { fmtMan } from '../utils/format'
@@ -454,8 +455,6 @@ const SEC_TAB = {
 
 // ── 발표 데모 고정 시나리오 (DEMO_RUNBOOK.md 기준값) ─────────────
 // "25세가 월 100만원 배당을 받으려면?" 역산 스토리
-const noEmoji = (t) => String(t ?? '').replace(/[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u200D]+\s?/gu, '').trim()
-
 const DEMO_PRESENTATION = {
   key:   'demo_presentation',
   icon:  '🎬',
@@ -2157,7 +2156,7 @@ export default function Portfolio() {
                   {portfolioInsight.map((line, i) => (
                     <div key={i} className={`insight-line ${line.startsWith('⚠️') ? 'warn' : ''}`}>
                       <span className="il-dot" />
-                      {line}
+                      {noEmoji(line)}
                     </div>
                   ))}
                 </div>
@@ -2187,7 +2186,7 @@ export default function Portfolio() {
                             : `약화확률 ${(alert.P_WEAKENING * 100).toFixed(0)}%`}
                         </span>
                       </div>
-                      <div className="ra-message">{alert.message}</div>
+                      <div className="ra-message">{noEmoji(alert.message)}</div>
                       {alert.alternative && (
                         <div className="ra-alternative">
                           대체 검토: <strong>{alert.alternative.name}</strong> — {alert.alternative.reason}
@@ -2739,7 +2738,7 @@ export default function Portfolio() {
                           ))}
                         </div>
                       )}
-                      <div style={{ fontSize: 12, color: 'var(--text-muted,#475569)', marginTop: 8 }}>{cmp.action_summary}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted,#475569)', marginTop: 8 }}>{noEmoji(cmp.action_summary)}</div>
                     </div>
                   ) : (
                     <div style={{ marginTop: 14, background: 'var(--surface2)', borderRadius: 10, padding: '10px 14px',
@@ -2748,7 +2747,7 @@ export default function Portfolio() {
                     </div>
                   ))}
 
-                  <div className="chart-note" style={{ marginTop: 10 }}>{s.summary}</div>
+                  <div className="chart-note" style={{ marginTop: 10 }}>{noEmoji(s.summary)}</div>
                 </div>
               )
             })()}
@@ -2767,12 +2766,9 @@ export default function Portfolio() {
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12,
                 }}>
-                  <div style={{ fontSize: 28 }}>
-                    {result.behavioral_finance.investor_type?.split(' ')[0]}
-                  </div>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 700, color: '#283143' }}>
-                      {result.behavioral_finance.investor_type}
+                      {noEmoji(result.behavioral_finance.investor_type)}
                     </div>
                     <div style={{ fontSize: 12, color: '#64748b' }}>
                       {result.behavioral_finance.bias_count}가지 편향 탐지 ·{' '}
@@ -2788,10 +2784,10 @@ export default function Portfolio() {
                     fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.6,
                   }}>
                     <div style={{ fontWeight: 700, color: '#283143' }}>
-                      {b.name} <span style={{ fontWeight: 500, fontSize: 12 }}>{b.severity_label}</span>
+                      {noEmoji(b.name)} <span style={{ fontWeight: 500, fontSize: 12 }}>{noEmoji(b.severity_label)}</span>
                     </div>
-                    <div>{b.evidence}</div>
-                    {b.debiasing_action && <div style={{ marginTop: 4 }}>{b.debiasing_action}</div>}
+                    <div>{noEmoji(b.evidence)}</div>
+                    {b.debiasing_action && <div style={{ marginTop: 4 }}>{noEmoji(b.debiasing_action)}</div>}
                   </div>
                 ))}
               </div>

@@ -61,7 +61,7 @@ function SourceBadge({ source, model }) {
       color:      isLLM ? C.purple        : C.muted,
       border:     `1px solid ${isLLM ? C.purple + '40' : C.cardBorder}`,
     }}>
-      {isLLM ? `🤖 ${model || 'qwen3:14b'}` : '📋 기본 분석'}
+      {isLLM ? `${model || 'qwen3:14b'}` : '기본 분석'}
     </span>
   )
 }
@@ -117,7 +117,7 @@ export default function AdvisorPanel({ portfolio }) {
               boxShadow: `0 0 12px ${C.purple}50`,
             }}
           >
-            🤖 AI 분석 요청
+            AI 분석 요청
           </button>
         )}
 
@@ -142,7 +142,7 @@ export default function AdvisorPanel({ portfolio }) {
           padding: '40px', textAlign: 'center', color: C.muted,
           background: C.cardBg, borderRadius: 14, border: `1px solid ${C.cardBorder}`,
         }}>
-          <div style={{ fontSize: 24, marginBottom: 8 }}>🤖</div>
+          <div style={{ fontSize: 24, marginBottom: 8 }}></div>
           <div style={{ fontSize: 13 }}>
             포트폴리오 계산 결과를 분석 중입니다...
           </div>
@@ -174,7 +174,7 @@ export default function AdvisorPanel({ portfolio }) {
               display: 'flex', justifyContent: 'space-between',
               alignItems: 'flex-start', marginBottom: 10, flexWrap: 'wrap', gap: 6,
             }}>
-              <div style={{ fontSize: 12, color: C.muted }}>📝 종합 요약</div>
+              <div style={{ fontSize: 12, color: C.muted }}>종합 요약</div>
               <SourceBadge source={advice.source} model={advice.model} />
             </div>
             <div style={{ fontSize: 13, lineHeight: 1.8, color: C.text }}>
@@ -185,17 +185,17 @@ export default function AdvisorPanel({ portfolio }) {
           {/* 강점 / 위험 / 행동 카드 (3열) */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
             <SectionCard
-              icon="✅" title="강점"
+              icon="" title="강점"
               items={advice.strengths}
               color={C.green}
             />
             <SectionCard
-              icon="⚠️" title="위험 요소"
+              icon="" title="위험 요소"
               items={advice.risks}
               color={C.red}
             />
             <SectionCard
-              icon="🎯" title="행동 우선순위"
+              icon="" title="행동 우선순위"
               items={advice.action_items}
               color={C.blue}
             />
@@ -208,7 +208,7 @@ export default function AdvisorPanel({ portfolio }) {
               borderRadius: 10, padding: '10px 14px',
               fontSize: 11, color: C.muted, lineHeight: 1.7,
             }}>
-              ⚡ {advice.caveats.join(' | ')}
+              {advice.caveats.join(' | ')}
             </div>
           )}
         </div>
@@ -221,7 +221,7 @@ export default function AdvisorPanel({ portfolio }) {
           background: `${C.purple}08`, borderRadius: 14,
           border: `1px dashed ${C.purple}30`,
         }}>
-          <div style={{ fontSize: 20, marginBottom: 8 }}>🤖</div>
+          <div style={{ fontSize: 20, marginBottom: 8 }}></div>
           <div style={{ fontSize: 12 }}>
             "AI 분석 요청" 버튼을 클릭하면<br />
             계산 완료된 결과를 해석해 맞춤 조언을 제공합니다 (로컬 LLM 연결 시 AI 문장 추가, 미연결 시 기본 분석)

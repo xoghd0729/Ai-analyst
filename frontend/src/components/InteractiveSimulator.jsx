@@ -169,7 +169,7 @@ function HeadlineCard({ rv, fireAge }) {
         borderRadius: 14, padding: '18px 20px', marginBottom: 16,
       }}>
         <div style={{ fontSize: 13, color: '#6ee7b7', marginBottom: 4 }}>
-          🎉 목표 달성 가능
+          목표 달성 가능
         </div>
         <div style={{ fontSize: 18, fontWeight: 700, color: C.text }}>
           현재 조건이면 {current_fire_age}세에 월 {target_monthly_만원}만원 배당 달성!
@@ -303,7 +303,7 @@ function MiniProjection({ sliders, currentAge, avgYield }) {
       <div style={{ display: 'flex', justifyContent: 'space-between',
                     alignItems: 'flex-start', marginBottom: 12 }}>
         <div style={{ fontSize: 12, color: C.muted }}>
-          📈 {sliders.fireAge}세 간이 자산 성장 추정 — 공식 FIRE 분석과 별도 계산
+          {sliders.fireAge}세 간이 자산 성장 추정 — 공식 FIRE 분석과 별도 계산
         </div>
         <div style={{
           fontSize: 10, color: C.amber,
@@ -433,7 +433,7 @@ function ResultSection({ rv, sliders }) {
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <PathCard
-              icon="💰"
+              icon=""
               title="월 적립금 추가"
               value={savings_increase > 0
                 ? `+${fmt(savings_increase)}만원/월`
@@ -445,7 +445,7 @@ function ResultSection({ rv, sliders }) {
               highlight={savings_increase > 0 && savings_increase < 200}
             />
             <PathCard
-              icon="🏦"
+              icon=""
               title="초기자산 추가"
               value={capital_increase > 0
                 ? `+${fmt(capital_increase)}만원`
@@ -457,7 +457,7 @@ function ResultSection({ rv, sliders }) {
               highlight={false}
             />
             <PathCard
-              icon="📊"
+              icon=""
               title="현재 조건 최대 달성"
               value={`${fmt(achievable_monthly)}만원/월`}
               sub="지금 조건으로 도달 가능한 최대"
@@ -471,7 +471,7 @@ function ResultSection({ rv, sliders }) {
       {/* 이미 달성 가능한 경우에도 achievable 표시 */}
       {already_achievable && (
         <PathCard
-          icon="📊"
+          icon=""
           title="현재 조건 최대 달성 가능"
           value={`${fmt(achievable_monthly)}만원/월`}
           sub="현재 포트폴리오 조건 기준"
@@ -644,7 +644,7 @@ export default function InteractiveSimulator({ portfolio }) {
           }} onClick={() => setLifecycleMode(m => !m)}>
             <div>
               <div style={{ fontSize: 12, fontWeight: 600, color: lifecycleMode ? C.purple : C.text }}>
-                🔄 생애주기 적립 모드
+                생애주기 적립 모드
               </div>
               <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>
                 연령대별 적립금을 다르게 설정

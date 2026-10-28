@@ -12,7 +12,7 @@ export default function YieldTrapWarning({ yieldTraps = [] }) {
       }}
     >
       <div style={{ color: '#fecaca', fontSize: 14, fontWeight: 700, marginBottom: 10 }}>
-        🚨 Yield Trap 경고
+        Yield Trap 경고
       </div>
       <div style={{ color: '#fee2e2', fontSize: 13, marginBottom: 12 }}>
         이 종목은 배당은 높지만 주가가 빠지고 있어요.

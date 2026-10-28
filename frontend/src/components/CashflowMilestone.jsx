@@ -15,11 +15,11 @@
  */
 
 const MILESTONES = [
-  { amount: 30,  icon: '📱', label: '통신비 자동화',     desc: '매달 통신비·구독료가 배당으로 해결',   color: '#6366f1' },
-  { amount: 80,  icon: '🍽️', label: '식비·교통비 커버', desc: '월 80만원 → 교통+식비 완전 자동화',    color: '#3b82f6' },
-  { amount: 150, icon: '🏠', label: 'Lean FIRE 진입',   desc: '주거비+생활비 50% 배당으로 조달',      color: '#0ea5e9' },
-  { amount: 300, icon: '🎯', label: '생활비 100% 커버', desc: '배당만으로 모든 생활비 조달 가능',      color: '#10b981' },
-  { amount: 500, icon: '🏝️', label: '경제적 자유',      desc: '월 500만원 — 일 없이도 풍요로운 삶',   color: '#f59e0b' },
+  { amount: 30,  icon: '', label: '통신비 자동화',     desc: '매달 통신비·구독료가 배당으로 해결',   color: '#6366f1' },
+  { amount: 80,  icon: '', label: '식비·교통비 커버', desc: '월 80만원 → 교통+식비 완전 자동화',    color: '#3b82f6' },
+  { amount: 150, icon: '', label: 'Lean FIRE 진입',   desc: '주거비+생활비 50% 배당으로 조달',      color: '#0ea5e9' },
+  { amount: 300, icon: '', label: '생활비 100% 커버', desc: '배당만으로 모든 생활비 조달 가능',      color: '#10b981' },
+  { amount: 500, icon: '', label: '경제적 자유',      desc: '월 500만원 — 일 없이도 풍요로운 삶',   color: '#f59e0b' },
 ]
 
 function getProjectionAge(fire_plan, label) {
@@ -94,12 +94,12 @@ export default function CashflowMilestone({ summary, fire_plan, fireEarliest = n
               <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12 }}>
                 {/* 아이콘 */}
                 <div style={{
-                  fontSize: 24, width: 40, height: 40,
+                  fontSize: 18, fontWeight: 700, color: achieved ? '#059669' : '#94a3b8', width: 40, height: 40,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   borderRadius: 10,
                   background: achieved ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)',
                 }}>
-                  {achieved ? '✅' : ms.icon}
+                  {achieved ? '✓' : '○'}
                 </div>
 
                 {/* 텍스트 */}
@@ -165,7 +165,6 @@ export default function CashflowMilestone({ summary, fire_plan, fireEarliest = n
                 : `${fire_plan.earliest_fire_type} — 만 ${fire_plan.earliest_fire_age}세`}
             </div>
           </div>
-          <div style={{ fontSize: 24 }}>🏝️</div>
         </div>
       )}
     </div>

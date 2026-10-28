@@ -106,25 +106,25 @@ export default function StockRationaleCard({ rec }) {
   // ── 주의사항 생성 ──────────────────────────────────────────
   const cautions = []
   if (trap === 'YIELD_TRAP') {
-    cautions.push({ icon: '🪤', text: '고배당 함정 의심 — 지속 가능성 확인 필요', color: C.danger })
+    cautions.push({ icon: '', text: '고배당 함정 의심 — 지속 가능성 확인 필요', color: C.danger })
   } else if (trap === 'MODERATE') {
-    cautions.push({ icon: '⚠️', text: '배당 지속성 주의', color: C.warn })
+    cautions.push({ icon: '', text: '배당 지속성 주의', color: C.warn })
   }
   if (ml === 'BROKEN') {
-    cautions.push({ icon: '🚨', text: 'AI: 배당 위험 신호 (BROKEN)', color: C.danger })
+    cautions.push({ icon: '', text: 'AI: 배당 위험 신호 (BROKEN)', color: C.danger })
   } else if (ml === 'WEAKENING') {
-    cautions.push({ icon: '⚠️', text: 'AI: 배당 약화 신호 (WEAKENING)', color: C.warn })
+    cautions.push({ icon: '', text: 'AI: 배당 약화 신호 (WEAKENING)', color: C.warn })
   }
   if (pBrk > 0.3) {
-    cautions.push({ icon: '📉', text: `배당컷 위험 지수 ${(pBrk * 100).toFixed(0)}%`, color: C.danger })
+    cautions.push({ icon: '', text: `배당컷 위험 지수 ${(pBrk * 100).toFixed(0)}%`, color: C.danger })
   } else if (pBrk > 0.15) {
-    cautions.push({ icon: '📊', text: `배당컷 위험 지수 ${(pBrk * 100).toFixed(0)}%`, color: C.warn })
+    cautions.push({ icon: '', text: `배당컷 위험 지수 ${(pBrk * 100).toFixed(0)}%`, color: C.warn })
   }
   if (cuts > 0) {
-    cautions.push({ icon: '✂️', text: `최근 3년 배당 삭감 ${cuts}회`, color: C.warn })
+    cautions.push({ icon: '', text: `최근 3년 배당 삭감 ${cuts}회`, color: C.warn })
   }
   if (rec.cold_start) {
-    cautions.push({ icon: '🔍', text: 'ML 분석 데이터 부족 — rule-based 대체', color: C.warn })
+    cautions.push({ icon: '', text: 'ML 분석 데이터 부족 — rule-based 대체', color: C.warn })
   }
 
   // ── 배당 성장 메시지 ──────────────────────────────────────
@@ -231,7 +231,7 @@ export default function StockRationaleCard({ rec }) {
                   fontSize: 11, padding: '3px 8px', borderRadius: 20,
                   background: 'rgba(37,99,235,.07)', border: '1px solid rgba(37,99,235,.2)',
                   color: C.blue,
-                }}>🏅 {consNote}</span>
+                }}>{consNote}</span>
               )}
             </div>
           )}
@@ -246,7 +246,7 @@ export default function StockRationaleCard({ rec }) {
                 fontSize: 11, fontWeight: 700, color: C.muted,
                 textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8,
               }}>
-                📊 AI 점수 분석 (한국주식 전용)
+                AI 점수 분석 (한국주식 전용)
               </div>
               <ScoreBar label="배당수익률 점수" value={bd.yield_score} max={35} color={C.blue}   />
               <ScoreBar label="배당 안정성"      value={bd.stability}   max={35} color={C.ok}     />
@@ -262,7 +262,7 @@ export default function StockRationaleCard({ rec }) {
                 fontSize: 11, fontWeight: 700, color: C.muted,
                 textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 6,
               }}>
-                ⚠️ 주의사항
+                주의사항
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {cautions.map((c, i) => (

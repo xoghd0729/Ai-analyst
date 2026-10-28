@@ -387,7 +387,7 @@ export default function CompareView({ portfolio }) {
             transition: 'all 0.2s',
           }}
         >
-          {loading ? '분석 중...' : '⚖️ 비교 분석 실행'}
+          {loading ? '분석 중...' : '비교 분석 실행'}
         </button>
         {!result && !loading && (
           <div style={{ fontSize: 11, color: C.muted, marginTop: 8 }}>
@@ -456,10 +456,10 @@ export default function CompareView({ portfolio }) {
             borderRadius: 10, color: C.muted, lineHeight: 1.7,
           }}>
             {wc.a > wc.b
-              ? `⚡ 포트폴리오 A가 ${wc.a}개 지표에서 우세합니다. 현재 전략을 유지하거나 소폭 조정하세요.`
+              ? `포트폴리오 A가 ${wc.a}개 지표에서 우세합니다. 현재 전략을 유지하거나 소폭 조정하세요.`
               : wc.b > wc.a
-              ? `⚡ 포트폴리오 B가 ${wc.b}개 지표에서 우세합니다. B 전략으로의 전환을 검토해보세요.`
-              : `⚡ A와 B가 각각 ${wc.a}개 지표에서 동등합니다. 개인 목표 우선순위에 따라 선택하세요.`
+              ? `포트폴리오 B가 ${wc.b}개 지표에서 우세합니다. B 전략으로의 전환을 검토해보세요.`
+              : `A와 B가 각각 ${wc.a}개 지표에서 동등합니다. 개인 목표 우선순위에 따라 선택하세요.`
             }
           </div>
         </>

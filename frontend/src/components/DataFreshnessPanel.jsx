@@ -49,42 +49,42 @@ const SOURCE_META = {
   kr_stock_ranking: {
     label: '한국주식 랭킹',
     desc:  'DART 공시 기반 점수·배당수익률',
-    icon:  '🇰🇷',
+    icon:  '',
   },
   ml_scoring: {
     label: 'ML 위험 점수',
     desc:  'TabPFN Survival 배당컷 위험 추정',
-    icon:  '🤖',
+    icon:  '',
   },
   us_stock_scores: {
     label: '미국주식 점수',
     desc:  '2015–2024 정적 수익률 캐시',
-    icon:  '🇺🇸',
+    icon:  '',
   },
   etf_quality: {
     label: 'ETF 구성 캐시',
     desc:  'SCHD·VYM·JEPI 등 배당 ETF 정적 구성',
-    icon:  '📦',
+    icon:  '',
   },
   kr_yield_live: {
     label: '한국 배당수익률',
     desc:  'DART/정적 캐시 (pykrx 실시간 미사용)',
-    icon:  '📊',
+    icon:  '',
   },
   dividend_dataset: {
     label: '배당 학습 데이터',
     desc:  'ML 모델 학습 기반 데이터셋',
-    icon:  '📁',
+    icon:  '',
   },
   survival_model: {
     label: 'Survival 모델',
     desc:  'TabPFN 학습 데이터 기준일',
-    icon:  '🛡️',
+    icon:  '',
   },
   tax_rule: {
     label: '세법 버전',
     desc:  '2026 세법 (ISA 4,000만원/연)',
-    icon:  '⚖️',
+    icon:  '',
   },
 }
 
@@ -114,12 +114,12 @@ const C = {
   muted:   'var(--text-sub)',
 }
 
-const STATUS_ICON = { ok: '✓', stale: '⚠', unknown: '—' }
+const STATUS_ICON = { ok: '✓', stale: '', unknown: '—' }
 const STATUS_COLOR = { ok: C.ok, stale: C.stale, unknown: C.unknown }
 
 // ── 한 행 ────────────────────────────────────────────────────────
 function SourceRow({ name, dateStr }) {
-  const meta   = SOURCE_META[name] || { label: name, desc: '', icon: '📄' }
+  const meta   = SOURCE_META[name] || { label: name, desc: '', icon: '' }
   const status = statusOf(dateStr)
   const days   = daysAgo(dateStr)
   const daysStr = days !== null ? ` (${days}일 전)` : ''
@@ -129,7 +129,7 @@ function SourceRow({ name, dateStr }) {
       display: 'flex', alignItems: 'center', gap: 8,
       padding: '5px 0', borderBottom: `1px solid ${C.border}`,
     }}>
-      <span style={{ fontSize: 14, minWidth: 20, textAlign: 'center' }}>{meta.icon}</span>
+      
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 12, fontWeight: 600, color: C.text }}>{meta.label}</div>
         <div style={{ fontSize: 10, color: C.muted, marginTop: 1, whiteSpace: 'nowrap',
@@ -207,7 +207,7 @@ export default function DataFreshnessPanel({ freshness }) {
           color: overall === 'ok' ? C.ok : C.stale,
           border: `1px solid ${overall === 'ok' ? 'rgba(16,185,129,.3)' : 'rgba(245,158,11,.3)'}`,
         }}>
-          {overall === 'ok' ? '✓ 데이터 정상' : '⚠ 일부 오래됨'}
+          {overall === 'ok' ? '✓ 데이터 정상' : '일부 오래됨'}
         </span>
         <span style={{ color: C.muted, fontSize: 11 }}>
           기준일 {latestStr} · DART/정적 캐시 기반
@@ -225,7 +225,7 @@ export default function DataFreshnessPanel({ freshness }) {
             fontSize: 10, color: C.muted, padding: '6px 0 8px',
             borderBottom: `1px solid ${C.border}`, marginBottom: 6,
           }}>
-            ℹ️ 한국주식은 DART 공시 기반 정적 캐시입니다.
+            한국주식은 DART 공시 기반 정적 캐시입니다.
             pykrx 실시간 시세는 연동하지 않습니다.
             미국주식·ETF는 2015–2024 정적 수익률 데이터를 사용합니다.
           </div>
@@ -240,7 +240,7 @@ export default function DataFreshnessPanel({ freshness }) {
             fontSize: 10, color: C.muted,
           }}>
             <span><span style={{ color: C.ok, fontWeight: 700 }}>✓</span> 30일 이내</span>
-            <span><span style={{ color: C.stale, fontWeight: 700 }}>⚠</span> 30일 초과</span>
+            <span><span style={{ color: C.stale, fontWeight: 700 }}></span> 30일 초과</span>
             <span><span style={{ color: C.unknown, fontWeight: 700 }}>—</span> 날짜 미확인</span>
           </div>
         </div>

@@ -186,7 +186,7 @@ export default function EfficientFrontierChart({ portfolio }) {
       padding: 32, textAlign: 'center', color: C.muted, fontSize: 13,
       background: C.cardBg, borderRadius: 14, border: `1px solid ${C.cardBorder}`,
     }}>
-      📐 효율적 프론티어 계산 중 (5,000개 포트폴리오 시뮬레이션)...
+      효율적 프론티어 계산 중 (5,000개 포트폴리오 시뮬레이션)...
     </div>
   )
 

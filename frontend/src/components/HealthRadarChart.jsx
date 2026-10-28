@@ -55,7 +55,7 @@ const CustomTooltip = ({ active, payload }) => {
       </div>
       {d?.action && (
         <div style={{ marginTop: 6, color: '#d97706', fontSize: 12 }}>
-          💡 {d.action}
+          {d.action}
         </div>
       )}
     </div>
@@ -161,7 +161,7 @@ export default function HealthRadarChart({ health }) {
         <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid #dfe3ea' }}>
           {health.tips.slice(0, 2).map((tip, i) => (
             <div key={i} style={{ fontSize: 12, color: '#d97706', marginTop: i > 0 ? 6 : 0 }}>
-              💡 {tip}
+              {tip}
             </div>
           ))}
         </div>

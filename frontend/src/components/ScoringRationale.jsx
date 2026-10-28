@@ -57,7 +57,7 @@ export default function ScoringRationale({ scoringRationale }) {
         }}>
 
           {/* ① 5축 평가 구성 */}
-          <SectionHeader icon="📊" title="평가 구성 (100점 만점)" />
+          <SectionHeader icon="" title="평가 구성 (100점 만점)" />
           <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 14 }}>
             <thead>
               <tr style={{ background: C.surface2 }}>
@@ -93,7 +93,7 @@ export default function ScoringRationale({ scoringRationale }) {
           {/* ② 건강도 등급 기준 */}
           {health.thresholds && Object.keys(health.thresholds).length > 0 && (
             <>
-              <SectionHeader icon="🏅" title="건강도 등급 기준" />
+              <SectionHeader icon="" title="건강도 등급 기준" />
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
                 {Object.entries(health.thresholds).map(([range, label]) => (
                   <span key={range} style={{
@@ -111,7 +111,7 @@ export default function ScoringRationale({ scoringRationale }) {
           {/* ③ 성장 점수 기준 */}
           {growth.thresholds && Object.keys(growth.thresholds).length > 0 && (
             <>
-              <SectionHeader icon="📈" title="성장 점수 기준 (Growth · 20점 만점)" />
+              <SectionHeader icon="" title="성장 점수 기준 (Growth · 20점 만점)" />
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
                 {Object.entries(growth.thresholds).map(([range, label]) => (
                   <span key={range} style={{
@@ -132,7 +132,7 @@ export default function ScoringRationale({ scoringRationale }) {
           {/* ④ 종합 점수 후보 기준 */}
           {cutoff.description && (
             <>
-              <SectionHeader icon="🔍" title="종목 선별 기준" />
+              <SectionHeader icon="" title="종목 선별 기준" />
               <div style={{
                 padding: '8px 10px', borderRadius: 7, marginBottom: 6,
                 background: C.surface2, border: `1px solid ${C.border}`,
@@ -158,7 +158,7 @@ export default function ScoringRationale({ scoringRationale }) {
             background: 'rgba(100,116,139,.07)',
             borderLeft: '3px solid var(--border)',
           }}>
-            💡 각 평가축은 CFA·Vanguard·Morningstar 등 외부 금융 연구를 참고하여 설계했으며,
+            각 평가축은 CFA·Vanguard·Morningstar 등 외부 금융 연구를 참고하여 설계했으며,
             세부 threshold와 cutoff는 시스템 내부 기준입니다. 향후 백테스트 기반 calibration 예정.
           </p>
 
@@ -188,7 +188,7 @@ function InternalNote({ note, C }) {
       background: C.amberBg,
       borderLeft: `3px solid ${C.amber}`,
     }}>
-      ⚠️ {note}
+      {note}
     </p>
   )
 }

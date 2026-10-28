@@ -50,7 +50,7 @@ export default function RationalePanel({ rationale, label }) {
         }}>
 
           {/* ① 투자 목적 */}
-          <Section icon="🎯" title="투자 목적">
+          <Section icon="" title="투자 목적">
             <p style={{ margin: 0, color: C.text, lineHeight: 1.6 }}>
               {rationale.investment_goal}
             </p>
@@ -58,7 +58,7 @@ export default function RationalePanel({ rationale, label }) {
 
           {/* ② 외부 기준 */}
           {ext.source && (
-            <Section icon="📚" title="외부 기준점">
+            <Section icon="" title="외부 기준점">
               <div style={{
                 padding: '8px 10px', borderRadius: 7,
                 background: 'rgba(37,99,235,.04)',
@@ -77,7 +77,7 @@ export default function RationalePanel({ rationale, label }) {
 
           {/* ③ 시스템 적용 + 내부값 안내 */}
           {(rationale.design_interpretation || rationale.internal_value_note) && (
-            <Section icon="⚙️" title="시스템 적용">
+            <Section icon="" title="시스템 적용">
               {rationale.design_interpretation && (
                 <p style={{ margin: '0 0 6px', color: C.text, lineHeight: 1.6 }}>
                   {rationale.design_interpretation}
@@ -90,7 +90,7 @@ export default function RationalePanel({ rationale, label }) {
                   background: 'rgba(100,116,139,.07)',
                   borderLeft: '3px solid var(--border)',
                 }}>
-                  💡 {rationale.internal_value_note}
+                  {rationale.internal_value_note}
                 </p>
               )}
             </Section>
