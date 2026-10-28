@@ -639,7 +639,7 @@ function ShapExplainPanel({ recs }) {
   return (
     <div id="sec-shap" className="card" style={{ scrollMarginTop: 16 }}>
       <h3 className="card-title">
-        🧠 배당 삭감 예측 근거 (XAI · SHAP)
+        배당 삭감 예측 근거 (XAI · SHAP)
         <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-sub,#64748b)', marginLeft: 8 }}>
           모델이 “왜 위험한가”를 재무 지표별로 설명
         </span>
@@ -1026,7 +1026,7 @@ export default function Portfolio() {
         {/* 내 포트폴리오 목록 패널 */}
         {authEmail && myOpen && (
           <div className="card" style={{ marginTop: 10 }}>
-            <h3 className="card-title" style={{ fontSize: 15 }}>📁 내 포트폴리오</h3>
+            <h3 className="card-title" style={{ fontSize: 15 }}>내 포트폴리오</h3>
             {myList.length === 0 ? (
               <div style={{ fontSize: 13, color: 'var(--text-sub)' }}>저장된 포트폴리오가 없습니다. 추천 결과에서 "💾 저장"을 눌러보세요.</div>
             ) : (
@@ -1576,7 +1576,7 @@ export default function Portfolio() {
                   Math.abs(d.age - a) < Math.abs(best.age - a) ? d : best, compoundData[0]))
               return (
                 <div className="card" style={{ borderLeft: '3px solid #059669' }}>
-                  <h3 className="card-title">📍 목표 달성 근거 — 왜 {targetAge}세인가?
+                  <h3 className="card-title">목표 달성 근거 — 왜 {targetAge}세인가?
                     <span className="title-sub">매년 적립·배당 재투자 복리 경로 (세후)</span>
                   </h3>
                   <div style={{ overflowX: 'auto' }}>
@@ -1632,7 +1632,7 @@ export default function Portfolio() {
               const baseAge = investScenarios?.find(x => x.extra === 0)?.age || null
               return (
                 <div className="card" style={{ borderLeft: '3px solid #7c3aed' }}>
-                  <h3 className="card-title">🚀 목표 달성 가속기
+                  <h3 className="card-title">목표 달성 가속기
                     <span className="title-sub">행동을 바꾸면 몇 년 빨라지나</span>
                   </h3>
 
@@ -1715,7 +1715,7 @@ export default function Portfolio() {
             <div className="rt wide" hidden={rtab !== 'ai'}>
             {/* ★ AI 모델 정보 카드 (항상 표시 — 발표 방어용) */}
             <div className="card" style={{ borderLeft: '3px solid #1456f0' }}>
-              <h3 className="card-title">🤖 AI 모델 정보
+              <h3 className="card-title">AI 모델 정보
                 <span className="title-sub">실제 머신러닝 기반 배당 삭감 예측 시스템</span>
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
@@ -1778,7 +1778,7 @@ export default function Portfolio() {
               const riskColor = { conservative: '#059669', moderate: '#2563eb', aggressive: '#dc2626' }[riskKey] || '#2563eb'
               return (<>
                 <div className="card" style={{ borderLeft: `3px solid ${riskColor}` }}>
-                  <h3 className="card-title">📊 선택된 투자 성향
+                  <h3 className="card-title">선택된 투자 성향
                     <span className="title-sub">포트폴리오 구성 기준</span>
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
@@ -1844,7 +1844,7 @@ export default function Portfolio() {
               const yieldCapped = result.yield_capped       // true면 20% 상한 적용됨
               return (
                 <div className="card">
-                  <h3 className="card-title">🧩 추천 포트폴리오
+                  <h3 className="card-title">추천 포트폴리오
                     <span className="title-sub">핵심 종목 + 분산 자산 총 {recs.length}개 · 세후 월배당 약 {monthly.toFixed(1)}만원</span>
                   </h3>
                   {tgtYield > 0 && (
@@ -2036,7 +2036,7 @@ export default function Portfolio() {
               if (top.length === 0) return null
               return (
                 <div className="card" style={{ borderLeft: '3px solid #d97706' }}>
-                  <h3 className="card-title" style={{ fontSize: 15 }}>🎬 오늘의 액션
+                  <h3 className="card-title" style={{ fontSize: 15 }}>오늘의 액션
                     <span className="title-sub">지금 바로 할 수 있는 것</span>
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -2074,7 +2074,7 @@ export default function Portfolio() {
               nodes.sort((a, b) => a.age - b.age)
               return (
                 <div className="card">
-                  <h3 className="card-title" style={{ fontSize: 15 }}>🗺️ 내 현금흐름 여정
+                  <h3 className="card-title" style={{ fontSize: 15 }}>내 현금흐름 여정
                     <span className="title-sub">{startAge}세부터 FIRE까지</span>
                   </h3>
                   <div style={{ display: 'flex', overflowX: 'auto', gap: 0, paddingBottom: 4 }}>
@@ -2157,62 +2157,29 @@ export default function Portfolio() {
 
             </div>
             <div className="rt half" hidden={rtab !== 'dash'}>
-            {/* HERO (보조 지표) */}
-            <div id="sec-hero" className="hero-card">
-              <div className="hero-grid">
-
-                {/* ① 목표 달성 시점 (Monte Carlo 시나리오) */}
-                <div className="hero-item main">
-                  <div className="hero-label">🗓️ 목표 달성 시점</div>
+            {/* 수익률 · 달성 시점 범위 (첫 카드와 중복되지 않는 보조 지표) */}
+            <div id="sec-hero" className="kpi-card">
+              <div className="kpi-h">수익률 · 달성 범위</div>
+              <div className="kpi-grid">
+                <div className="kpi">
+                  <span>연 Total Return</span>
+                  <b>{avgTotalReturn}<small>%</small></b>
+                  <em>배당 {avgYield}% + 자본차익 {(avgTotalReturn - avgYield).toFixed(1)}%</em>
+                </div>
+                <div className="kpi">
+                  <span>은행 대비 초과수익</span>
+                  <b className={vsBank > 0 ? 'pos' : vsBank < 0 ? 'neg' : ''}>{vsBank > 0 ? '+' : ''}{vsBank}<small>%p</small></b>
+                  <em>예금 {bankRate}% 대비</em>
+                </div>
+                <div className="kpi">
+                  <span>달성 시점 범위</span>
                   {mc ? (
                     <>
-                      <div className="hero-value highlight">
-                        <span className="hv-num">{achieveAge ? Math.ceil(achieveAge) : (mc.p50Age ? Math.ceil(mc.p50Age) : '—')}</span>
-                        <span className="hv-unit">세</span>
-                      </div>
-                      <div className="hero-sub">목표 달성 예상 나이 · 비관~낙관은 Monte Carlo 범위</div>
-                      {/* 시나리오 범위 */}
-                      <div className="scenario-row">
-                        <span className="sc-item pessimistic">
-                          비관 {mc.p90Age ? `${Math.ceil(mc.p90Age)}세` : '미달성'}
-                        </span>
-                        <span className="sc-sep">·</span>
-                        <span className="sc-item base">
-                          중간 {achieveAge ? `${Math.ceil(achieveAge)}세` : '미달성'}
-                        </span>
-                        <span className="sc-sep">·</span>
-                        <span className="sc-item optimistic">
-                          낙관 {mc.p10Age ? `${Math.ceil(mc.p10Age)}세` : '미달성'}
-                        </span>
-                      </div>
+                      <b>{mc.p10Age ? Math.ceil(mc.p10Age) : '—'}<small>~</small>{mc.p90Age ? Math.ceil(mc.p90Age) : '미달성'}<small>{mc.p90Age ? '세' : ''}</small></b>
+                      <em>낙관 · 중간 {achieveAge ? Math.ceil(achieveAge) : '—'}세 · 비관 (Monte Carlo)</em>
                     </>
-                  ) : (
-                    <div className="hero-value" style={{ fontSize: 16 }}>계산 중...</div>
-                  )}
+                  ) : <b>—</b>}
                 </div>
-
-                <div className="hero-item">
-                  <div className="hero-label">📈 Total Return (연)</div>
-                  <div className="hero-value">
-                    <span className={`hv-num ${avgTotalReturn > 0 ? 'green' : ''}`}>{avgTotalReturn}</span>
-                    <span className="hv-unit">%</span>
-                  </div>
-                  <div className="hero-sub">
-                    배당 {avgYield}% + 자본차익 {(avgTotalReturn - avgYield).toFixed(1)}%
-                  </div>
-                </div>
-
-                <div className="hero-item">
-                  <div className="hero-label">🏦 은행 대비 초과수익</div>
-                  <div className="hero-value">
-                    <span className={`hv-num ${vsBank > 0 ? 'green' : 'red'}`}>
-                      {vsBank > 0 ? '+' : ''}{vsBank}
-                    </span>
-                    <span className="hv-unit">%p</span>
-                  </div>
-                  <div className="hero-sub">예금 {bankRate}% 대비</div>
-                </div>
-
               </div>
             </div>
 
@@ -2222,7 +2189,7 @@ export default function Portfolio() {
             {portfolioInsight?.length > 0 && (
               <div className="card ai-insight-card">
                 <h3 className="card-title">
-                  🤖 AI 포트폴리오 진단
+                  AI 포트폴리오 진단
                   <span className="title-sub">구성·리스크·달성 가능성 종합 분석</span>
                 </h3>
                 <div className="insight-lines">
@@ -2242,7 +2209,7 @@ export default function Portfolio() {
             {result.risk_alerts?.length > 0 && (
               <div className="card risk-alert-card">
                 <h3 className="card-title">
-                  ⚠️ AI 배당 리스크 경보
+                  AI 배당 리스크 경보
                   <span className="title-sub">{result.risk_alerts.length}개 종목에서 신호 감지</span>
                 </h3>
                 <div className="risk-alert-list">
@@ -2276,7 +2243,7 @@ export default function Portfolio() {
             {/* 4축 구성 요약 + 분산 근거 설명 */}
             {result.axis_summary?.length > 0 && (
               <div id="sec-axis" className="card" style={{ scrollMarginTop: 16 }}>
-                <h3 className="card-title">📐 4축 자산 배분 요약</h3>
+                <h3 className="card-title">4축 자산 배분 요약</h3>
 
                 {/* 분산 근거 한 줄 — "왜 종목당 비중이 작은지" 답 */}
                 {(() => {
@@ -2331,7 +2298,7 @@ export default function Portfolio() {
             {/* 복리 성장 그래프 */}
             <div id="sec-growth" className="card" style={{ scrollMarginTop: 16 }}>
               <h3 className="card-title">
-                📈 복리 성장 곡선
+                복리 성장 곡선
                 <span className="title-sub">매달 {result.monthly_invest}만원
                   {(result.invest_growth > 0) && ` (연 ${result.invest_growth}% 증액)`}
                   {' '}× 배당 재투자 · 세후 기준</span>
@@ -2401,7 +2368,7 @@ export default function Portfolio() {
             {/* 월배당 현금흐름 캘린더 */}
             <div className="card">
               <h3 className="card-title">
-                📅 월배당 현금흐름 캘린더
+                월배당 현금흐름 캘린더
                 <span className="title-sub">현재 포트폴리오 기준 월별 예상 배당 수령</span>
               </h3>
               {(() => {
@@ -2448,7 +2415,7 @@ export default function Portfolio() {
             <div className="rt wide" hidden={rtab !== 'alloc'}>
             {/* 도넛 + 종목 근거 */}
             <div className="card">
-              <h3 className="card-title">🧩 AI 포트폴리오 구성
+              <h3 className="card-title">AI 포트폴리오 구성
                 <span className="title-sub">4축 가중 배분</span>
               </h3>
               <div className="donut-layout">
@@ -2519,7 +2486,7 @@ export default function Portfolio() {
             <div className="rt wide" hidden={rtab !== 'alloc'}>
             {/* 추천 종목 테이블 */}
             <div id="sec-recs" className="card" style={{ scrollMarginTop: 16 }}>
-              <h3 className="card-title">📋 종목별 적립 배분</h3>
+              <h3 className="card-title">종목별 적립 배분</h3>
               <YieldTrapWarning yieldTraps={result.yield_traps || []} />
               <table className="rec-table">
                 <thead>
@@ -2579,7 +2546,7 @@ export default function Portfolio() {
             <div className="rt wide" hidden={rtab !== 'tax'}>
             {/* ISA 절세 전략 */}
             <div className="card isa-card">
-              <h3 className="card-title">💰 ISA 절세 전략</h3>
+              <h3 className="card-title">ISA 절세 전략</h3>
               <div className="isa-grid">
                 <div className="isa-item">
                   <div className="isa-label">계좌 유형</div>
@@ -2609,7 +2576,7 @@ export default function Portfolio() {
             {/* FIRE 통합 카드 — 배당목표 / Lean / 일반 FIRE 한눈에 (헤드라인과 동일 엔진) */}
             {fireTargets?.length > 0 && (
                 <div className="card" id="sec-fire" style={{ scrollMarginTop: 16 }}>
-                  <h3 className="card-title">🔥 FIRE 달성 한눈에
+                  <h3 className="card-title">FIRE 달성 한눈에
                     <span className="title-sub">
                       목표별 달성 나이
                       {result.invest_growth > 0 ? ` · 적립 연 ${result.invest_growth}% 증액 반영` : ' · 적립 고정'}
@@ -2720,7 +2687,7 @@ export default function Portfolio() {
               return (
                 <div id="sec-survival" className="card" style={{ scrollMarginTop: 16 }}>
                   <h3 className="card-title">
-                    🛡️ 소득 지속성 점수
+                    소득 지속성 점수
                     <span className="title-sub">Monte Carlo 시뮬레이션·집중도 통합 — 20년 배당 유지 시뮬레이션 결과</span>
                   </h3>
                   <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap', padding: '8px 4px' }}>
@@ -2967,9 +2934,9 @@ export default function Portfolio() {
             </>)}
 
             <div className="result-pager">
-              <button type="button" className="wz-btn ghost" disabled={pageIdx === 0} onClick={() => goPage(-1)}>◀ 이전</button>
+              <button type="button" className="wz-btn ghost" disabled={pageIdx === 0} onClick={() => goPage(-1)}><Icon name="chevL" size={16} /> 이전</button>
               <span className="rp-title"><b>{pageIdx + 1} / {RESULT_TABS.length}</b> · {RESULT_TABS[pageIdx].label}</span>
-              <button type="button" className="wz-btn primary" disabled={pageIdx === RESULT_TABS.length - 1} onClick={() => goPage(1)}>다음 ▶</button>
+              <button type="button" className="wz-btn primary" disabled={pageIdx === RESULT_TABS.length - 1} onClick={() => goPage(1)}>다음 <Icon name="chevR" size={16} /></button>
             </div>
             </div>{/* /result-main */}
             </div>{/* /result-layout */}

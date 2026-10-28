@@ -14,7 +14,7 @@
  * 차트 구성:
  *   - 상단 카드: CAGR / MDD / Sharpe 3개 요약
  *   - ComposedChart:
- *       Bar  — 포트폴리오 연도별 수익률 (양수=파랑, 음수=빨강, Cell 기반)
+ *       Bar  — 포트폴리오 연도별 수익률 (양수=빨강, 음수=파랑: 한국 관례, Cell 기반)
  *       Line — KOSPI 수익률 (노랑 점선)
  *       Line — S&P 500 수익률 (보라 점선)
  *   - 커스텀 툴팁: 연도/포트폴리오/KOSPI/S&P500 + KOSPI 대비 초과수익
@@ -29,8 +29,8 @@ import api from '../api/client'
 
 // ── 색상 상수 ────────────────────────────────────────────────────
 const C = {
-  positive:   '#3b82f6',   // 파랑 — 양수 수익률 Bar
-  negative:   '#ef4444',   // 빨강 — 음수 수익률 Bar
+  positive:   '#dc2626',   // 빨강 — 양수 수익률 Bar (한국 관례: 상승=빨강)
+  negative:   '#2563eb',   // 파랑 — 음수 수익률 Bar (한국 관례: 하락=파랑)
   kospi:      '#f59e0b',   // 노랑 — KOSPI
   sp500:      '#a855f7',   // 보라 — S&P 500
   zero:       '#475569',   // 회색 — 0% 기준선
@@ -158,7 +158,7 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
 
   if (error) return (
     <div style={{
-      padding: '16px', color: C.negative, fontSize: 13,
+      padding: '16px', color: '#dc2626', fontSize: 13,
       background: C.cardBg, borderRadius: 14, border: `1px solid ${C.cardBorder}`,
     }}>
       {error}
@@ -191,7 +191,7 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
   // ── 색상 판단 ──
   const fmtPct = (v) => `${v > 0 ? '+' : ''}${Number(v).toFixed(1)}%`
 
-  const cagrColor   = cagr_pct >= 8 ? C.green : cagr_pct >= 3.5 ? C.positive : C.negative
+  const cagrColor   = cagr_pct >= 8 ? C.positive : cagr_pct >= 3.5 ? C.amber : C.negative
   const mddColor    = Math.abs(mdd_pct) <= 20 ? C.green
                     : Math.abs(mdd_pct) <= 35  ? C.amber
                     : C.negative
