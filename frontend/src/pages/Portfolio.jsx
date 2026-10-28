@@ -2466,7 +2466,7 @@ export default function Portfolio() {
                       <td>
                         <div className="rec-name">{r.name}</div>
                         <div className="rec-asset-label" style={{ color: ASSET_COLOR[r.asset_class] }}>
-                          {r.asset_class_label}
+                          {noEmoji(r.asset_class_label)}
                         </div>
                         <StockRationaleCard rec={r} />
                       </td>
@@ -2482,7 +2482,7 @@ export default function Portfolio() {
                       <td className="num">
                         {r.ml_status ? (
                           <span className={`ml-badge ml-${r.ml_status?.toLowerCase()}`}>
-                            {r.ml_icon} {r.ml_status}
+                            {r.ml_status}
                           </span>
                         ) : <span className="ml-badge ml-intact">N/A</span>}
                       </td>
@@ -2525,8 +2525,8 @@ export default function Portfolio() {
                   <div className="isa-value">{result.isa_strategy.tax_rate}</div>
                 </div>
               </div>
-              <div className="isa-tip">{result.isa_strategy.tip}</div>
-              <div className="rebalancing-tip">{result.rebalancing_tip}</div>
+              <div className="isa-tip">{noEmoji(result.isa_strategy.tip)}</div>
+              <div className="rebalancing-tip">{noEmoji(result.rebalancing_tip)}</div>
             </div>
 
             {/* ══ 신규 분석 패널 ══════════════════════════════════════ */}
@@ -2550,7 +2550,7 @@ export default function Portfolio() {
                         <div key={name} style={{ textAlign: 'center', padding: '12px 8px',
                              border: '1px solid var(--border)', borderRadius: 12,
                              background: ok ? 'var(--surface2)' : 'rgba(220,38,38,.05)' }}>
-                          <div style={{ fontSize: 12, color: 'var(--text-sub)' }}>{icon} {name}</div>
+                          <div style={{ fontSize: 12, color: 'var(--text-sub)' }}>{name}</div>
                           <div style={{ fontSize: 12, color: 'var(--text-sub)', marginTop: 2 }}>월 {target}만원</div>
                           <div style={{ fontSize: 26, fontWeight: 800, marginTop: 4, color }}>
                             {ok ? `${age}세` : '미달성'}
@@ -2837,7 +2837,7 @@ export default function Portfolio() {
                     fontSize: 13, color: 'var(--text-sub)', lineHeight: 1.8,
                     whiteSpace: 'pre-line',
                   }}>
-                    {text}
+                    {noEmoji(text)}
                   </div>
                 </div>
               )
