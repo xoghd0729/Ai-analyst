@@ -2,10 +2,11 @@
  * InputWizard — 투자 조건 설정. 좌측: 단계별 입력 / 우측: 입력값 요약(계산은 단순 곱셈만).
  * 질문 1개당 화면 1개. Enter / 다음 버튼으로 진행, 마지막에서 추천 실행.
  *
- * props: form, onChange(key,val), onSubmit(), onPersona(persona), demo, personas, loading, error, loadingMsg
+ * props: form, onChange(key,val), onSubmit(), onPersona(persona), demo, personas, loading, error, phase, wakeSec
  */
 import { useState, useEffect } from 'react'
 import { fmtMan } from '../utils/format'
+import AnalysisProgress from './AnalysisProgress'
 import Icon from './Icon'
 
 const STEPS = [
@@ -29,7 +30,7 @@ const GROWTHS = [{ v: 0, l: '고정' }, { v: 3, l: '연 3%' }, { v: 5, l: '연 5
 const riskLabel = (v) => RISKS.find(r => r.value === v)?.label || '—'
 const won = (v) => (v === '' || v == null || isNaN(Number(v)) ? '—' : fmtMan(Number(v)))
 
-export default function InputWizard({ form, onChange, onSubmit, onPersona, demo, personas, loading, error, loadingMsg }) {
+export default function InputWizard({ form, onChange, onSubmit, onPersona, demo, personas, loading, error, phase, wakeSec }) {
   const [step, setStep] = useState(0)          // 0 = 시작 방식 선택, 1~5 = 입력 단계
   const cur = step > 0 ? STEPS[step - 1] : null
   const last = step === STEPS.length
@@ -80,7 +81,8 @@ export default function InputWizard({ form, onChange, onSubmit, onPersona, demo,
                   </li>
                 ))}
               </ul>
-              {loading && <div className="iw-loading">{loadingMsg || '분석 중... 잠시만 기다려 주세요'}</div>}
+              {error && <div className="iw-error">{error}</div>}
+              {loading && <AnalysisProgress phase={phase} wakeSec={wakeSec} />}
             </div>
           )}
 
@@ -134,7 +136,7 @@ export default function InputWizard({ form, onChange, onSubmit, onPersona, demo,
               )}
 
               {error && <div className="iw-error">{error}</div>}
-              {loading && last && <div className="iw-loading">{loadingMsg || '분석 중...'}</div>}
+              {loading && last && <AnalysisProgress phase={phase} wakeSec={wakeSec} />}
 
               <div className="iw-nav">
                 <button type="button" className="iw-btn ghost" onClick={prev}>이전</button>

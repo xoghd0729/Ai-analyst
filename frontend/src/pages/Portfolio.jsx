@@ -743,6 +743,7 @@ export default function Portfolio() {
   const [activePersona, setActivePersona] = useState(null)
   const [showAnalysis, setShowAnalysis] = useState(true)    // (탭 구조로 대체 — 항상 펼침)
   const [sideCollapsed, setSideCollapsed] = useState(false)   // 사이드바 접기
+  const [phase, setPhase] = useState('wake')                   // 분석 단계: wake | analyze
   const [wakeSec, setWakeSec] = useState(null)               // 서버 깨우는 중 경과(초)
   const [rtab, setRtab] = useState('dash')                   // 결과 화면
   const [formOpen, setFormOpen] = useState(true)               // 입력 폼 표시 여부
@@ -836,10 +837,10 @@ export default function Portfolio() {
   // 단일 진실의 원천: form override를 받을 수 있게
   const runRecommend = async (overrideForm) => {
     const f = overrideForm || form
-    setLoading(true); setError(null); setWakeSec(null)
+    setLoading(true); setError(null); setWakeSec(null); setPhase('wake')
     try {
       await wakeServer(sec => setWakeSec(sec))
-      setWakeSec(null)
+      setWakeSec(null); setPhase('analyze')
       // investable_amount = 초기 여유자금(reserve)만. monthly_invest는 monthly_savings로 별도 전달.
       // reserve=0이면 백엔드가 target_yield=5%로 폴백하고 양호하게 처리함.
       const investable = Number(f.reserve)
@@ -1088,7 +1089,7 @@ export default function Portfolio() {
             form={form} onChange={handleChange} onSubmit={handleSubmit}
             onPersona={handlePersonaClick} demo={DEMO_PRESENTATION} personas={PERSONAS}
             loading={loading} error={error}
-            loadingMsg={wakeSec != null ? `서버를 깨우는 중... ${wakeSec}초 경과 (처음 접속 시 1~2분 걸릴 수 있어요)` : '분석 중... 잠시만 기다려 주세요'}
+            phase={phase} wakeSec={wakeSec}
           />
         )}
         {/* ── 입력 폼 ── */}

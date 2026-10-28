@@ -472,3 +472,17 @@ button, input, select, textarea { font-family: inherit; }
 .rtbl-tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px}
 .rtbl-tag.muted{color:#64748b;background:#f1f5f9;font-weight:600}
 @media (max-width:900px){.rtbl-row{grid-template-columns:minmax(0,2fr) 1fr 1fr;row-gap:6px}.rtbl-row>:nth-child(n+4){display:none}.rtbl-head>:nth-child(n+4){display:none}}
+
+/* ── 분석 진행 표시 ───────────────────────── */
+.ap{margin-top:22px;padding:16px 18px;border:1px solid var(--line,#e3e8f2);border-radius:12px;background:#fff;max-width:420px}
+.ap-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.ap-item{display:flex;align-items:center;gap:10px;font-size:14px;color:#8a94a8}
+.ap-item.active{color:var(--ink-900,#111c33);font-weight:600}
+.ap-item.done{color:#0f7a55}
+.ap-mark{width:18px;height:18px;border-radius:50%;border:1.5px solid #d3d9e6;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.ap-item.done .ap-mark{background:#0f7a55;border-color:#0f7a55;color:#fff}
+.ap-item.active .ap-mark{border-color:var(--brand,#2563eb)}
+.ap-spin{width:9px;height:9px;border-radius:50%;border:2px solid var(--brand,#2563eb);border-right-color:transparent;animation:ap-rot .8s linear infinite}
+@keyframes ap-rot{to{transform:rotate(360deg)}}
+.ap-time{margin-left:auto;font-size:13px;color:var(--ink-600,#5b6577);font-variant-numeric:tabular-nums}
+.ap-note{margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-600,#5b6577)}
