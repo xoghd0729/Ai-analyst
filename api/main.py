@@ -69,7 +69,7 @@ app.include_router(portfolio.router, prefix="/api/portfolio", tags=["포트폴�
 app.include_router(auth.router,      prefix="/api/auth",      tags=["사용자"])
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def root():
     return {
         "status":  "ok",
@@ -79,7 +79,7 @@ def root():
     }
 
 
-@app.get("/api/health", tags=["시스템"])
+@app.api_route("/api/health", methods=["GET", "HEAD"], tags=["시스템"])
 def health_check():
     """
     헬스 체크 엔드포인트.
