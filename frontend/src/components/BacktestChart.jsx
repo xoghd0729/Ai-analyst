@@ -99,9 +99,9 @@ const StatCard = ({ label, value, color, sub }) => (
     background: C.cardBg, border: `1px solid ${C.cardBorder}`,
     borderRadius: 12, padding: '14px 18px', flex: 1, minWidth: 100,
   }}>
-    <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>{label}</div>
-    <div style={{ fontSize: 22, fontWeight: 700, color }}>{value}</div>
-    {sub && <div style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>{sub}</div>}
+    <div style={{ fontSize: 13, color: C.muted, marginBottom: 6 }}>{label}</div>
+    <div style={{ fontSize: 28, fontWeight: 700, color, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+    {sub && <div style={{ fontSize: 12, color: C.muted, marginTop: 4, lineHeight: 1.5 }}>{sub}</div>}
   </div>
 )
 
@@ -109,7 +109,7 @@ const StatCard = ({ label, value, color, sub }) => (
 const ChartLegend = () => (
   <div style={{
     display: 'flex', gap: 16, justifyContent: 'center',
-    fontSize: 12, color: C.muted, marginTop: 4,
+    fontSize: 13, color: C.muted, marginTop: 8,
   }}>
     <span><span style={{ color: C.positive, fontWeight: 700 }}>■</span> 포트폴리오(+)</span>
     <span><span style={{ color: C.negative, fontWeight: 700 }}>■</span> 포트폴리오(−)</span>
@@ -206,7 +206,7 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
       {/* ── 헤더 ── */}
       <div style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>
+          <span style={{ fontSize: 17, fontWeight: 700 }}>
             과거 성과 분석 ({startYear}–{endYear})
           </span>
           {grade && (
@@ -220,7 +220,7 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
           )}
         </div>
         {summary_message && (
-          <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>
+          <div style={{ fontSize: 13, color: C.muted, marginTop: 6 }}>
             {noEmoji(summary_message)}
           </div>
         )}
@@ -251,21 +251,21 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
       {/* ── ComposedChart ── */}
       <ResponsiveContainer width="100%" height={280}>
         <ComposedChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+          <CartesianGrid strokeDasharray="0" stroke="#e8ecf4" vertical={false} />
           <XAxis
             dataKey="year"
-            tick={{ fontSize: 11, fill: C.muted }}
+            tick={{ fontSize: 12, fill: C.muted }}
             axisLine={{ stroke: C.cardBorder }}
             tickLine={false}
           />
           <YAxis
             tickFormatter={v => `${v > 0 ? '+' : ''}${v}%`}
-            tick={{ fontSize: 11, fill: C.muted }}
+            tick={{ fontSize: 12, fill: C.muted }}
             axisLine={false}
             tickLine={false}
             width={50}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(15,42,92,0.05)' }} />
 
           {/* 0% 기준선 */}
           <ReferenceLine y={0} stroke={C.zero} strokeWidth={1} />
@@ -283,7 +283,7 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
 
           {/* KOSPI 라인 */}
           <Line
-            type="monotone"
+            type="linear"
             dataKey="kospi_ret"
             name="KOSPI"
             stroke={C.kospi}
@@ -294,7 +294,7 @@ export default function BacktestChart({ portfolio, startYear = 2015, endYear = 2
 
           {/* S&P 500 라인 */}
           <Line
-            type="monotone"
+            type="linear"
             dataKey="sp500_ret"
             name="S&P 500"
             stroke={C.sp500}
