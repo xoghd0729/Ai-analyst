@@ -21,7 +21,7 @@ function Tip({ active, payload, label }) {
 
 export default function GoalHero({
   target, achAge, curAge, prob, riskLabel, riskColor, curMonthly, curAsset, targetAsset,
-  monthlyInvest, growth, fanData, gap, onGo,
+  monthlyInvest, growth, fanData, gap, onGo, reserve = 0, netYield = null,
 }) {
   const left = achAge ? achAge - curAge : null
   const pctAsset = Math.max(1, Math.min(100, (curAsset / targetAsset) * 100))
@@ -57,7 +57,18 @@ export default function GoalHero({
           <div className="gh-prog-h"><span>목표 자산 도달</span><b>{fmtAsset(curAsset)} → {fmtAsset(targetAsset)}</b></div>
           <div className="gh-bar"><div style={{ width: `${pctAsset}%` }} /></div>
         </div>
-        <div className="gh-note">가정 기반 추정{growth > 0 ? ` · 연 ${growth}% 증액` : ''} · 배당 재투자 복리</div>
+        <details className="gh-assump">
+          <summary>계산 가정 보기</summary>
+          <ul>
+            <li><span>현재 나이</span><b>{curAge}세</b></li>
+            <li><span>시작 자산</span><b>{fmtAsset(reserve)}원</b></li>
+            <li><span>월 투자</span><b>{monthlyInvest}만원{growth > 0 ? ` (연 ${growth}% 증액)` : ''}</b></li>
+            {netYield != null && <li><span>세후 배당수익률 가정</span><b>{Number(netYield).toFixed(2)}%</b></li>}
+            <li><span>목표 자산 (목표 연 배당 ÷ 수익률)</span><b>{fmtAsset(targetAsset)}원</b></li>
+            <li><span>재투자</span><b>배당 재투자 복리</b></li>
+          </ul>
+          <p>가정에 기반한 추정치이며 미래 수익을 보장하지 않습니다.</p>
+        </details>
       </div>
 
       <div className="gh-right">

@@ -1393,6 +1393,7 @@ export default function Portfolio() {
                   curMonthly={curMonthly} curAsset={curAsset} targetAsset={targetAsset}
                   monthlyInvest={Number(result.monthly_invest || 0)} growth={Number(result.invest_growth || 0)}
                   fanData={mc?.fanData || []} gap={gap}
+                  reserve={Number(result.reserve || 0)} netYield={netY}
                   onGo={(id) => { setRtab(id); setFormOpen(false) }}
                 />
               )

@@ -424,3 +424,29 @@ button, input, select, textarea { font-family: inherit; }
 .lp-btn { font-size: 17px; padding: 15px 26px; }
 .lp-flow { padding: 26px 30px; }
 .lp-step-t { font-size: 16px; } .lp-step-d { font-size: 14px; }
+
+/* ═══════════ 입력 중심 흐름: 랜딩 최소화 / 진행 표시줄 / 계산 가정 ═══════════ */
+.lp-center { width: 100%; max-width: 720px; margin: 0 auto; text-align: center; }
+.lp-center .lp-eyebrow { letter-spacing: .14em; text-transform: uppercase; }
+.lp-center .lp-title { font-size: clamp(36px, 6.4vh, 60px); margin: 16px 0 16px; }
+.lp-center .lp-sub { margin: 0 auto; max-width: 520px; }
+.lp-center .lp-cta { justify-content: center; margin-top: 30px; }
+.lp-center .lp-login { margin-top: 22px; }
+
+.iw-progress { margin: 0 0 26px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.iw-progress-t { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: #64748b; margin-bottom: 10px; }
+.iw-progress-t b { color: var(--ink-900); font-size: 15px; }
+.iw-bar { height: 4px; border-radius: 4px; background: #e8edf5; overflow: hidden; }
+.iw-bar div { height: 100%; background: #2563eb; border-radius: 4px; transition: width .25s ease; }
+.iw-grid { grid-template-columns: 1.6fr 1fr; }
+.iw-side { align-self: start; }
+
+.gh-assump { margin-top: auto; padding-top: 14px; font-size: 13px; color: #64748b; }
+.gh-assump summary { cursor: pointer; font-weight: 600; color: #1d4ed8; list-style: none; width: fit-content; }
+.gh-assump summary::-webkit-details-marker { display: none; }
+.gh-assump summary::before { content: '+'; display: inline-block; width: 16px; font-weight: 700; }
+.gh-assump[open] summary::before { content: '−'; }
+.gh-assump ul { list-style: none; margin: 10px 0 8px; padding: 10px 14px; background: #f6f8fc; border-radius: 10px; }
+.gh-assump li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
+.gh-assump li b { color: var(--ink-900); text-align: right; }
+.gh-assump p { margin: 0; font-size: 12px; color: #94a3b8; }

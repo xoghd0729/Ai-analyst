@@ -50,22 +50,16 @@ export default function InputWizard({ form, onChange, onSubmit, onPersona, demo,
     { k: 'monthly_target', l: '목표 월배당', v: won(form.monthly_target) },
     { k: 'risk_tolerance', l: '투자 성향',   v: riskLabel(form.risk_tolerance) },
   ]
-  const yearInvest = Number(form.monthly_invest) * 12
-  const yearTarget = Number(form.monthly_target) * 12
 
   return (
     <div className="iw">
       <div className="iw-grid">
         {/* ── 좌측: 입력 ── */}
         <section className="iw-main">
-          <ol className="iw-steps" aria-label="진행 단계">
-            <li className={step === 0 ? 'on' : 'done'}><button type="button" onClick={() => setStep(0)}>시작</button></li>
-            {STEPS.map((s, i) => (
-              <li key={s.key} className={step === i + 1 ? 'on' : step > i + 1 ? 'done' : ''}>
-                <button type="button" onClick={() => setStep(i + 1)}>{s.label}</button>
-              </li>
-            ))}
-          </ol>
+          <div className="iw-progress" aria-label="진행 상태">
+            <div className="iw-progress-t"><b>투자 조건 입력</b><span>{step === 0 ? '시작' : `${step} / ${STEPS.length}`}</span></div>
+            <div className="iw-bar"><div style={{ width: `${(step / STEPS.length) * 100}%` }} /></div>
+          </div>
 
           {step === 0 && (
             <div className="iw-body">
@@ -92,7 +86,7 @@ export default function InputWizard({ form, onChange, onSubmit, onPersona, demo,
 
           {cur && (
             <div className="iw-body">
-              <div className="iw-eyebrow">{step} / {STEPS.length} · {cur.label}</div>
+              <div className="iw-eyebrow">{cur.label}</div>
               <h1 className="iw-title">{cur.title}</h1>
               <p className="iw-hint">{cur.hint}</p>
 
@@ -155,7 +149,7 @@ export default function InputWizard({ form, onChange, onSubmit, onPersona, demo,
 
         {/* ── 우측: 입력값 요약 ── */}
         <aside className="iw-side" aria-label="입력 조건 요약">
-          <div className="iw-side-h">입력 조건 요약</div>
+          <div className="iw-side-h">입력한 조건</div>
           <dl className="iw-rows">
             {rows.map(r => (
               <div key={r.k} className={cur && cur.key === r.k ? 'on' : ''}>
@@ -163,14 +157,6 @@ export default function InputWizard({ form, onChange, onSubmit, onPersona, demo,
               </div>
             ))}
           </dl>
-          <div className="iw-side-h sub">입력값 기준 단순 계산</div>
-          <dl className="iw-rows calc">
-            <div><dt>연 투자 금액</dt><dd>{isNaN(yearInvest) ? '—' : fmtMan(yearInvest)}</dd></div>
-            <div><dt>목표 연 배당</dt><dd>{isNaN(yearTarget) ? '—' : fmtMan(yearTarget)}</dd></div>
-          </dl>
-          <p className="iw-side-note">
-            포트폴리오 구성, 달성 시점, 위험 지표는 분석을 실행한 뒤 계산됩니다. 여기에는 입력값과 단순 곱셈 값만 표시돼요.
-          </p>
         </aside>
       </div>
     </div>
