@@ -83,13 +83,14 @@ const CustomTooltip = ({ active, payload }) => {
 }
 
 // ── 최적 포트폴리오 요약 카드 ─────────────────────────────────────
-function OptPortCard({ title, icon, data, color }) {
+function OptPortCard({ title, icon, data, color, names = {} }) {
   if (!data) return null
   const { tickers = [], weight_pct = [], expected_return, volatility, sharpe } = data
 
   // 상위 3 종목 (가중치 높은 순)
   const top3 = tickers
     .map((t, i) => ({ ticker: t, pct: weight_pct[i] ?? 0 }))
+    .filter(x => x.pct >= 0.5)
     .sort((a, b) => b.pct - a.pct)
     .slice(0, 3)
 
@@ -111,7 +112,7 @@ function OptPortCard({ title, icon, data, color }) {
         ].map(({ label, value, color: c }) => (
           <div key={label} style={{
             background: 'var(--surface)', borderRadius: 8,
-            padding: '6px 10px', fontSize: 11,
+            padding: '6px 10px', fontSize: 12,
           }}>
             <div style={{ color: C.muted }}>{label}</div>
             <div style={{ color: c, fontWeight: 700, fontSize: 13 }}>{value}</div>
@@ -120,15 +121,15 @@ function OptPortCard({ title, icon, data, color }) {
       </div>
 
       {/* 상위 종목 */}
-      <div style={{ fontSize: 11, color: C.muted, marginBottom: 4 }}>상위 배분</div>
+      <div style={{ fontSize: 12, color: C.muted, marginBottom: 4 }}>상위 배분</div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {top3.map(({ ticker, pct }) => (
           <span key={ticker} style={{
             background: `${color}18`, border: `1px solid ${color}40`,
-            borderRadius: 6, padding: '3px 8px', fontSize: 11,
+            borderRadius: 6, padding: '3px 8px', fontSize: 12,
             color: C.text,
           }}>
-            {ticker} {pct?.toFixed(0)}%
+            {names[ticker] || ticker} {pct?.toFixed(0)}%
           </span>
         ))}
       </div>
@@ -211,9 +212,10 @@ export default function EfficientFrontierChart({ portfolio }) {
   const maxS = Math.max(...sharpes)
 
   // 특수 마커 (max_sharpe, min_vol)
+  const names = Object.fromEntries((portfolio?.recommendations || []).map(r => [r.ticker, r.name]))
   const specialPts = [
-    max_sharpe    && { ...max_sharpe,    _type: 'max_sharpe'    },
-    min_volatility && { ...min_volatility, _type: 'min_vol'      },
+    max_sharpe    && { ...max_sharpe,    return: max_sharpe.expected_return,    _type: 'max_sharpe' },
+    min_volatility && { ...min_volatility, return: min_volatility.expected_return, _type: 'min_vol'    },
   ].filter(Boolean)
 
   return (
@@ -237,12 +239,14 @@ export default function EfficientFrontierChart({ portfolio }) {
           icon="★"
           data={max_sharpe}
           color={C.purple}
+          names={names}
         />
         <OptPortCard
           title="최소 변동성 포트폴리오"
           icon="◆"
           data={min_volatility}
           color={C.blue}
+          names={names}
         />
       </div>
 
@@ -255,23 +259,23 @@ export default function EfficientFrontierChart({ portfolio }) {
             type="number"
             name="변동성"
             unit="%"
-            tick={{ fontSize: 11, fill: C.muted }}
+            tick={{ fontSize: 12, fill: C.muted }}
             axisLine={{ stroke: C.cardBorder }}
             tickLine={false}
             label={{ value: '변동성 (%)', position: 'insideBottom', offset: -2,
-                     style: { fontSize: 10, fill: C.muted } }}
+                     style: { fontSize: 12, fill: C.muted } }}
           />
           <YAxis
             dataKey="return"
             type="number"
             name="기대수익률"
             unit="%"
-            tick={{ fontSize: 11, fill: C.muted }}
+            tick={{ fontSize: 12, fill: C.muted }}
             axisLine={false}
             tickLine={false}
             width={48}
             label={{ value: '기대수익률 (%)', angle: -90, position: 'insideLeft',
-                     offset: 10, style: { fontSize: 10, fill: C.muted } }}
+                     offset: 10, style: { fontSize: 12, fill: C.muted } }}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#c8d0dc', strokeDasharray: '3 3' }} />
 
@@ -282,7 +286,7 @@ export default function EfficientFrontierChart({ portfolio }) {
             strokeDasharray="4 2"
             strokeWidth={1}
             label={{ value: `rf ${risk_free_rate}%`, position: 'right',
-                     style: { fontSize: 9, fill: C.muted } }}
+                     style: { fontSize: 12, fill: C.muted } }}
           />
 
           {/* 일반 frontier 점들 — 색상은 CSS fill로 개별 설정 */}
@@ -313,7 +317,6 @@ export default function EfficientFrontierChart({ portfolio }) {
                   textAnchor="middle" dominantBaseline="central"
                   fontSize={isMax ? 16 : 13}
                   fill={color}
-                  filter="drop-shadow(0 0 3px rgba(0,0,0,0.8))"
                 >
                   {symbol}
                 </text>
