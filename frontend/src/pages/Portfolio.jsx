@@ -687,7 +687,7 @@ function ShapExplainPanel({ recs }) {
           {/* AI 설명 — 3단계: 지표 → 의미 → 배당 영향 */}
           {aiLines.length > 0 && (
             <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#1456f0', marginBottom: 8 }}>🤖 AI 설명 — 지표 · 의미 · 배당 영향</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#1456f0', marginBottom: 8 }}>AI 설명 — 지표 · 의미 · 배당 영향</div>
               {aiLines.map((step, i) => (
                 <div key={i} style={{
                   marginBottom: 12, padding: '10px 12px',
@@ -711,12 +711,12 @@ function ShapExplainPanel({ recs }) {
 
           {/* 현실 맥락 — 현실에서 이 종목은 */}
           <div style={{ marginTop: 12, background: '#f4f6f9', borderRadius: 8, padding: '9px 12px' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--border)', marginBottom: 3 }}>🏢 현실에서 이 종목은</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--border)', marginBottom: 3 }}>현실에서 이 종목은</div>
             <div style={{ fontSize: 12.5, color: 'var(--text,#1f2937)', lineHeight: 1.55 }}>{realWorldContext(selName)}</div>
           </div>
 
           {data.summary && (
-            <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-muted,#475569)' }}>💡 {data.summary}</div>
+            <div style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-muted,#475569)' }}>{data.summary}</div>
           )}
           <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-muted,#cbd5e1)' }}>
             Survival 리스크 모델 · 막대 길이 = 피처 기여 강도(high/medium/low) · 출처: DART 재무 데이터
@@ -1012,14 +1012,14 @@ export default function Portfolio() {
         <div style={{ marginTop: 10, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           {authEmail ? (
             <>
-              <span style={{ fontSize: 13, color: 'var(--text-sub)' }}>👤 {authEmail}</span>
+              <span style={{ fontSize: 13, color: 'var(--text-sub)' }}>{authEmail}</span>
               <button type="button" onClick={() => { setMyOpen(o => !o); refreshMyList() }}
-                style={authBtn(false)}>📁 내 포트폴리오 {myList.length ? `(${myList.length})` : ''}</button>
+                style={authBtn(false)}>내 포트폴리오 {myList.length ? `(${myList.length})` : ''}</button>
               <button type="button" onClick={handleLogout} style={authBtn(false)}>로그아웃</button>
             </>
           ) : (
             <button type="button" onClick={() => { setAuthMode('login'); setAuthOpen(true) }}
-              style={authBtn(true)}>🔑 로그인 / 회원가입</button>
+              style={authBtn(true)}>로그인 / 회원가입</button>
           )}
         </div>
 
@@ -1028,7 +1028,7 @@ export default function Portfolio() {
           <div className="card" style={{ marginTop: 10 }}>
             <h3 className="card-title" style={{ fontSize: 15 }}>내 포트폴리오</h3>
             {myList.length === 0 ? (
-              <div style={{ fontSize: 13, color: 'var(--text-sub)' }}>저장된 포트폴리오가 없습니다. 추천 결과에서 "💾 저장"을 눌러보세요.</div>
+              <div style={{ fontSize: 13, color: 'var(--text-sub)' }}>저장된 포트폴리오가 없습니다. 추천 결과에서 "저장"을 눌러보세요.</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {myList.map(p => (
@@ -1057,7 +1057,7 @@ export default function Portfolio() {
              background: 'rgba(15,23,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div onClick={e => e.stopPropagation()} className="card"
                style={{ width: 340, maxWidth: '90vw' }}>
-            <h3 className="card-title">{authMode === 'login' ? '🔑 로그인' : '📝 회원가입'}</h3>
+            <h3 className="card-title">{authMode === 'login' ? '로그인' : '회원가입'}</h3>
             <input type="email" placeholder="이메일" value={authForm.email}
               onChange={e => setAuthForm(f => ({ ...f, email: e.target.value }))}
               style={modalInput} />
@@ -1110,7 +1110,7 @@ export default function Portfolio() {
               transition: 'all .2s',
             }}
           >
-            <span style={{ fontSize: 22 }}>🎬</span>
+            
             <div style={{ flex: 1, textAlign: 'left' }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
                 발표 데모 시작
@@ -1123,7 +1123,7 @@ export default function Portfolio() {
               fontSize: 10, padding: '2px 7px', borderRadius: 5, fontWeight: 700,
               background: '#7c3aed', color: '#fff',
             }}>
-              {loading && activePersona === 'demo_presentation' ? '분석 중...' : '▶ 시작'}
+              {loading && activePersona === 'demo_presentation' ? '분석 중...' : '시작'}
             </span>
           </button>
 
@@ -1139,7 +1139,7 @@ export default function Portfolio() {
               fontSize: 11, fontWeight: 600, color: 'var(--text-sub)',
               letterSpacing: 0.5, textTransform: 'uppercase',
             }}>
-              ⚡ 빠른 데모 — 페르소나 선택
+              빠른 데모 — 페르소나 선택
             </div>
             <div style={{
               display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6,
@@ -1169,8 +1169,7 @@ export default function Portfolio() {
                       if (!active) e.currentTarget.style.borderColor = 'var(--border)'
                     }}
                   >
-                    <div style={{ fontSize: 16 }}>{p.icon}</div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>
+                                        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>
                       {p.title}
                     </div>
                     <div style={{ fontSize: 10, color: 'var(--text-sub)' }}>
@@ -1260,7 +1259,7 @@ export default function Portfolio() {
           </div>
 
           <button className="btn btn-primary submit-btn" onClick={handleSubmit} disabled={loading}>
-            {loading ? '⏳ 분석 중...' : '🚀 포트폴리오 추천받기'}
+            {loading ? '분석 중...' : '포트폴리오 추천받기'}
           </button>
           {error && <div className="error-box" style={{ marginTop: 12 }}>{error}</div>}
         </div>
@@ -1313,8 +1312,7 @@ export default function Portfolio() {
                 onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 title={s.label}
               >
-                <span style={{ fontSize: 14 }}>{s.icon}</span>
-                <span>{s.label}</span>
+                                <span>{s.label}</span>
               </a>
             ))}
           </nav>
@@ -1362,10 +1360,10 @@ export default function Portfolio() {
                 <p>{RESULT_TABS[pageIdx].group} · 분석 결과를 한 화면씩 확인하세요</p>
               </div>
               <div className="rh-tools">
-                {activePersona === 'demo_presentation' && <span className="rh-chip">🎬 발표 데모 · {DEMO_PRESENTATION.label}</span>}
+                {activePersona === 'demo_presentation' && <span className="rh-chip">발표 데모 · {DEMO_PRESENTATION.label}</span>}
                 {saveMsg && <span style={{ fontSize: 12, color: saveMsg.startsWith('✓') ? '#059669' : '#dc2626' }}>{saveMsg}</span>}
                 <button type="button" className="rh-btn" onClick={handleSavePortfolio}>
-                  💾 {authEmail ? '저장' : '로그인하고 저장'}
+                  {authEmail ? '저장' : '로그인하고 저장'}
                 </button>
                 <button type="button" className="rh-btn" onClick={() => setFormOpen(v => !v)}><Icon name="edit" size={15} /> 입력 수정</button>
               </div>
@@ -1502,7 +1500,7 @@ export default function Portfolio() {
                       background: 'rgba(37,99,235,.08)', border: '1px solid rgba(37,99,235,.2)',
                       borderRadius: 5, padding: '2px 8px', fontWeight: 600, color: '#2563eb',
                     }}>
-                      🔧 계산 가정 {showAssumptions ? '▲ 접기' : '▼ 보기'}
+                      계산 가정 {showAssumptions ? '▲ 접기' : '▼ 보기'}
                     </span>
                     <span>각 섹션이 사용하는 수익률·CPI·기간 가정</span>
                   </button>
@@ -1598,7 +1596,7 @@ export default function Portfolio() {
                                  textAlign: 'right', fontWeight: last ? 700 : 400,
                                  background: last ? 'rgba(5,150,105,.06)' : 'transparent' }}>
                               <td style={{ textAlign: 'left', padding: '8px' }}>
-                                {d.age}세 {i === 0 ? '(현재)' : last ? '🎯 달성' : ''}
+                                {d.age}세 {i === 0 ? '(현재)' : last ? '달성' : ''}
                               </td>
                               <td style={{ padding: '8px', color: 'var(--text-sub)' }}>{fmt(d.invested)}원</td>
                               <td style={{ padding: '8px' }}>{fmt(d.portfolio)}원</td>
@@ -1612,12 +1610,12 @@ export default function Portfolio() {
                     </table>
                   </div>
                   <div className="chart-note" style={{ marginTop: 8 }}>
-                    💡 {startAge}세 {fmt(rows[0].portfolio)}원 → {targetAge}세 {fmt(rows[rows.length-1].portfolio)}원,
+                    {startAge}세 {fmt(rows[0].portfolio)}원 → {targetAge}세 {fmt(rows[rows.length-1].portfolio)}원,
                     월배당 {Math.round(rows[rows.length-1].monthlyDiv)}만원으로 목표({result.monthly_target}만원) 도달.
                   </div>
                   <div style={{ marginTop: 8, fontSize: 11.5, color: 'var(--text-sub)',
                        background: 'var(--surface2)', borderRadius: 8, padding: '8px 10px' }}>
-                    ⚙️ 가정 — 세후 배당률 {afterTaxYield ? afterTaxYield.toFixed(1) : '-'}%
+                    가정 — 세후 배당률 {afterTaxYield ? afterTaxYield.toFixed(1) : '-'}%
                     · 배당 전액 재투자(복리)
                     · 적립금 연 {result.invest_growth || 0}% 증액
                     · 주가성장 제외(보수적)
@@ -1641,7 +1639,7 @@ export default function Portfolio() {
                   {investScenarios?.some(x => x.age) && (
                     <div style={{ marginBottom: 16 }}>
                       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--border)', marginBottom: 8 }}>
-                        💰 월 투자금 증액 → 달성 나이 단축
+                        월 투자금 증액 → 달성 나이 단축
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {investScenarios.map(({ extra, monthlyInvest, age }) => {
@@ -1665,7 +1663,7 @@ export default function Portfolio() {
                               </div>
                               {gain > 0 && (
                                 <div style={{ width: 70, fontSize: 12, fontWeight: 700, color: '#7c3aed', textAlign: 'right', flexShrink: 0 }}>
-                                  ⚡ {gain}년 단축
+                                  {gain}년 단축
                                 </div>
                               )}
                             </div>
@@ -1679,7 +1677,7 @@ export default function Portfolio() {
                   {growthScenarios?.some(x => x.age) && (
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--border)', marginBottom: 8 }}>
-                        📈 연봉 상승(적립 연 증가) → 달성 나이 단축
+                        연봉 상승(적립 연 증가) → 달성 나이 단축
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
                         {growthScenarios.map(({ gr, age }) => {
@@ -1697,7 +1695,7 @@ export default function Portfolio() {
                                 {age ? `${age}세` : '미달성'}
                               </div>
                               {gr > 0 && gain > 0 && (
-                                <div style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>⚡ {gain}년 단축</div>
+                                <div style={{ fontSize: 11, color: '#059669', fontWeight: 700 }}>{gain}년 단축</div>
                               )}
                             </div>
                           )
@@ -1706,7 +1704,7 @@ export default function Portfolio() {
                     </div>
                   )}
                   <div className="chart-note" style={{ marginTop: 10 }}>
-                    💡 수익률보다 투자금 증가가 달성 시점에 더 직접적인 영향을 미칩니다. 승진·연봉 인상 시 투자금을 우선 늘리세요.
+                    수익률보다 투자금 증가가 달성 시점에 더 직접적인 영향을 미칩니다. 승진·연봉 인상 시 투자금을 우선 늘리세요.
                   </div>
                 </div>
               )
@@ -1723,49 +1721,49 @@ export default function Portfolio() {
                 <div style={{ padding: '12px 14px', background: 'rgba(20,86,240,.05)', borderRadius: 10,
                      border: '1px solid rgba(20,86,240,.15)' }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: '#1456f0', marginBottom: 8, letterSpacing: 0.5 }}>
-                    📚 학습 데이터
+                    학습 데이터
                   </div>
                   <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.8 }}>
-                    <div>🏢 <b>210</b>개 국내 배당주</div>
-                    <div>📊 <b>1,679</b>개 관측치</div>
-                    <div>📅 <b>2013~2025</b></div>
-                    <div>📂 출처: DART 재무 데이터</div>
+                    <div><b>210</b>개 국내 배당주</div>
+                    <div><b>1,679</b>개 관측치</div>
+                    <div><b>2013~2025</b></div>
+                    <div>출처: DART 재무 데이터</div>
                   </div>
                 </div>
                 <div style={{ padding: '12px 14px', background: 'rgba(5,150,105,.05)', borderRadius: 10,
                      border: '1px solid rgba(5,150,105,.15)' }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: '#059669', marginBottom: 8, letterSpacing: 0.5 }}>
-                    🧠 모델 구조
+                    모델 구조
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.9 }}>
-                    <div>⚙️ <b>Survival 리스크 모델</b></div>
+                    <div><b>Survival 리스크 모델</b></div>
                     <div style={{ fontSize: 11, color: 'var(--text-muted,#cbd5e1)', marginBottom: 4 }}>
                       배당 삭감까지 걸리는 시간을 확률로 예측하는<br/>
                       생존분석 기반 배당 지속성 판별 모델.<br/>
                       FCF·배당성향·이자보상배율 등 재무지표로<br/>
                       학습하며, DART 공시 데이터를 사용합니다.
                     </div>
-                    <div>🟢 INTACT — 삭감 위험 낮음</div>
-                    <div>🟡 WEAKENING — 위험 신호 감지</div>
-                    <div>🔴 BROKEN — 삭감 발생 또는 임박</div>
+                    <div>INTACT — 삭감 위험 낮음</div>
+                    <div>WEAKENING — 위험 신호 감지</div>
+                    <div>BROKEN — 삭감 발생 또는 임박</div>
                   </div>
                 </div>
                 <div style={{ padding: '12px 14px', background: 'rgba(124,58,237,.05)', borderRadius: 10,
                      border: '1px solid rgba(124,58,237,.15)' }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: '#7c3aed', marginBottom: 8, letterSpacing: 0.5 }}>
-                    ✅ 검증 결과
+                    검증 결과
                   </div>
                   <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.8 }}>
-                    <div>🔁 <b>GroupKFold</b></div>
-                    <div>📈 PR-AUC <b>0.801</b></div>
-                    <div>🎯 상위 20% 정밀도</div>
+                    <div><b>GroupKFold</b></div>
+                    <div>PR-AUC <b>0.801</b></div>
+                    <div>상위 20% 정밀도</div>
                     <div style={{ fontWeight: 700, color: '#7c3aed' }}>    <b>0.96</b></div>
                   </div>
                 </div>
               </div>
               <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-sub)',
                    background: 'var(--surface2)', borderRadius: 8, padding: '8px 12px' }}>
-                💡 10개 재무 피처(FCF·배당커버리지·영업현금흐름 등)를 입력받아 배당 삭감 위험을 3단계로 분류합니다.
+                10개 재무 피처(FCF·배당커버리지·영업현금흐름 등)를 입력받아 배당 삭감 위험을 3단계로 분류합니다.
                 SHAP(Explainable AI)으로 각 지표의 기여도를 정량화하여 "왜 위험한가"를 설명합니다.
               </div>
             </div>
@@ -1808,19 +1806,19 @@ export default function Portfolio() {
                        border: `1px solid ${riskColor}25` }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                       <div>
-                        <div style={{ fontSize: 11, color: 'var(--text-sub)', marginBottom: 3 }}>📈 기대 수익률</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-sub)', marginBottom: 3 }}>기대 수익률</div>
                         <div style={{ fontSize: 16, fontWeight: 700, color: riskColor }}>{selectedRisk.returnRange}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 11, color: 'var(--text-sub)', marginBottom: 3 }}>📉 예상 최대 낙폭(MDD)</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-sub)', marginBottom: 3 }}>예상 최대 낙폭(MDD)</div>
                         <div style={{ fontSize: 16, fontWeight: 700, color: '#dc2626' }}>{selectedRisk.mdd}</div>
                       </div>
                       <div style={{ gridColumn: '1 / -1' }}>
-                        <div style={{ fontSize: 11, color: 'var(--text-sub)', marginBottom: 3 }}>🧩 구성 특징</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-sub)', marginBottom: 3 }}>구성 특징</div>
                         <div style={{ fontSize: 13, color: 'var(--text)' }}>{selectedRisk.composition}</div>
                       </div>
                       <div style={{ gridColumn: '1 / -1' }}>
-                        <div style={{ fontSize: 11, color: 'var(--text-sub)', marginBottom: 3 }}>👤 추천 대상</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-sub)', marginBottom: 3 }}>추천 대상</div>
                         <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>{selectedRisk.target}</div>
                       </div>
                     </div>
@@ -1857,7 +1855,7 @@ export default function Portfolio() {
                       {yieldCapped ? (
                         /* 20% 상한 적용 시 — 명확한 설명 표시 */
                         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                          <span style={{ fontWeight: 700, color: '#d97706' }}>📐 필요 수익률</span>
+                          <span style={{ fontWeight: 700, color: '#d97706' }}>필요 수익률</span>
                           <span style={{ fontWeight: 800, fontSize: 15, color: '#d97706', textDecoration: 'line-through', opacity: .7 }}>
                             {rawYield ? `${Number(rawYield).toFixed(1)}%` : '—'}
                           </span>
@@ -1870,7 +1868,7 @@ export default function Portfolio() {
                       ) : (
                         /* 정상 범위 — 기존 표시 */
                         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                          <span style={{ fontWeight: 700, color: '#059669' }}>🎯 역산 목표수익률</span>
+                          <span style={{ fontWeight: 700, color: '#059669' }}>역산 목표수익률</span>
                           <span style={{ fontWeight: 800, fontSize: 15, color: '#059669' }}>{Number(tgtYield).toFixed(2)}%</span>
                           <span style={{ color: 'var(--text-sub)' }}>월 {result.input?.monthly_target}만원 목표 ÷ 투자금 {fmtMan(result.input?.investable)}으로 산출</span>
                         </div>
@@ -1882,7 +1880,7 @@ export default function Portfolio() {
                   <div style={{ marginBottom: 14, padding: '12px 14px', background: 'rgba(20,86,240,.04)',
                        borderRadius: 10, border: '1px solid rgba(20,86,240,.12)' }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: '#1456f0', marginBottom: 8 }}>
-                      🔍 AI가 이 종목들을 선택한 방식
+                      AI가 이 종목들을 선택한 방식
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, fontSize: 12 }}>
                       {[
@@ -1892,7 +1890,7 @@ export default function Portfolio() {
                         { icon: '🎯', title: '역할 중복 제거', desc: 'SCHD·VIG·DGRO처럼 역할이 겹치는 ETF는 대표 1개로 정리해 비중 왜곡 방지' },
                       ].map(item => (
                         <div key={item.title} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                          <span style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>
+                          <span style={{ width: 6, height: 6, borderRadius: 3, background: '#1456f0', marginTop: 6, flexShrink: 0 }} />
                           <div>
                             <div style={{ fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>{item.title}</div>
                             <div style={{ color: 'var(--text-sub)', lineHeight: 1.5 }}>{item.desc}</div>
@@ -1906,96 +1904,56 @@ export default function Portfolio() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div className="rtbl" role="table">
+                    <div className="rtbl-row rtbl-head" role="row">
+                      <span>종목</span>
+                      <span className="num">비중</span>
+                      <span className="num">배당률</span>
+                      <span className="num">위험 점수</span>
+                      <span>배당 안정성</span>
+                      <span className="num">적합도</span>
+                    </div>
                     {(showAllHoldings ? recs : recs.slice(0, 6)).map((r, i) => {
                       const role = holdingRole(r)
                       const desc = getStockDescription(r)
-                      // composite_risk_score 색상
                       const crs = r.composite_risk_score
                       const gate = r.risk_gate || (crs >= 75 ? 'BLOCK' : crs >= 50 ? 'WARN' : 'PASS')
                       const gateColor = gate === 'BLOCK' ? '#dc2626' : gate === 'WARN' ? '#d97706' : '#059669'
                       const gateLabel = gate === 'BLOCK' ? '위험' : gate === 'WARN' ? '주의' : '안전'
-                      // ml_status 배지
                       const mlStatus = r.ml_status
                       const mlColor = mlStatus === 'BROKEN' ? '#dc2626' : mlStatus === 'WEAKENING' ? '#d97706' : '#059669'
                       const mlLabel = mlStatus === 'BROKEN' ? 'BROKEN' : mlStatus === 'WEAKENING' ? 'WEAK' : 'INTACT'
+                      const col = ASSET_COLOR[r.asset_class] || '#2563eb'
+                      const note = r.recommendation_reason || desc
                       return (
-                      <div key={i} style={{ padding: '10px 12px', background: 'var(--surface2)',
-                           borderRadius: 10, border: `1px solid ${gate === 'BLOCK' ? '#fca5a5' : 'var(--border)'}` }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                          <span style={{ width: 8, height: 8, borderRadius: 99, background: ASSET_COLOR[r.asset_class] || '#2563eb', flexShrink: 0 }} />
-                          <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700,
-                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
-                          <span style={{ fontSize: 10.5, fontWeight: 700, padding: '2px 7px', borderRadius: 5,
-                                background: `${role.c}1a`, color: role.c, flexShrink: 0 }}>{role.t}</span>
-                          <div style={{ width: 60, height: 7, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', flexShrink: 0 }}>
-                            <div style={{ width: `${Math.min(100, r.weight_pct * 6)}%`, height: '100%', background: ASSET_COLOR[r.asset_class] || '#2563eb' }} />
+                        <div key={i} className={`rtbl-row${gate === 'BLOCK' ? ' is-block' : ''}`} role="row" title={desc || undefined}>
+                          <div className="rtbl-name">
+                            <div className="rtbl-title">
+                              <span className="rtbl-dot" style={{ background: col }} />
+                              <span className="rtbl-nm">{r.name}</span>
+                              <span className="rtbl-role" style={{ background: `${role.c}1a`, color: role.c }}>{role.t}</span>
+                            </div>
+                            {note && <div className="rtbl-note">{note}</div>}
                           </div>
-                          <span style={{ width: 42, textAlign: 'right', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{r.weight_pct}%</span>
+                          <div className="num rtbl-w">
+                            <span className="rtbl-bar"><i style={{ width: `${Math.min(100, r.weight_pct * 6)}%`, background: col }} /></span>
+                            <b>{r.weight_pct}%</b>
+                          </div>
+                          <div className="num">{r.expected_yield != null ? `${Number(r.expected_yield).toFixed(1)}%` : '-'}</div>
+                          <div className="num">
+                            {crs != null ? (
+                              <span style={{ color: gateColor, fontWeight: 700 }}>{Math.round(crs)} <small>{gateLabel}</small></span>
+                            ) : '-'}
+                          </div>
+                          <div>
+                            {mlStatus === 'NO_DATA' ? (
+                              <span className="rtbl-tag muted">데이터 부족</span>
+                            ) : mlStatus ? (
+                              <span className="rtbl-tag" style={{ color: mlColor, background: `${mlColor}14` }}>{mlLabel}</span>
+                            ) : '-'}
+                          </div>
+                          <div className="num">{r.fit_score != null ? `${Number(r.fit_score).toFixed(0)}점` : '-'}</div>
                         </div>
-                        {/* Risk Engine 출력: composite_risk_score / ml_status / fit_score */}
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', paddingLeft: 18, marginBottom: desc ? 4 : 0, flexWrap: 'wrap' }}>
-                          {crs != null && (
-                            <span style={{ fontSize: 10.5, padding: '1px 6px', borderRadius: 4,
-                              background: `${gateColor}18`, color: gateColor, fontWeight: 700 }}>
-                              위험 {Math.round(crs)} · {gateLabel}
-                            </span>
-                          )}
-                          {mlStatus === 'NO_DATA' ? (
-                            <span style={{ fontSize: 10.5, padding: '1px 6px', borderRadius: 4,
-                              background: '#f1f5f9', color: '#64748b', fontWeight: 600,
-                              border: '1px dashed #cbd5e1' }}>
-                              데이터부족
-                            </span>
-                          ) : mlStatus && (
-                            <span style={{ fontSize: 10.5, padding: '1px 6px', borderRadius: 4,
-                              background: `${mlColor}12`, color: mlColor, fontWeight: 600 }}>
-                              ML:{mlLabel}
-                            </span>
-                          )}
-                          {r.fit_score != null && (
-                            <span style={{ fontSize: 10.5, padding: '1px 6px', borderRadius: 4,
-                              background: 'rgba(20,86,240,.08)', color: '#1456f0', fontWeight: 600 }}>
-                              적합도 {Number(r.fit_score).toFixed(0)}점
-                            </span>
-                          )}
-                          {/* 적합도 세부: yield_fit / risk_fit / age_fit (0-100 스케일) */}
-                          {r.yield_fit != null && (
-                            <span style={{ fontSize: 10, color: 'var(--text-sub)', display: 'flex', gap: 4 }}>
-                              {[
-                                { label: '수익률', v: r.yield_fit },
-                                { label: '위험', v: r.risk_fit },
-                                { label: '나이', v: r.age_fit },
-                              ].map(({ label, v }) => (v != null && v > 2) && (
-                                <span key={label} style={{ padding: '0 4px', borderRadius: 3,
-                                  background: v >= 70 ? '#d1fae5' : v >= 40 ? '#fef3c7' : '#fee2e2',
-                                  color: v >= 70 ? '#065f46' : v >= 40 ? '#92400e' : '#991b1b',
-                                  fontWeight: 500 }}>
-                                  {label} {Math.round(v)}
-                                </span>
-                              ))}
-                            </span>
-                          )}
-                          {r.expected_yield != null && (
-                            <span style={{ fontSize: 10.5, color: 'var(--text-sub)' }}>
-                              배당 {Number(r.expected_yield).toFixed(1)}%
-                            </span>
-                          )}
-                        </div>
-                        {/* 추천 이유 (AI 개인화 설명) */}
-                        {r.recommendation_reason && (
-                          <div style={{ fontSize: 11, color: '#1456f0', lineHeight: 1.5, paddingLeft: 18,
-                            marginBottom: 2, opacity: 0.85 }}>
-                            💡 {r.recommendation_reason}
-                          </div>
-                        )}
-                        {/* 종목 설명 (자산 정보) */}
-                        {desc && (
-                          <div style={{ fontSize: 11.5, color: 'var(--text-sub)', lineHeight: 1.55, paddingLeft: 18 }}>
-                            {desc}
-                          </div>
-                        )}
-                      </div>
                       )
                     })}
                   </div>
@@ -2044,7 +2002,7 @@ export default function Portfolio() {
                     {top.map((a, i) => (
                       <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 13.5 }}>
                         <span style={{ fontWeight: 800, color: '#d97706' }}>{i + 1}</span>
-                        <span>{a.icon} {a.text}</span>
+                        <span>{a.text}</span>
                       </div>
                     ))}
                   </div>
@@ -2063,15 +2021,15 @@ export default function Portfolio() {
               const regAge  = (fireTargets || []).find(t => t.name === '일반 FIRE')?.age
               // 마일스톤 노드 구성 (나이순)
               const nodes = []
-              nodes.push({ age: startAge, label: '🌱 시작', sub: `월배당 ${Math.round(compoundData[0].monthlyDiv)}만` })
+              nodes.push({ age: startAge, label: '시작', sub: `월배당 ${Math.round(compoundData[0].monthlyDiv)}만` })
               const midAges = [Math.round((startAge + (achAge || startAge + 20)) / 2)]
               midAges.forEach(a => {
                 const d = compoundData.reduce((b, x) => Math.abs(x.age - a) < Math.abs(b.age - a) ? x : b, compoundData[0])
                 nodes.push({ age: d.age, label: `월배당 ${Math.round(d.monthlyDiv)}만` })
               })
-              if (achAge) nodes.push({ age: achAge, label: `🎯 목표 ${tgt}만 달성`, hl: true })
-              if (leanAge && leanAge !== achAge) nodes.push({ age: leanAge, label: '🏠 Lean FIRE' })
-              if (regAge && regAge !== achAge) nodes.push({ age: regAge, label: '🌴 일반 FIRE' })
+              if (achAge) nodes.push({ age: achAge, label: `목표 ${tgt}만 달성`, hl: true })
+              if (leanAge && leanAge !== achAge) nodes.push({ age: leanAge, label: 'Lean FIRE' })
+              if (regAge && regAge !== achAge) nodes.push({ age: regAge, label: '일반 FIRE' })
               nodes.sort((a, b) => a.age - b.age)
               return (
                 <div className="card">
@@ -2145,12 +2103,12 @@ export default function Portfolio() {
                   </div>
                   <div style={{ flex: 1, minWidth: 280, display: 'flex', flexWrap: 'wrap',
                        borderLeft: '1px solid var(--border)' }}>
-                    <Metric label="🛡️ 현재 소득 유지확률" value={`${sm.survival}%`}
+                    <Metric label="현재 소득 유지확률" value={`${sm.survival}%`}
                             color={sm.survival >= 70 ? '#059669' : sm.survival >= 40 ? '#d97706' : '#dc2626'} />
-                    <Metric label="🎯 목표 소득 달성확률" value={`${Math.round(ach)}%`}
+                    <Metric label="목표 소득 달성확률" value={`${Math.round(ach)}%`}
                             color={ach >= 70 ? '#059669' : ach >= 40 ? '#d97706' : '#dc2626'} />
-                    <Metric label="✂️ 배당컷 위험" value={sm.cut_risk_level} color={lvColor(sm.cut_risk_level)} />
-                    <Metric label="🔥 인플레 방어" value={sm.inflation_level} color={lvColor(sm.inflation_level)} />
+                    <Metric label="배당컷 위험" value={sm.cut_risk_level} color={lvColor(sm.cut_risk_level)} />
+                    <Metric label="인플레 방어" value={sm.inflation_level} color={lvColor(sm.inflation_level)} />
                   </div>
                 </div>
               )
@@ -2217,7 +2175,7 @@ export default function Portfolio() {
                   {result.risk_alerts.map((alert, i) => (
                     <div key={i} className={`risk-alert-item severity-${alert.severity}`}>
                       <div className="ra-header">
-                        <span className="ra-icon">{alert.status === 'BROKEN' ? '🔴' : '🟡'}</span>
+                        <span className="ra-icon" style={{ width: 8, height: 8, borderRadius: 4, display: 'inline-block', background: alert.status === 'BROKEN' ? '#dc2626' : '#d97706' }} />
                         <span className="ra-name">{alert.name}</span>
                         <span className="ra-badge">{alert.status}</span>
                         <span className="ra-weight">포트폴리오 {alert.weight_pct}%</span>
@@ -2230,7 +2188,7 @@ export default function Portfolio() {
                       <div className="ra-message">{alert.message}</div>
                       {alert.alternative && (
                         <div className="ra-alternative">
-                          💡 대체 검토: <strong>{alert.alternative.name}</strong> — {alert.alternative.reason}
+                          대체 검토: <strong>{alert.alternative.name}</strong> — {alert.alternative.reason}
                         </div>
                       )}
                     </div>
@@ -2264,7 +2222,7 @@ export default function Portfolio() {
                       fontSize: 12, color: 'var(--text-sub)', lineHeight: 1.6,
                     }}>
                       <div style={{ color: 'var(--border)', fontWeight: 600, marginBottom: 4 }}>
-                        ⚖️ 분산 방식 — 자산군 비중 × 종목 점수 비례
+                        분산 방식 — 자산군 비중 × 종목 점수 비례
                       </div>
                       총 <strong style={{ color: '#60a5fa' }}>{totalCount}개</strong> 종목,
                       평균 <strong style={{ color: '#60a5fa' }}>{avgWeight}%</strong> 비중.
@@ -2348,7 +2306,7 @@ export default function Portfolio() {
                   {/* 중간 달성 시점 */}
                   {(achieveAge || mc?.p50Age) && (
                     <ReferenceLine x={Math.ceil(achieveAge || mc.p50Age)} stroke="#059669" strokeDasharray="4 4"
-                      label={{ value: `🎯 ${Math.ceil(achieveAge || mc.p50Age)}세`, fill: '#059669', fontSize: 11, position: 'top' }} />
+                      label={{ value: `${Math.ceil(achieveAge || mc.p50Age)}세`, fill: '#059669', fontSize: 11, position: 'top' }} />
                   )}
 
                   <Line type="monotone" dataKey="high" stroke="rgba(52,211,153,0.4)"
@@ -2360,7 +2318,7 @@ export default function Portfolio() {
                 </ComposedChart>
               </ResponsiveContainer>
               <div className="chart-note">
-                💡 1,000회 Monte Carlo 시뮬레이션 | 음영 = 수익률 변동 구간 | 기본선 = 세후 수익률 기준
+                1,000회 Monte Carlo 시뮬레이션 | 음영 = 수익률 변동 구간 | 기본선 = 세후 수익률 기준
               </div>
             </div>
 
@@ -2407,7 +2365,7 @@ export default function Portfolio() {
                 )
               })()}
               <div className="chart-note">
-                💡 파랑 막대(연 1회 집중)는 한국 배당주가 연 1회(주로 4월) 일괄 지급되어 그달에 몰린 것입니다 — 오류 아님.
+                파랑 막대(연 1회 집중)는 한국 배당주가 연 1회(주로 4월) 일괄 지급되어 그달에 몰린 것입니다 — 오류 아님.
                 JEPI·O 등 월배당 ETF를 늘리면 매월 고르게 분산됩니다.
               </div>
             </div>
@@ -2472,7 +2430,7 @@ export default function Portfolio() {
                             background: rs.ok ? 'rgba(5,150,105,.12)' : 'rgba(217,119,6,.12)',
                             color: rs.ok ? '#059669' : '#d97706',
                           }}>
-                            {rs.ok ? '✓' : '⚠'} {rs.text}
+                            {rs.ok ? '✓' : '!'} {rs.text}
                           </span>
                         ))}
                       </div>
@@ -2525,7 +2483,7 @@ export default function Portfolio() {
                           <span className={`ml-badge ml-${r.ml_status?.toLowerCase()}`}>
                             {r.ml_icon} {r.ml_status}
                           </span>
-                        ) : <span className="ml-badge ml-intact">⚪ N/A</span>}
+                        ) : <span className="ml-badge ml-intact">N/A</span>}
                       </td>
                       <td className="num">{r.weight_pct}%</td>
                       <td className="num green">{r.est_monthly_div_만원}만원</td>
@@ -2534,7 +2492,7 @@ export default function Portfolio() {
                 </tbody>
               </table>
               <div className="chart-note" style={{ textAlign: 'left', marginTop: 8 }}>
-                💡 Total Return = 배당수익률 + 자본차익(주가성장) 근사값 | 은행 예금({bankRate}%) 초과 여부로 비교
+                Total Return = 배당수익률 + 자본차익(주가성장) 근사값 | 은행 예금({bankRate}%) 초과 여부로 비교
               </div>
             </div>
 
@@ -2566,8 +2524,8 @@ export default function Portfolio() {
                   <div className="isa-value">{result.isa_strategy.tax_rate}</div>
                 </div>
               </div>
-              <div className="isa-tip">💡 {result.isa_strategy.tip}</div>
-              <div className="rebalancing-tip">🔄 {result.rebalancing_tip}</div>
+              <div className="isa-tip">{result.isa_strategy.tip}</div>
+              <div className="rebalancing-tip">{result.rebalancing_tip}</div>
             </div>
 
             {/* ══ 신규 분석 패널 ══════════════════════════════════════ */}
@@ -2604,7 +2562,7 @@ export default function Portfolio() {
                     })}
                   </div>
                   <div className="chart-note" style={{ marginTop: 10 }}>
-                    ⚙️ 가정: 월 {result.monthly_invest}만원 적립
+                    가정: 월 {result.monthly_invest}만원 적립
                     {result.invest_growth > 0 ? ` (연 ${result.invest_growth}% 증액)` : ' (고정)'}
                     {' · '}배당 {result.summary?.avg_dividend_yield ? Number(result.summary.avg_dividend_yield).toFixed(1) : '-'}% 재투자 복리
                     {' · '}주가성장 제외(보수적). 가정이 바뀌면 달성 나이도 달라집니다.
@@ -2712,7 +2670,7 @@ export default function Portfolio() {
                     <div style={{ marginTop: 8, fontSize: 11, color: 'var(--text-muted,#cbd5e1)',
                                   padding: '4px 8px', background: 'var(--surface-2,rgba(0,0,0,.08))',
                                   borderRadius: 4, display: 'inline-block' }}>
-                      ℹ️ {mlNote}
+                      {mlNote}
                     </div>
                   )}
 
@@ -2747,7 +2705,7 @@ export default function Portfolio() {
                         return (
                           <div style={{ fontSize: 11.5, color: 'var(--text-sub)', marginTop: 8,
                                background: 'var(--surface2)', borderRadius: 8, padding: '8px 10px' }}>
-                            💡 <b>{r?.ko || top.g}</b>는 비중 {top.w}%지만 위험 기여 {top.pct}%
+                            <b>{r?.ko || top.g}</b>는 비중 {top.w}%지만 위험 기여 {top.pct}%
                             {` — ${r?.why || '분산 효과가 낮음'} (비중 대비 ${(top.pct / top.w).toFixed(1)}배)`}
                           </div>
                         )
@@ -2779,16 +2737,16 @@ export default function Portfolio() {
                           ))}
                         </div>
                       )}
-                      <div style={{ fontSize: 12, color: 'var(--text-muted,#475569)', marginTop: 8 }}>💡 {cmp.action_summary}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted,#475569)', marginTop: 8 }}>{cmp.action_summary}</div>
                     </div>
                   ) : (
                     <div style={{ marginTop: 14, background: 'var(--surface2)', borderRadius: 10, padding: '10px 14px',
                                   fontSize: 12, color: 'var(--text-sub)' }}>
-                      ✅ 분산 최적화 개선 여지 미미(+{cmp.delta_survival}%p) — 현재 구조가 이미 균형적입니다. 유지 권장.
+                      분산 최적화 개선 여지 미미(+{cmp.delta_survival}%p) — 현재 구조가 이미 균형적입니다. 유지 권장.
                     </div>
                   ))}
 
-                  <div className="chart-note" style={{ marginTop: 10 }}>💡 {s.summary}</div>
+                  <div className="chart-note" style={{ marginTop: 10 }}>{s.summary}</div>
                 </div>
               )
             })()}
@@ -2831,7 +2789,7 @@ export default function Portfolio() {
                       {b.name} <span style={{ fontWeight: 500, fontSize: 12 }}>{b.severity_label}</span>
                     </div>
                     <div>{b.evidence}</div>
-                    {b.debiasing_action && <div style={{ marginTop: 4 }}>💡 {b.debiasing_action}</div>}
+                    {b.debiasing_action && <div style={{ marginTop: 4 }}>{b.debiasing_action}</div>}
                   </div>
                 ))}
               </div>
@@ -2945,7 +2903,7 @@ export default function Portfolio() {
           </div>
         ) : (
           <div className="empty-result">
-            <div className="er-icon">📊</div>
+            
             <div className="er-title">정보를 입력하고 추천받기를 눌러보세요</div>
             <div className="er-desc">
               나이·월 투자금·목표 배당금을 입력하면<br/>
