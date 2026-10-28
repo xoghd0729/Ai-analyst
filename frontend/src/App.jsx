@@ -3,6 +3,7 @@ import Dashboard from './pages/Dashboard'
 import StockDetail from './pages/StockDetail'
 import Portfolio from './pages/Portfolio'
 import ErrorBoundary from './components/ErrorBoundary'
+import Icon from './components/Icon'
 import './App.css'
 
 export default function App() {
@@ -11,7 +12,7 @@ export default function App() {
       <div className="app">
         <nav className="navbar">
           <div className="nav-brand">
-            <span className="nav-logo">📈</span>
+            <span className="nav-logo"><Icon name="logo" size={17} strokeWidth={2.3} /></span>
             <span className="nav-title">AI 기반 배당·포트폴리오 최적화 시스템</span>
           </div>
           <div className="nav-links">

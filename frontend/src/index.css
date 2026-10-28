@@ -401,3 +401,26 @@ button, input, select, textarea { font-family: inherit; }
 .kpi b small { font-size: 14px; font-weight: 700; color: #64748b; margin-left: 2px; letter-spacing: 0; }
 .kpi em { display: block; margin-top: 8px; font-style: normal; font-size: 12.5px; line-height: 1.45; color: #64748b; }
 @media (max-width: 1100px) { .kpi-grid { grid-template-columns: 1fr; gap: 14px; } .kpi { border-left: 0; padding: 0; } }
+
+/* 상단 로고 배지 */
+.nav-logo { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: #fff; font-size: 0;
+  background: linear-gradient(135deg, #4f46e5, #0ea5e9); }
+
+/* 큰 화면(전시 모니터)에서 설정 화면과 랜딩을 더 크게 */
+.iw-grid { max-width: 1280px; gap: 32px; }
+.iw-main { padding: 30px 40px 36px; }
+.iw-body { min-height: 400px; }
+.iw-title { font-size: clamp(26px, 4.2vh, 38px); }
+.iw-hint { font-size: 16px; }
+.iw-input { font-size: clamp(40px, 6vh, 52px); }
+.iw-chip { font-size: 15px; padding: 9px 16px; }
+.iw-btn { font-size: 16px; padding: 13px 26px; }
+.iw-steps button { font-size: 14.5px; }
+.iw-rows dt { font-size: 15px; } .iw-rows dd { font-size: 17px; }
+.iw-side { padding: 26px 28px; }
+.lp-grid { max-width: 1320px; }
+.lp-title { font-size: clamp(36px, 6.2vh, 60px); }
+.lp-sub { font-size: 18px; }
+.lp-btn { font-size: 17px; padding: 15px 26px; }
+.lp-flow { padding: 26px 30px; }
+.lp-step-t { font-size: 16px; } .lp-step-d { font-size: 14px; }
