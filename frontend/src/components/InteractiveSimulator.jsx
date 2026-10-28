@@ -30,6 +30,7 @@ import api from '../api/client'
 import { fmtMan } from '../utils/format'
 
 // ── 색상 상수 ────────────────────────────────────────────────────
+const BRAND = '#2563eb'
 const C = {
   cardBg:     'var(--surface)',
   cardBorder: 'var(--border)',
@@ -54,7 +55,7 @@ const SLIDERS = [
     max:    50000,
     step:   500,
     format: v => fmtMan(v),
-    color:  C.blue,
+    color:  BRAND,
   },
   {
     key:    'savings',
@@ -64,7 +65,7 @@ const SLIDERS = [
     max:    500,
     step:   10,
     format: v => fmtMan(v),
-    color:  C.purple,
+    color:  BRAND,
   },
   {
     key:    'monthlyTarget',
@@ -74,7 +75,7 @@ const SLIDERS = [
     max:    500,
     step:   10,
     format: v => fmtMan(v),
-    color:  C.green,
+    color:  BRAND,
   },
   {
     key:    'fireAge',
@@ -84,7 +85,7 @@ const SLIDERS = [
     max:    75,
     step:   1,
     format: v => `${v}세`,
-    color:  C.amber,
+    color:  BRAND,
   },
 ]
 
@@ -164,17 +165,17 @@ function HeadlineCard({ rv, fireAge }) {
   if (already_achievable) {
     return (
       <div style={{
-        background: 'linear-gradient(135deg, #064e3b 0%, #065f46 100%)',
-        border: `1px solid ${C.green}60`,
+        background: '#f2f8f5',
+        border: '1px solid #cfe6d9',
         borderRadius: 14, padding: '18px 20px', marginBottom: 16,
       }}>
-        <div style={{ fontSize: 13, color: '#6ee7b7', marginBottom: 4 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#0f7a55', marginBottom: 4 }}>
           목표 달성 가능
         </div>
         <div style={{ fontSize: 18, fontWeight: 700, color: C.text }}>
           현재 조건이면 {current_fire_age}세에 월 {target_monthly_만원}만원 배당 달성!
         </div>
-        <div style={{ fontSize: 12, color: '#86efac', marginTop: 6 }}>
+        <div style={{ fontSize: 13, color: '#4b6b5c', marginTop: 6 }}>
           내가 정한 목표 {fireAge}세보다 {fireAge - current_fire_age >= 0
             ? `${fireAge - current_fire_age}년 일찍`
             : `${current_fire_age - fireAge}년 늦게`} 달성 · 슬라이더를 바꾸면 이 나이가 바뀝니다
@@ -185,8 +186,8 @@ function HeadlineCard({ rv, fireAge }) {
 
   return (
     <div style={{
-      background: '#1e293b',
-      border: `1px solid #475569`,
+      background: '#f6f8fc',
+      border: '1px solid #e3e8f2',
       borderRadius: 14, padding: '18px 20px', marginBottom: 16,
     }}>
       <div style={{ fontSize: 12, color: C.muted, marginBottom: 8 }}>FIRE 달성 시뮬레이션</div>

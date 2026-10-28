@@ -24,7 +24,7 @@ const STEPS = [
 const RISKS = [
   { value: 'conservative', label: '안정형', desc: '우량 종목 위주 · 배당 안정성 최우선' },
   { value: 'moderate',     label: '중립형', desc: '안정성과 수익률의 균형' },
-  { value: 'aggressive',   label: '공격형', desc: 'Total Return 극대화 · 성장 ETF 포함' },
+  { value: 'aggressive',   label: '공격형', desc: '총수익률 극대화 · 성장 ETF 포함' },
 ]
 const GROWTHS = [{ v: 0, l: '고정' }, { v: 3, l: '연 3%' }, { v: 5, l: '연 5%' }, { v: 8, l: '연 8%' }]
 const riskLabel = (v) => RISKS.find(r => r.value === v)?.label || '—'

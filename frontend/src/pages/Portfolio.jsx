@@ -43,7 +43,7 @@ const RISK_OPTIONS = [
     target: '일반 직장인 (노후 준비 시작)',
   },
   {
-    value: 'aggressive', label: '공격형', desc: 'Total Return 극대화, 성장 ETF 포함',
+    value: 'aggressive', label: '공격형', desc: '총수익률 극대화, 성장 ETF 포함',
     returnRange: '10~14%', mdd: '-40~-60%',
     composition: '성장형 ETF + 배당성장주 + 고위험 리츠, 자본차익 추구',
     target: '장기 투자 가능 청년층 (20~30년 운용)',
@@ -1887,7 +1887,7 @@ export default function Portfolio() {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, fontSize: 12 }}>
                       {[
                         { icon: '✂️', title: '배당 삭감 위험', desc: 'Survival 모델로 재무 지표를 분석해 삭감 위험이 낮은 종목 우선 선별' },
-                        { icon: '📈', title: 'Total Return', desc: '배당수익률만이 아닌 자본차익까지 포함한 총수익률 기준으로 평가' },
+                        { icon: '📈', title: '총수익률', desc: '배당수익률만이 아닌 자본차익까지 포함한 총수익률 기준으로 평가' },
                         { icon: '🌐', title: '자산군 분산', desc: '한국·미국·리츠·방어형 4축으로 분산해 특정 시장 충격 최소화' },
                         { icon: '🎯', title: '역할 중복 제거', desc: 'SCHD·VIG·DGRO처럼 역할이 겹치는 ETF는 대표 1개로 정리해 비중 왜곡 방지' },
                       ].map(item => (
@@ -2123,7 +2123,7 @@ export default function Portfolio() {
               <div className="kpi-h">수익률 · 달성 범위</div>
               <div className="kpi-grid">
                 <div className="kpi">
-                  <span>연 Total Return</span>
+                  <span>연 총수익률</span>
                   <b>{avgTotalReturn}<small>%</small></b>
                   <em>배당 {avgYield}% + 자본차익 {(avgTotalReturn - avgYield).toFixed(1)}%</em>
                 </div>
@@ -2400,7 +2400,7 @@ export default function Portfolio() {
                   </ResponsiveContainer>
                   <div className="donut-center-text">
                     <div className="dct-value">{avgTotalReturn}%</div>
-                    <div className="dct-label">Total Return</div>
+                    <div className="dct-label">총수익률</div>
                   </div>
                 </div>
 
@@ -2455,7 +2455,7 @@ export default function Portfolio() {
                     <th>종목명 / 자산군</th>
                     <th>계좌</th>
                     <th>배당수익률</th>
-                    <th>Total Return</th>
+                    <th>총수익률</th>
                     <th>AI 리스크</th>
                     <th>비중</th>
                     <th>월 배당(예상)</th>
@@ -2494,7 +2494,7 @@ export default function Portfolio() {
                 </tbody>
               </table>
               <div className="chart-note" style={{ textAlign: 'left', marginTop: 8 }}>
-                Total Return = 배당수익률 + 자본차익(주가성장) 근사값 | 은행 예금({bankRate}%) 초과 여부로 비교
+                총수익률(Total Return) = 배당수익률 + 자본차익(주가성장) 근사값 | 은행 예금({bankRate}%) 초과 여부로 비교
               </div>
             </div>
 
@@ -2906,7 +2906,7 @@ export default function Portfolio() {
             <div className="er-title">정보를 입력하고 추천받기를 눌러보세요</div>
             <div className="er-desc">
               나이·월 투자금·목표 배당금을 입력하면<br/>
-              AI가 4축 포트폴리오와 <strong>Total Return</strong> 기반 은행 금리 초과 달성 시점을 계산합니다
+              AI가 4축 포트폴리오와 <strong>총수익률</strong> 기반 은행 금리 초과 달성 시점을 계산합니다
             </div>
           </div>
         )}

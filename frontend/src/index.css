@@ -486,3 +486,9 @@ button, input, select, textarea { font-family: inherit; }
 @keyframes ap-rot{to{transform:rotate(360deg)}}
 .ap-time{margin-left:auto;font-size:13px;color:var(--ink-600,#5b6577);font-variant-numeric:tabular-nums}
 .ap-note{margin:12px 0 0;font-size:13px;line-height:1.55;color:var(--ink-600,#5b6577)}
+
+/* ── 차트 툴팁 공통 (recharts 기본 툴팁 포함) ───── */
+.recharts-default-tooltip{background:#fff!important;border:1px solid #e3e8f2!important;border-radius:10px!important;box-shadow:0 6px 20px rgba(15,42,92,.12)!important;padding:10px 14px!important;font-size:13px;font-variant-numeric:tabular-nums}
+.recharts-default-tooltip .recharts-tooltip-label{margin-bottom:6px!important;font-weight:700;color:var(--ink-900,#111c33)}
+.recharts-default-tooltip .recharts-tooltip-item{color:var(--ink-600,#5b6577)!important;padding:1px 0!important}
+.recharts-wrapper:focus,.recharts-surface:focus{outline:none}

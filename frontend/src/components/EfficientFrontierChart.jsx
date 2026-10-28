@@ -249,7 +249,7 @@ export default function EfficientFrontierChart({ portfolio }) {
       {/* ── 산점도 ── */}
       <ResponsiveContainer width="100%" height={300}>
         <ScatterChart margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+          <CartesianGrid strokeDasharray="0" stroke="#e8ecf4" />
           <XAxis
             dataKey="volatility"
             type="number"
@@ -273,7 +273,7 @@ export default function EfficientFrontierChart({ portfolio }) {
             label={{ value: '기대수익률 (%)', angle: -90, position: 'insideLeft',
                      offset: 10, style: { fontSize: 10, fill: C.muted } }}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#c8d0dc', strokeDasharray: '3 3' }} />
 
           {/* 무위험 수익률 기준선 */}
           <ReferenceLine
