@@ -454,6 +454,8 @@ const SEC_TAB = {
 
 // ── 발표 데모 고정 시나리오 (DEMO_RUNBOOK.md 기준값) ─────────────
 // "25세가 월 100만원 배당을 받으려면?" 역산 스토리
+const noEmoji = (t) => String(t ?? '').replace(/[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u200D]+\s?/gu, '').trim()
+
 const DEMO_PRESENTATION = {
   key:   'demo_presentation',
   icon:  '🎬',
@@ -2221,12 +2223,12 @@ export default function Portfolio() {
                       borderRadius: 8, border: '1px solid rgba(79,142,247,.2)',
                       fontSize: 12, color: 'var(--text-sub)', lineHeight: 1.6,
                     }}>
-                      <div style={{ color: 'var(--border)', fontWeight: 600, marginBottom: 4 }}>
+                      <div style={{ color: 'var(--ink-900,#111c33)', fontWeight: 700, marginBottom: 4, fontSize: 13 }}>
                         분산 방식 — 자산군 비중 × 종목 점수 비례
                       </div>
-                      총 <strong style={{ color: '#60a5fa' }}>{totalCount}개</strong> 종목,
-                      평균 <strong style={{ color: '#60a5fa' }}>{avgWeight}%</strong> 비중.
-                      최대 비중 <strong style={{ color: '#60a5fa' }}>
+                      총 <strong style={{ color: 'var(--brand,#2563eb)' }}>{totalCount}개</strong> 종목,
+                      평균 <strong style={{ color: 'var(--brand,#2563eb)' }}>{avgWeight}%</strong> 비중.
+                      최대 비중 <strong style={{ color: 'var(--brand,#2563eb)' }}>
                       {maxRec.ticker} ({maxRec.weight_pct?.toFixed(1)}%)
                       </strong>.
                       <br/>
@@ -2239,7 +2241,7 @@ export default function Portfolio() {
                   {result.axis_summary.map((ax, i) => (
                     <div key={i} className="axis-item"
                       style={{ borderLeft: `3px solid ${ASSET_COLOR[ax.asset_class] || '#2563eb'}` }}>
-                      <div className="ax-label">{ax.label}</div>
+                      <div className="ax-label">{noEmoji(ax.label)}</div>
                       <div className="ax-weight">{ax.weight_pct}%</div>
                       <div className="ax-yields">
                         배당 {ax.avg_div_yield}%
@@ -2412,7 +2414,7 @@ export default function Portfolio() {
                         <span className="rc-weight">{r.weight_pct}%</span>
                       </div>
                       <div className="rc-badge-row">
-                        <span className="rc-asset-badge">{r.asset_class_label}</span>
+                        <span className="rc-asset-badge">{noEmoji(r.asset_class_label)}</span>
                         <span className="rc-account-badge"
                           style={{ background: r.account.includes('ISA') ? 'rgba(52,211,153,.15)' : 'rgba(79,142,247,.1)',
                                    color: r.account.includes('ISA') ? 'var(--green)' : 'var(--blue)' }}>
@@ -2424,17 +2426,17 @@ export default function Portfolio() {
                         {r.capital_gain_rate > 0 && ` + 주가성장 ${r.capital_gain_rate}% = TR ${r.total_return_pct}%`}
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
-                        {selectionReasons(r).map((rs, j) => (
+                        {selectionReasons(r).slice(0, 2).map((rs, j) => (
                           <span key={j} style={{
                             fontSize: 10.5, fontWeight: 600, borderRadius: 5, padding: '2px 7px',
-                            background: rs.ok ? 'rgba(5,150,105,.12)' : 'rgba(217,119,6,.12)',
-                            color: rs.ok ? '#059669' : '#d97706',
+                            background: rs.ok ? '#eef6f2' : '#fbf3e6',
+                            color: rs.ok ? '#0f7a55' : '#b45309',
                           }}>
                             {rs.ok ? '✓' : '!'} {rs.text}
                           </span>
                         ))}
                       </div>
-                      <div className="rc-reason" style={{ fontSize: 11, opacity: .75, marginTop: 5 }}>{r.description}</div>
+                      <div className="rc-reason" style={{ fontSize: 12, color: 'var(--ink-600,#5b6577)', marginTop: 6, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.description}</div>
                     </div>
                   ))}
                 </div>
