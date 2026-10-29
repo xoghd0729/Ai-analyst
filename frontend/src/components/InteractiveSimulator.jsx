@@ -279,7 +279,7 @@ function MiniProjection({ sliders, currentAge, avgYield }) {
   const mBase  = (fvBase  * yBase_ / 100) / 12
   const mOpti  = (fvOpti  * yOpti  / 100) / 12
 
-  const fmt  = v => v.toLocaleString(undefined, { maximumFractionDigits: 0 })
+  const fmt  = v => (v ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })  // 백엔드가 달성 불가능한 경로에 null을 줄 수 있음 (fire_engine.py 역산 바이너리서치 실패 시)
   const fmtM = v => fmtMan(v)
   const fmtY = v => `${v.toFixed(1)}%`
 
@@ -420,7 +420,7 @@ function ResultSection({ rv, sliders }) {
     achievable_monthly  = 0,
   } = rv
 
-  const fmt = v => v.toLocaleString(undefined, { maximumFractionDigits: 0 })
+  const fmt = v => (v ?? 0).toLocaleString(undefined, { maximumFractionDigits: 0 })  // required_monthly_savings/required_initial_capital/achievable_monthly 는 API에서 float | null 로 명시됨 (achievable_monthly가 null이면 그 기간 내 목표가 애초에 불가능하다는 뜻이라 0으로 보여주는 게 맞음)
 
   return (
     <div>
@@ -436,24 +436,32 @@ function ResultSection({ rv, sliders }) {
             <PathCard
               icon=""
               title="월 적립금 추가"
-              value={savings_increase > 0
-                ? `+${fmt(savings_increase)}만원/월`
-                : '현재 조건 충분'}
-              sub={savings_increase > 0
-                ? `총 ${fmt(required_monthly_savings)}만원/월로 달성`
-                : '추가 저축 불필요'}
+              value={savings_increase == null
+                ? '현실적 범위 내 불가'
+                : savings_increase > 0
+                  ? `+${fmt(savings_increase)}만원/월`
+                  : '현재 조건 충분'}
+              sub={savings_increase == null
+                ? '적립금 증액만으로는 달성 어려움'
+                : savings_increase > 0
+                  ? `총 ${fmt(required_monthly_savings)}만원/월로 달성`
+                  : '추가 저축 불필요'}
               color={C.blue}
               highlight={savings_increase > 0 && savings_increase < 200}
             />
             <PathCard
               icon=""
               title="초기자산 추가"
-              value={capital_increase > 0
-                ? `+${fmt(capital_increase)}만원`
-                : '현재 조건 충분'}
-              sub={capital_increase > 0
-                ? `총 ${fmt(required_initial_capital)}만원으로 달성`
-                : '추가 자본 불필요'}
+              value={capital_increase == null
+                ? '현실적 범위 내 불가'
+                : capital_increase > 0
+                  ? `+${fmt(capital_increase)}만원`
+                  : '현재 조건 충분'}
+              sub={capital_increase == null
+                ? '초기자산 증액만으로는 달성 어려움'
+                : capital_increase > 0
+                  ? `총 ${fmt(required_initial_capital)}만원으로 달성`
+                  : '추가 자본 불필요'}
               color={C.purple}
               highlight={false}
             />
