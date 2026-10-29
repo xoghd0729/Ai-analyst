@@ -429,7 +429,7 @@ button, input, select, textarea { font-family: inherit; }
 .lp-center { width: 100%; max-width: 720px; margin: 0 auto; text-align: center; }
 .lp-center .lp-eyebrow { letter-spacing: .14em; text-transform: uppercase; }
 .lp-center .lp-title { font-size: clamp(36px, 6.4vh, 60px); margin: 16px 0 16px; }
-.lp-center .lp-sub { margin: 0 auto; max-width: 520px; }
+.lp-center .lp-sub { margin: 0 auto; max-width: 640px; word-break: keep-all; text-wrap: balance; }
 .lp-center .lp-cta { justify-content: center; margin-top: 30px; }
 .lp-center .lp-login { margin-top: 22px; }
 

@@ -8,7 +8,7 @@ export default function Landing({ onStart, onDemo, onLogin }) {
       <div className="lp-center">
         <div className="lp-eyebrow">FinSight</div>
         <h1 className="lp-title">나의 배당 투자 계획을<br />설계하세요</h1>
-        <p className="lp-sub">투자 조건을 입력하면 배당 포트폴리오부터 FIRE 달성 전망까지 분석합니다.</p>
+        <p className="lp-sub">투자 조건을 입력하면<br />배당 포트폴리오부터 FIRE 달성 전망까지 분석합니다.</p>
         <div className="lp-cta">
           <button type="button" className="lp-btn primary" onClick={onStart}>분석 시작하기</button>
           <button type="button" className="lp-btn ghost" onClick={onDemo}>예시로 바로 보기</button>
